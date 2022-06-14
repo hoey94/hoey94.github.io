@@ -1,0 +1,857 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Hoey">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="本文主要说明HDFS和MapReduce两门技术的入门使用.因为MapReduce太长,后面就简称MR,我们到官网下载hadoop-2.4.1.tar.gz,并解压,进入到hadoop-2.4.1&#x2F;etc&#x2F;hadoop,分别配置以下几个文件  hadoop-env.sh core-site.xml hdfs-site.xml mapred-site.xml.template(重">
+<meta property="og:type" content="article">
+<meta property="og:title" content="HDFS and YARN">
+<meta property="og:url" content="http://example.com/2017/08/21/2017-8-21-hadoop-HDFS%E5%92%8CYARN/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="本文主要说明HDFS和MapReduce两门技术的入门使用.因为MapReduce太长,后面就简称MR,我们到官网下载hadoop-2.4.1.tar.gz,并解压,进入到hadoop-2.4.1&#x2F;etc&#x2F;hadoop,分别配置以下几个文件  hadoop-env.sh core-site.xml hdfs-site.xml mapred-site.xml.template(重">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://i.loli.net/2019/06/30/5d18567363a5f26626.jpg">
+<meta property="og:image" content="https://i.loli.net/2019/06/30/5d185674e1eac90408.jpg">
+<meta property="og:image" content="https://i.loli.net/2019/06/30/5d1856759d07a87559.jpg">
+<meta property="og:image" content="https://i.loli.net/2019/06/30/5d18567686ce084291.jpg">
+<meta property="og:image" content="https://i.loli.net/2019/06/30/5d18567a2fe3a45964.jpg">
+<meta property="og:image" content="https://i.loli.net/2019/06/30/5d18567b17a6e33029.jpg">
+<meta property="og:image" content="https://i.loli.net/2019/06/30/5d18567e4b37e92668.jpg">
+<meta property="og:image" content="https://i.loli.net/2019/06/30/5d18567fd7f1683994.jpg">
+<meta property="og:image" content="https://i.loli.net/2019/06/30/5d185682ac28195281.jpg">
+<meta property="og:image" content="https://i.loli.net/2019/06/30/5d184751aabf122988.jpg">
+<meta property="og:image" content="https://i.loli.net/2019/06/30/5d1847531472850379.jpg">
+<meta property="og:image" content="https://i.loli.net/2019/06/30/5d1847540b49622501.jpg">
+<meta property="og:image" content="https://i.loli.net/2019/06/30/5d184755225a588947.jpg">
+<meta property="og:image" content="https://i.loli.net/2019/06/30/5d1856883ee1b39713.jpg">
+<meta property="og:image" content="https://i.loli.net/2019/06/30/5d1856891db3037047.jpg">
+<meta property="og:image" content="https://i.loli.net/2019/06/30/5d18568a5a14a37356.jpg">
+<meta property="og:image" content="https://i.loli.net/2019/06/30/5d18568c4251f40910.jpg">
+<meta property="og:image" content="https://i.loli.net/2019/06/30/5d18568e7a5b870045.jpg">
+<meta property="og:image" content="https://i.loli.net/2019/06/30/5d18568fba13758809.jpg">
+<meta property="og:image" content="https://i.loli.net/2019/06/30/5d1856912037076903.jpg">
+<meta property="og:image" content="https://i.loli.net/2019/06/30/5d185692e5a9d43661.jpg">
+<meta property="og:image" content="https://i.loli.net/2019/06/30/5d185699bc9f428703.jpg">
+<meta property="og:image" content="https://i.loli.net/2019/06/30/5d18569c354df29231.jpg">
+<meta property="og:image" content="https://i.loli.net/2019/06/30/5d18569d7134b87906.jpg">
+<meta property="article:published_time" content="2017-08-20T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-10-12T09:07:14.066Z">
+<meta property="article:author" content="Hoey">
+<meta property="article:tag" content="Hadoop">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://i.loli.net/2019/06/30/5d18567363a5f26626.jpg">
+  
+  
+  
+  <title>HDFS and YARN - Hexo</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.9.1","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+
+  
+<meta name="generator" content="Hexo 6.2.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Hoey</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                主页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="HDFS and YARN"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2017-08-21 00:00" pubdate>
+          August 21, 2017 am
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          4k words
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          34 mins
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">HDFS and YARN</h1>
+            
+            <div class="markdown-body">
+              
+              <p>本文主要说明HDFS和MapReduce两门技术的入门使用.因为MapReduce太长,后面就简称MR,我们到<a target="_blank" rel="noopener" href="http://hadoop.apache.org/releases.html">官网</a>下载hadoop-2.4.1.tar.gz,并解压,进入到hadoop-2.4.1&#x2F;etc&#x2F;hadoop,分别配置以下几个文件</p>
+<ul>
+<li>hadoop-env.sh</li>
+<li>core-site.xml</li>
+<li>hdfs-site.xml</li>
+<li>mapred-site.xml.template(重命名为mapred-site.xml)</li>
+<li>yarn-site.xml</li>
+</ul>
+<h3 id="配置-hadoop-env-sh"><a href="#配置-hadoop-env-sh" class="headerlink" title="配置 hadoop-env.sh"></a>配置 hadoop-env.sh</h3><p>需要到hadoop-env.sh中配置Java环境,值得注意的是在hadoop-env.sh文件中使用的变量名不会生效,我们在这里写死它,查询Java存放路径</p>
+<blockquote>
+<p>ehco $JAVA_HOME</p>
+</blockquote>
+<p><img src="https://i.loli.net/2019/06/30/5d18567363a5f26626.jpg" srcset="/img/loading.gif" lazyload alt="java"></p>
+<p><img src="https://i.loli.net/2019/06/30/5d185674e1eac90408.jpg" srcset="/img/loading.gif" lazyload></p>
+<h3 id="配置-core-site-xml"><a href="#配置-core-site-xml" class="headerlink" title="配置 core-site.xml"></a>配置 core-site.xml</h3><ol>
+<li>fs.defaultFS: 指定HADOOP所使用的文件系统访问的URI</li>
+<li>hadoop.tmp.dir: 指定hadoop运行时产生文件的存储目录</li>
+</ol>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">configuration</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">property</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">name</span>&gt;</span>fs.defaultFS<span class="hljs-tag">&lt;/<span class="hljs-name">name</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">value</span>&gt;</span>hdfs://zyh:9000/<span class="hljs-tag">&lt;/<span class="hljs-name">value</span>&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">property</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">property</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">name</span>&gt;</span>hadoop.tmp.dir<span class="hljs-tag">&lt;/<span class="hljs-name">name</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">value</span>&gt;</span>/media/zyh/software/hadoop-2.4.1/data/<span class="hljs-tag">&lt;/<span class="hljs-name">value</span>&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">property</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">configuration</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p>这里hdfs:&#x2F;&#x2F;zyh:9000&#x2F;中的zyh相当于localhost,因为我在&#x2F;etc&#x2F;hosts文件中修改了</p>
+<p><img src="https://i.loli.net/2019/06/30/5d1856759d07a87559.jpg" srcset="/img/loading.gif" lazyload></p>
+<h3 id="配置-hdfs-site-xml"><a href="#配置-hdfs-site-xml" class="headerlink" title="配置 hdfs-site.xml"></a>配置 hdfs-site.xml</h3><ol>
+<li>dfs.replication: 指定HDFS切块(blk)的副本数量</li>
+</ol>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">configuration</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">property</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">name</span>&gt;</span>dfs.replication<span class="hljs-tag">&lt;/<span class="hljs-name">name</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">value</span>&gt;</span>1<span class="hljs-tag">&lt;/<span class="hljs-name">value</span>&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">property</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">configuration</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<h3 id="配置-mapred-site-xml"><a href="#配置-mapred-site-xml" class="headerlink" title="配置 mapred-site.xml"></a>配置 mapred-site.xml</h3><ol>
+<li>mapreduce.framework.name:指定MR的运行的资源由yarn分配</li>
+</ol>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">configuration</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">property</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">name</span>&gt;</span>mapreduce.framework.name<span class="hljs-tag">&lt;/<span class="hljs-name">name</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">value</span>&gt;</span>yarn<span class="hljs-tag">&lt;/<span class="hljs-name">value</span>&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">property</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">configuration</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<h3 id="配置-yarn-site-xml"><a href="#配置-yarn-site-xml" class="headerlink" title="配置 yarn-site.xml"></a>配置 yarn-site.xml</h3><ol>
+<li>yarn.resourcemanager.hostname: 指定YARN的ResourceManager的地址,其实就是我本机zyh(127.0.0.1)</li>
+<li>yarn.nodemanager.aux-services: reducer获取数据的方式</li>
+</ol>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">configuration</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">property</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">name</span>&gt;</span>yarn.resourcemanager.hostname<span class="hljs-tag">&lt;/<span class="hljs-name">name</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">value</span>&gt;</span>zyh<span class="hljs-tag">&lt;/<span class="hljs-name">value</span>&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">property</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">property</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">name</span>&gt;</span>yarn.nodemanager.aux-services<span class="hljs-tag">&lt;/<span class="hljs-name">name</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">value</span>&gt;</span>mapreduce_shuffle<span class="hljs-tag">&lt;/<span class="hljs-name">value</span>&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">property</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">configuration</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<h3 id="将hadoop添加到环境变量"><a href="#将hadoop添加到环境变量" class="headerlink" title="将hadoop添加到环境变量"></a>将hadoop添加到环境变量</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_">$ </span><span class="language-bash">vim /etc/proflie</span><br><span class="hljs-meta prompt_">$ </span><span class="language-bash"><span class="hljs-built_in">export</span> JAVA_HOME=/usr/java/jdk1.6.0_45</span><br><span class="hljs-meta prompt_">$ </span><span class="language-bash"><span class="hljs-built_in">export</span> HADOOP_HOME=/media/zyh/software/software <span class="hljs-keyword">for</span> linux/hadoop-2.4.1</span><br><span class="hljs-meta prompt_">$ </span><span class="language-bash"><span class="hljs-built_in">export</span> PATH=<span class="hljs-variable">$PATH</span>:<span class="hljs-variable">$JAVA_HOME</span>/bin:<span class="hljs-variable">$HADOOP_HOME</span>/bin:<span class="hljs-variable">$HADOOP_HOME</span>/sbin</span><br><span class="hljs-meta prompt_">$ </span><span class="language-bash"><span class="hljs-built_in">source</span> /etc/profile</span><br></code></pre></td></tr></table></figure>
+<p>这个是我本地的profile作参考</p>
+<p><img src="https://i.loli.net/2019/06/30/5d18567686ce084291.jpg" srcset="/img/loading.gif" lazyload alt="hadoop添加到环境变量"></p>
+<h3 id="初始化namenode（又叫格式化namenode）"><a href="#初始化namenode（又叫格式化namenode）" class="headerlink" title="初始化namenode（又叫格式化namenode）"></a>初始化namenode（又叫格式化namenode）</h3><blockquote>
+<p>$ hdfs namenode -format (hadoop namenode -format)</p>
+</blockquote>
+<p><img src="https://i.loli.net/2019/06/30/5d18567a2fe3a45964.jpg" srcset="/img/loading.gif" lazyload alt="初始化namenode"></p>
+<p>弹出一大片log,英语很nice可以稍微看看,不好的可以键入命令<code>echo $?</code>来校验上一个操作是否正确,如果是0就是正确的</p>
+<h2 id="启动hadoop"><a href="#启动hadoop" class="headerlink" title="启动hadoop"></a>启动hadoop</h2><p>如果你格式化namenode已成功,就可以运行hadoop了！在<strong>hadoop-2.4.1&#x2F;sbin</strong>目录下面,hadoop为我们提供了很多命令</p>
+<ol>
+<li>start-all.sh : 启动dfs和yarn</li>
+<li>start-dfs.sh : 启动dfs</li>
+<li>start-yarn.sh : 启动yarn</li>
+</ol>
+<p><img src="https://i.loli.net/2019/06/30/5d18567b17a6e33029.jpg" srcset="/img/loading.gif" lazyload></p>
+<p>作为入门的新手,我们当然是一步一步启动,先启动HDFS,再启动YARN.并观察启动后的运行状态</p>
+<h3 id="启动HDFS"><a href="#启动HDFS" class="headerlink" title="启动HDFS"></a>启动HDFS</h3><blockquote>
+<p>$ sbin&#x2F;start-dfs.sh</p>
+</blockquote>
+<p>启动报错,如果说本地ssh拒绝访问,那么我们需要安装openssh-server,如果没有报错请无视！</p>
+<p><img src="https://i.loli.net/2019/06/30/5d18567e4b37e92668.jpg" srcset="/img/loading.gif" lazyload alt="报错"></p>
+<p>安装后再次键入命令.HDFS会提示会让我们输入很多次密码并确认,因为部署的是分布式系统,尽管我们只使用了一台电脑,但是HDSF不知道,他会使用SSH去访问我们远程的服务器(本例中远程服务器就是本机啦！)之后它会启动一系列进程,这些进程分别是:</p>
+<ol>
+<li>NameNode</li>
+<li>DataNode</li>
+<li>SecondaryNameNode</li>
+</ol>
+<p><img src="https://i.loli.net/2019/06/30/5d18567fd7f1683994.jpg" srcset="/img/loading.gif" lazyload alt="启动HDFS"></p>
+<h3 id="启动YARN"><a href="#启动YARN" class="headerlink" title="启动YARN"></a>启动YARN</h3><blockquote>
+<p>$ sbin&#x2F;start-yarn.sh</p>
+</blockquote>
+<p>yarn也是一样的一路yes并输入密码即可,yarn会先后开启两个进程,他们分别是</p>
+<ol>
+<li>ResourceManager</li>
+<li>NodeManager</li>
+</ol>
+<p><img src="https://i.loli.net/2019/06/30/5d185682ac28195281.jpg" srcset="/img/loading.gif" lazyload alt="启动YARN"></p>
+<h3 id="查看启动进程的状态"><a href="#查看启动进程的状态" class="headerlink" title="查看启动进程的状态"></a>查看启动进程的状态</h3><blockquote>
+<p>$ jps</p>
+</blockquote>
+<p><img src="https://i.loli.net/2019/06/30/5d184751aabf122988.jpg" srcset="/img/loading.gif" lazyload alt="查看启动状态"></p>
+<h2 id="使用HDFS"><a href="#使用HDFS" class="headerlink" title="使用HDFS"></a>使用HDFS</h2><p>打开网址<a target="_blank" rel="noopener" href="http://zyh:50070/">http://zyh:50070</a> （HDFS管理界面）,在该界面我们可以查看HDFS的运行状态信息,在Browse the file system一栏中可以查看HDFS目录结构</p>
+<p><img src="https://i.loli.net/2019/06/30/5d1847531472850379.jpg" srcset="/img/loading.gif" lazyload alt="Browse the file system"></p>
+<p>因为我们什么都没有做,所以在Browse Directory下面什么都没有,HDFS的目录结构和linux的目录结构差不多,都是以<code>/</code>为根目录.</p>
+<p><img src="https://i.loli.net/2019/06/30/5d1847540b49622501.jpg" srcset="/img/loading.gif" lazyload alt="什么都没有"></p>
+<p>编写test.txt并上传到HDFS中(被上传的文件会被分为若干个切块，分别放于不同的datanode中)</p>
+<p><img src="https://i.loli.net/2019/06/30/5d184755225a588947.jpg" srcset="/img/loading.gif" lazyload alt="test.txt"></p>
+<p>键入命令,将test.txt上传到hdfs上</p>
+<blockquote>
+<p>$ hadoop fs -put test.txt hdfs:&#x2F;&#x2F;zyh:9000&#x2F;</p>
+</blockquote>
+<p><img src="https://i.loli.net/2019/06/30/5d1856883ee1b39713.jpg" srcset="/img/loading.gif" lazyload alt="put"></p>
+<p>再次打开<a href="http://zyh:50070,查看HDFS就会发现多出了一个test.txt文件">http://zyh:50070,查看HDFS就会发现多出了一个test.txt文件</a></p>
+<p><img src="https://i.loli.net/2019/06/30/5d1856891db3037047.jpg" srcset="/img/loading.gif" lazyload alt="查看结果"></p>
+<h2 id="使用MR"><a href="#使用MR" class="headerlink" title="使用MR"></a>使用MR</h2><p>到<strong>hadoop-2.4.1&#x2F;share&#x2F;hadoop&#x2F;mapreduce</strong>目录下可以找到<strong>hadoop-mapreduce-examples-2.4.1.jar</strong>,这个jar是Hadoop为我们编写的mapreduce小例子,我们可以使用它来做一些测试</p>
+<p><img src="https://i.loli.net/2019/06/30/5d18568a5a14a37356.jpg" srcset="/img/loading.gif" lazyload alt="examples"></p>
+<p>我们使用MR做一些小测试！</p>
+<ul>
+<li>打印pi的值</li>
+</ul>
+<p>到<strong>hadoop-mapreduce-examples-2.4.1.jar</strong>根目录</p>
+<ol>
+<li>pi : 方法名</li>
+<li>5 : 参数1</li>
+<li>100 : 参数2</li>
+</ol>
+<blockquote>
+<p>$ hadoop jar hadoop-mapreduce-examples-2.4.1.jar pi 5 100</p>
+</blockquote>
+<p><img src="https://i.loli.net/2019/06/30/5d18568c4251f40910.jpg" srcset="/img/loading.gif" lazyload alt="pi"></p>
+<ul>
+<li>统计我们之前test.txt中字符串出现的次数</li>
+</ul>
+<blockquote>
+<p>$ cat test.txt</p>
+</blockquote>
+<p><img src="https://i.loli.net/2019/06/30/5d18568e7a5b870045.jpg" srcset="/img/loading.gif" lazyload alt="test file"></p>
+<p>这一次我们在HDFS文件系统中创建一些目录,将test.txt上传到指定目录中去</p>
+<p>创建&#x2F;<strong>wordcount</strong>&#x2F;<strong>input</strong>用来放被统计的文件,值得注意的是我们必须先创建&#x2F;<strong>wordcount</strong>,才能再创建&#x2F;<strong>input</strong></p>
+<blockquote>
+<p>$ hadoop fs -mkdir &#x2F;wordcount</p>
+</blockquote>
+<blockquote>
+<p>$ hadoop fs -mkdir &#x2F;wordcount&#x2F;input</p>
+</blockquote>
+<p><img src="https://i.loli.net/2019/06/30/5d18568fba13758809.jpg" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://i.loli.net/2019/06/30/5d1856912037076903.jpg" srcset="/img/loading.gif" lazyload></p>
+<p>同理创建创建&#x2F;<strong>wordcount</strong>&#x2F;<strong>output</strong>用来放被统计后的输出文件</p>
+<blockquote>
+<p>$ hadoop fs -mkdir &#x2F;wordcount</p>
+</blockquote>
+<blockquote>
+<p>$ hadoop fs -mkdir &#x2F;wordcount&#x2F;out </p>
+</blockquote>
+<p>将test.txt文件上传到HDFS文件系统中的input目录</p>
+<blockquote>
+<p>$ hadoop fs -put text.txt &#x2F;wordcount&#x2F;input </p>
+</blockquote>
+<p>使用命令对test.txt进行统计,<strong>wordcount</strong>:指定本次运行的是统计方法,&#x2F;<strong>wordcount</strong>&#x2F;<strong>input</strong>:指定被统计的文件,&#x2F;<strong>wordcount</strong>&#x2F;<strong>out</strong>: 指定统计后的输出目录</p>
+<ol>
+<li>wordcount : 方法名</li>
+<li>&#x2F;wordcount&#x2F;input : 参数1</li>
+<li>&#x2F;wordcount&#x2F;out : 参数2</li>
+</ol>
+<blockquote>
+<p>$ hadoop jar hadoop-mapreduce-examples-2.4.1.jar wordcount &#x2F;wordcount&#x2F;input &#x2F;wordcount&#x2F;out </p>
+</blockquote>
+<p><img src="https://i.loli.net/2019/06/30/5d185692e5a9d43661.jpg" srcset="/img/loading.gif" lazyload></p>
+<p>到&#x2F;<strong>wordcount</strong>&#x2F;<strong>out</strong>查看MR分析结果,并使用命令下载文件</p>
+<blockquote>
+<p>$ hadoop fs -ls &#x2F;wordcount&#x2F;out&#x2F;</p>
+</blockquote>
+<p><img src="https://i.loli.net/2019/06/30/5d185699bc9f428703.jpg" srcset="/img/loading.gif" lazyload></p>
+<blockquote>
+<p>$ hadoop fs -get &#x2F;wordcount&#x2F;out part-r-00000</p>
+</blockquote>
+<p><img src="https://i.loli.net/2019/06/30/5d18569c354df29231.jpg" srcset="/img/loading.gif" lazyload></p>
+<p>查看MR分析结果</p>
+<p><img src="https://i.loli.net/2019/06/30/5d18569d7134b87906.jpg" srcset="/img/loading.gif" lazyload></p>
+
+              
+            </div>
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/" class="category-chain-item">大数据</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Hadoop/">#Hadoop</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>HDFS and YARN</div>
+      <div>http://example.com/2017/08/21/2017-8-21-hadoop-HDFS和YARN/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>Author</div>
+          <div>Hoey</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>Posted on</div>
+          <div>August 21, 2017</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>Licensed under</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - Hoey">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2017/08/22/2017-8-22-Struts2-Spring%E9%9B%86%E6%88%90%E5%90%8E%E5%85%B3%E4%BA%8Estruts.xml%E4%B8%AD%E7%9A%84class%E5%A6%82%E4%BD%95%E5%86%99%E7%9A%84%E9%97%AE%E9%A2%98/" title="Struts2和Spring集成后关于struts.xml中的class如何写的问题">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Struts2和Spring集成后关于struts.xml中的class如何写的问题</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2017/08/15/2017-8-15-JQuery%E5%BC%B9%E5%87%BA%E6%A1%86/" title="JQuery弹出框小Demo">
+                        <span class="hidden-mobile">JQuery弹出框小Demo</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;Table of Contents</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
+</body>
+</html>

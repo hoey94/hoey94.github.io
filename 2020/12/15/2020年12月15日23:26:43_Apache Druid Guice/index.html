@@ -1,0 +1,711 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Hoey">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="大数据组件中OLAP引擎应用广泛，比较火的有presto、Kylin、Druid。 Presto基于内存处理，HQL用Presto瞬间搞定，猛成一把刀，但你再看看内存使用情况也是把人给惊呆了，真是没有个上百G内存玩不转。 再说Kylin和Druid，前者偏离线，后者偏实时。Kylin作为Hadoop领域的老大哥，已经几乎成为离线标准，指标分析领域应用广泛。而Apache Druid则在实时OLAP">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Apache Druid Guice">
+<meta property="og:url" content="http://example.com/2020/12/15/2020%E5%B9%B412%E6%9C%8815%E6%97%A523:26:43_Apache%20Druid%20Guice/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="大数据组件中OLAP引擎应用广泛，比较火的有presto、Kylin、Druid。 Presto基于内存处理，HQL用Presto瞬间搞定，猛成一把刀，但你再看看内存使用情况也是把人给惊呆了，真是没有个上百G内存玩不转。 再说Kylin和Druid，前者偏离线，后者偏实时。Kylin作为Hadoop领域的老大哥，已经几乎成为离线标准，指标分析领域应用广泛。而Apache Druid则在实时OLAP">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2020-12-15T15:26:43.000Z">
+<meta property="article:modified_time" content="2021-08-27T08:00:23.050Z">
+<meta property="article:author" content="Hoey">
+<meta property="article:tag" content="Apache Druid">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>Apache Druid Guice - Hexo</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.9.1","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+
+  
+<meta name="generator" content="Hexo 6.2.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Hoey</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                主页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="Apache Druid Guice"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2020-12-15 23:26" pubdate>
+          December 15, 2020 pm
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          9.4k words
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          79 mins
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">Apache Druid Guice</h1>
+            
+            <div class="markdown-body">
+              
+              <p>大数据组件中OLAP引擎应用广泛，比较火的有presto、Kylin、Druid。</p>
+<p>Presto基于内存处理，HQL用Presto瞬间搞定，猛成一把刀，但你再看看内存使用情况也是把人给惊呆了，真是没有个上百G内存玩不转。</p>
+<p>再说Kylin和Druid，前者偏离线，后者偏实时。Kylin作为Hadoop领域的老大哥，已经几乎成为离线标准，指标分析领域应用广泛。而Apache Druid则在实时OLAP领域独领风骚，优异的性能、高可用、易拓展。</p>
+<p>平安2019年底引进Druid，离线迎合数仓、实时迎合埋点+Kafka构建OLAP多维分析报表。关于Druid的资料在网上很少，接触时，只有英文文档。想要了解一下源码，资料更是少的可怜，Druid源码要看懂，得先知道Google Guice这个东西，本文来讨论一下。</p>
+<h3 id="一、-Google-Guice介绍"><a href="#一、-Google-Guice介绍" class="headerlink" title="一、 Google Guice介绍"></a>一、 Google Guice介绍</h3><p><a target="_blank" rel="noopener" href="https://github.com/google/guice">Guice</a>是一个小巧的依赖注入工具，玩Java的话，关于Spring依赖注入大家肯定不陌生。早期，Spring依赖注入靠的是写XML，这种方式太过隐蔽。目前Spring依赖注入玩注解，这种方式很灵活。而Guice依赖注入是靠写代码，下面具一些小栗子方便快速入门。</p>
+<h3 id="二、-Guice实例"><a href="#二、-Guice实例" class="headerlink" title="二、 Guice实例"></a>二、 Guice实例</h3><p><strong>1. 普通注入</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">package</span> ml.yihao;<br><br><span class="hljs-keyword">import</span> com.google.inject.*;<br><span class="hljs-keyword">import</span> com.google.inject.name.Named;<br><span class="hljs-keyword">import</span> com.google.inject.name.Names;<br><br><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * <span class="hljs-doctag">@author</span> zyh</span><br><span class="hljs-comment"> * <span class="hljs-doctag">@Description</span>:</span><br><span class="hljs-comment"> * <span class="hljs-doctag">@date</span> 2020/12/158:34 下午</span><br><span class="hljs-comment"> */</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Example1</span> &#123;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span> &#123;<br>        <span class="hljs-type">Injector</span> <span class="hljs-variable">injector</span> <span class="hljs-operator">=</span> Guice.createInjector(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Module</span>() &#123;<br>            <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">configure</span><span class="hljs-params">(Binder binder)</span> &#123;<br>                binder.bind(DataBaseMeta.class).to(MysqlDataBaseMeta.class);<br>                <span class="hljs-comment">// 注入用户名</span><br>                binder.bind(String.class).annotatedWith(Names.named(<span class="hljs-string">&quot;username&quot;</span>)).toInstance(<span class="hljs-string">&quot;root&quot;</span>);<br>                <span class="hljs-comment">// 注入密码</span><br>                binder.bind(String.class).annotatedWith(Names.named(<span class="hljs-string">&quot;password&quot;</span>)).toInstance(<span class="hljs-string">&quot;^5g%@!hKH&quot;</span>);<br>            &#125;<br>        &#125;);<br><br>        <span class="hljs-type">DataBaseMeta</span> <span class="hljs-variable">dataBaseMeta</span> <span class="hljs-operator">=</span> injector.getInstance(DataBaseMeta.class);<br>        dataBaseMeta.print();<br>    &#125;<br><br>&#125;<br><br><span class="hljs-keyword">interface</span> <span class="hljs-title class_">DataBaseMeta</span>&#123;<br><br>    <span class="hljs-keyword">void</span> <span class="hljs-title function_">print</span><span class="hljs-params">()</span>;<br>&#125;<br><br><span class="hljs-meta">@Singleton</span><br><span class="hljs-keyword">class</span> <span class="hljs-title class_">MysqlDataBaseMeta</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">DataBaseMeta</span> &#123;<br><br><br>    <span class="hljs-keyword">private</span> String username;<br>    <span class="hljs-keyword">private</span> String password;<br><br>    <span class="hljs-meta">@Inject</span><br>    MysqlDataBaseMeta(<span class="hljs-meta">@Named(&quot;username&quot;)</span> String username, <span class="hljs-meta">@Named(&quot;password&quot;)</span> String password)&#123;<br>        <span class="hljs-built_in">this</span>.username = username;<br>        <span class="hljs-built_in">this</span>.password = password;<br>    &#125;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">print</span><span class="hljs-params">()</span> &#123;<br>        System.out.println(username + <span class="hljs-string">&quot;:&quot;</span> + password);<br>    &#125;<br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<p>使用Guice动态注入<strong>username</strong>和<strong>password</strong>属性</p>
+<p><strong>2. 默认值</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">package</span> ml.yihao;<br><br><span class="hljs-keyword">import</span> com.google.inject.*;<br><span class="hljs-keyword">import</span> com.google.inject.multibindings.OptionalBinder;<br><br><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * <span class="hljs-doctag">@author</span> zyh</span><br><span class="hljs-comment"> * <span class="hljs-doctag">@Description</span>:</span><br><span class="hljs-comment"> * <span class="hljs-doctag">@date</span> 2020/12/159:12 下午</span><br><span class="hljs-comment"> */</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Example3</span> &#123;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span> &#123;<br>        <span class="hljs-type">Injector</span> <span class="hljs-variable">injector</span> <span class="hljs-operator">=</span> Guice.createInjector(<span class="hljs-keyword">new</span> <span class="hljs-title class_">FrameWorkModule</span>()<span class="hljs-comment">/*, new Module() &#123;</span><br><span class="hljs-comment">            @Override</span><br><span class="hljs-comment">            public void configure(Binder binder) &#123;</span><br><span class="hljs-comment">                OptionalBinder.newOptionalBinder(binder, Emit.class).setBinding().to(KafkaEmit.class);</span><br><span class="hljs-comment">            &#125;</span><br><span class="hljs-comment">        &#125;*/</span>);<br>        <span class="hljs-type">TestService</span> <span class="hljs-variable">instance</span> <span class="hljs-operator">=</span> injector.getInstance(TestService.class);<br>        instance.print();<br>    &#125;<br>&#125;<br><br><span class="hljs-keyword">class</span> <span class="hljs-title class_">TestService</span>&#123;<br><br>    <span class="hljs-keyword">private</span> Emit emit;<br><br>    <span class="hljs-meta">@Inject</span><br>    TestService(Emit emit)&#123;<br>        <span class="hljs-built_in">this</span>.emit = emit;<br>    &#125;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">print</span><span class="hljs-params">()</span>&#123;<br>        <span class="hljs-built_in">this</span>.emit.emit();<br>    &#125;<br><br><br><br>&#125;<br><br><span class="hljs-keyword">interface</span> <span class="hljs-title class_">Emit</span>&#123;<br>    <span class="hljs-keyword">void</span> <span class="hljs-title function_">emit</span><span class="hljs-params">()</span>;<br>&#125;<br><br><span class="hljs-keyword">class</span> <span class="hljs-title class_">KafkaEmit</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">Emit</span>&#123;<br><br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">emit</span><span class="hljs-params">()</span> &#123;<br>        System.out.println(<span class="hljs-string">&quot;kafka&quot;</span>);<br>    &#125;<br>&#125;<br><br><span class="hljs-keyword">class</span> <span class="hljs-title class_">HttpEmit</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">Emit</span>&#123;<br><br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">emit</span><span class="hljs-params">()</span> &#123;<br>        System.out.println(<span class="hljs-string">&quot;http&quot;</span>);<br>    &#125;<br>&#125;<br><br><span class="hljs-keyword">class</span> <span class="hljs-title class_">FrameWorkModule</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">Module</span> &#123;<br><br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">configure</span><span class="hljs-params">(Binder binder)</span> &#123;<br>        OptionalBinder.newOptionalBinder(binder, Emit.class).setDefault().to(HttpEmit.class);<br>    &#125;<br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<p><strong>3. 覆盖已绑定关系</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">package</span> ml.yihao;<br><br><span class="hljs-keyword">import</span> com.google.common.collect.ImmutableList;<br><span class="hljs-keyword">import</span> com.google.inject.Guice;<br><span class="hljs-keyword">import</span> com.google.inject.Inject;<br><span class="hljs-keyword">import</span> com.google.inject.Injector;<br><span class="hljs-keyword">import</span> com.google.inject.Module;<br><span class="hljs-keyword">import</span> com.google.inject.util.Modules;<br><br><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * <span class="hljs-doctag">@author</span> zyh</span><br><span class="hljs-comment"> * <span class="hljs-doctag">@Description</span>: 默认注入Mysql，后续覆盖成oracle</span><br><span class="hljs-comment"> * <span class="hljs-doctag">@date</span> 2020/12/158:48 下午</span><br><span class="hljs-comment"> */</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Example2</span> &#123;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span> &#123;<br>        ImmutableList&lt;Module&gt; defaultModule = ImmutableList.of(binder -&gt; &#123;<br>            binder.bind(Database.class).to(MysqlDatabase.class);<br>        &#125;);<br><br>        ImmutableList&lt;Module&gt; customModule = ImmutableList.of(binder -&gt; &#123;<br>            binder.bind(Database.class).to(OracleDatabase.class);<br>        &#125;);<br><br>        <span class="hljs-comment">// 默认</span><br>        <span class="hljs-comment">//Injector injector = Guice.createInjector(defaultModule);</span><br><br>        <span class="hljs-comment">// 覆盖</span><br>        <span class="hljs-type">Injector</span> <span class="hljs-variable">injector</span> <span class="hljs-operator">=</span> Guice.createInjector(Modules.override(defaultModule).with(customModule));<br><br>        <span class="hljs-type">FrameWork</span> <span class="hljs-variable">instance</span> <span class="hljs-operator">=</span> injector.getInstance(FrameWork.class);<br>        instance.start();<br>        <br>    &#125;<br>    <br>&#125;<br><br><span class="hljs-keyword">class</span> <span class="hljs-title class_">FrameWork</span>&#123;<br><br>    <span class="hljs-keyword">private</span> Database database;<br><br>    <span class="hljs-meta">@Inject</span><br>    FrameWork(Database database)&#123;<br>        <span class="hljs-built_in">this</span>.database = database;<br>    &#125;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">start</span><span class="hljs-params">()</span>&#123;<br>        database.print();<br>    &#125;<br><br>&#125;<br><br><span class="hljs-keyword">interface</span> <span class="hljs-title class_">Database</span>&#123;<br>    <span class="hljs-keyword">void</span> <span class="hljs-title function_">print</span><span class="hljs-params">()</span>;<br>&#125;<br><br><span class="hljs-keyword">class</span> <span class="hljs-title class_">MysqlDatabase</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">Database</span> &#123;<br>    <span class="hljs-keyword">private</span> <span class="hljs-type">String</span> <span class="hljs-variable">type</span> <span class="hljs-operator">=</span> <span class="hljs-string">&quot;mysql&quot;</span>;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">print</span><span class="hljs-params">()</span> &#123;<br>        System.out.println(type);<br>    &#125;<br>&#125;<br><br><br><span class="hljs-keyword">class</span> <span class="hljs-title class_">OracleDatabase</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">Database</span> &#123;<br>    <span class="hljs-keyword">private</span> <span class="hljs-type">String</span> <span class="hljs-variable">type</span> <span class="hljs-operator">=</span> <span class="hljs-string">&quot;oracle&quot;</span>;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">print</span><span class="hljs-params">()</span> &#123;<br>        System.out.println(type);<br>    &#125;<br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<h3 id="三、-Druid中拓展组件"><a href="#三、-Druid中拓展组件" class="headerlink" title="三、 Druid中拓展组件"></a>三、 Druid中拓展组件</h3><p>Druid在Guice基础上拓展了三个插件，这三个插件贯穿整个Druid源码，不懂会影响看代码。它们分别是<code>guice-lifecycle</code>、<code>guice-jsonconfig</code>和<code>guice-jersey-jetty</code></p>
+<ul>
+<li>guice-lifecycle：提供生命周期管理</li>
+<li>guice-jsonconfig：提供配置文件Bean注入</li>
+<li>guice-jersey-jetty：提供jetty轻量级servlet容器</li>
+</ul>
+<p>下面分别上代码演示一下三个模块的使用，在使用之前我们需要先将其加入到依赖</p>
+<p>这里提供<a target="_blank" rel="noopener" href="https://github.com/Demo233/guice-module">源码</a>，你只需要<strong>clone</strong>下来执行<code>mvn package install</code>，然后将下面内容加入到自己项目的<code>pom.xml</code>中即可</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>com.google.code<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>guice-lifecycle<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>1.0-SNAPSHOT<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>com.google.code<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>guice-jsonconfig<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>1.0-SNAPSHOT<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br><br><span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>com.google.code<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>guice-jersey-jetty<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>1.0-SNAPSHOT<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+
+<p><strong>1. lifecycle生命周期管理</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">package</span> ml.yihao;<br><br><span class="hljs-keyword">import</span> com.google.code.guice.lifecycle.*;<br><span class="hljs-keyword">import</span> com.google.inject.Guice;<br><span class="hljs-keyword">import</span> com.google.inject.Inject;<br><span class="hljs-keyword">import</span> com.google.inject.Injector;<br><br><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * <span class="hljs-doctag">@author</span> zyh</span><br><span class="hljs-comment"> * <span class="hljs-doctag">@Description</span>:</span><br><span class="hljs-comment"> * <span class="hljs-doctag">@date</span> 2020/12/1510:04 下午</span><br><span class="hljs-comment"> */</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Example4</span> &#123;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span> <span class="hljs-keyword">throws</span> Exception&#123;<br>        <span class="hljs-type">Injector</span> <span class="hljs-variable">injector</span> <span class="hljs-operator">=</span> Guice.createInjector(<span class="hljs-keyword">new</span> <span class="hljs-title class_">LifecycleModule</span>());<br>        <span class="hljs-type">Bootstrap</span> <span class="hljs-variable">bootstrap</span> <span class="hljs-operator">=</span> injector.getInstance(Bootstrap.class);<br>        bootstrap.start();<br><br>    &#125;<br><br>    <span class="hljs-meta">@ManageLifecycle</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">PrintLifecycle</span>&#123;<br><br>        <span class="hljs-meta">@LifecycleStart</span><br>        <span class="hljs-keyword">void</span> <span class="hljs-title function_">start</span><span class="hljs-params">()</span>&#123;<br>            System.out.println(<span class="hljs-string">&quot;start&quot;</span>);<br>        &#125;<br><br>        <span class="hljs-meta">@LifecycleStop</span><br>        <span class="hljs-keyword">void</span> <span class="hljs-title function_">stop</span><span class="hljs-params">()</span>&#123;<br>            System.out.println(<span class="hljs-string">&quot;stop&quot;</span>);<br>        &#125;<br><br>    &#125;<br><br>    <span class="hljs-comment">// 定义好类</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Bootstrap</span>&#123;<br><br>        <span class="hljs-keyword">private</span> PrintLifecycle printLifecycle;<br>        <span class="hljs-keyword">private</span> Lifecycle lifecycle;<br><br>        <span class="hljs-meta">@Inject</span><br>        Bootstrap(PrintLifecycle printLifecycle, Lifecycle lifecycle)&#123;<br>            <span class="hljs-built_in">this</span>.printLifecycle = printLifecycle;<br>            <span class="hljs-built_in">this</span>.lifecycle = lifecycle;<br>        &#125;<br><br>        <span class="hljs-keyword">void</span> <span class="hljs-title function_">start</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span> Exception &#123;<br>            System.out.println(<span class="hljs-string">&quot;bootstrap start&quot;</span>);<br>            lifecycle.start();<br>            <span class="hljs-comment">// 等待子线程运行完成以后主线程终止</span><br>            lifecycle.join();<br>        &#125;<br>    &#125;<br><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><strong>2. 配置类Bean注入</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">package</span> ml.yihao;<br><br><span class="hljs-keyword">import</span> com.fasterxml.jackson.annotation.JsonProperty;<br><span class="hljs-keyword">import</span> com.google.code.guice.jsonconfig.JsonConfigModule;<br><span class="hljs-keyword">import</span> com.google.code.guice.jsonconfig.JsonConfigProvider;<br><span class="hljs-keyword">import</span> com.google.inject.*;<br><span class="hljs-keyword">import</span> lombok.Data;<br><br><span class="hljs-keyword">import</span> javax.validation.constraints.Min;<br><span class="hljs-keyword">import</span> javax.validation.constraints.NotNull;<br><span class="hljs-keyword">import</span> java.util.Properties;<br><br><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * <span class="hljs-doctag">@author</span> zyh</span><br><span class="hljs-comment"> * <span class="hljs-doctag">@Description</span>:</span><br><span class="hljs-comment"> * <span class="hljs-doctag">@date</span> 2020/12/1510:31 下午</span><br><span class="hljs-comment"> */</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Example5</span> &#123;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span> &#123;<br>        <span class="hljs-type">Injector</span> <span class="hljs-variable">injector</span> <span class="hljs-operator">=</span> Guice.createInjector(<span class="hljs-keyword">new</span> <span class="hljs-title class_">JsonConfigModule</span>(), <span class="hljs-keyword">new</span> <span class="hljs-title class_">Module</span>() &#123;<br>            <span class="hljs-meta">@Override</span><br>            <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">configure</span><span class="hljs-params">(Binder binder)</span> &#123;<br>                JsonConfigProvider.bind(binder, <span class="hljs-string">&quot;druid.server&quot;</span>, DruidServerConfig.class);<br>            &#125;<br><br>            <span class="hljs-meta">@Provides</span><br>            <span class="hljs-meta">@Singleton</span><br>            Properties <span class="hljs-title function_">init</span><span class="hljs-params">()</span> &#123;<br>                <span class="hljs-type">Properties</span> <span class="hljs-variable">prop</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Properties</span>();<br>                prop.put(<span class="hljs-string">&quot;druid.server.host&quot;</span>, <span class="hljs-string">&quot;127.0.0.1&quot;</span>);<br>                prop.put(<span class="hljs-string">&quot;druid.server.port&quot;</span>, <span class="hljs-number">9999</span>);<br>                <span class="hljs-keyword">return</span> prop;<br>            &#125;<br><br>        &#125;);<br>        <span class="hljs-type">DruidServerConfig</span> <span class="hljs-variable">config</span> <span class="hljs-operator">=</span> injector.getInstance(DruidServerConfig.class);<br>        System.out.println(config.getHost() + <span class="hljs-string">&quot;:&quot;</span> + config.getPort());<br>    &#125;<br><br>&#125;<br><br><span class="hljs-meta">@Data</span><br><span class="hljs-keyword">class</span> <span class="hljs-title class_">DruidServerConfig</span>&#123;<br><br>    <span class="hljs-meta">@JsonProperty</span> <span class="hljs-meta">@NotNull</span> <span class="hljs-keyword">private</span> String host;<br><br>    <span class="hljs-meta">@JsonProperty</span> <span class="hljs-meta">@Min(6060)</span> <span class="hljs-keyword">private</span> <span class="hljs-type">int</span> <span class="hljs-variable">port</span> <span class="hljs-operator">=</span> <span class="hljs-number">8080</span>;<br><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><strong>3. jetty容器管理</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">package</span> ml.yihao;<br><br><span class="hljs-keyword">import</span> com.google.code.guice.jsonconfig.JsonConfigModule;<br><span class="hljs-keyword">import</span> com.google.code.jersey.Jerseys;<br><span class="hljs-keyword">import</span> com.google.code.jersey.ServerConfig;<br><span class="hljs-keyword">import</span> com.google.code.jersey.jetty.JerseyJettyServer;<br><span class="hljs-keyword">import</span> com.google.code.jersey.jetty.JettyServerModule;<br><span class="hljs-keyword">import</span> com.google.inject.*;<br><br><span class="hljs-keyword">import</span> javax.servlet.http.HttpServletRequest;<br><span class="hljs-keyword">import</span> javax.ws.rs.GET;<br><span class="hljs-keyword">import</span> javax.ws.rs.Path;<br><span class="hljs-keyword">import</span> javax.ws.rs.Produces;<br><span class="hljs-keyword">import</span> javax.ws.rs.core.Context;<br><span class="hljs-keyword">import</span> javax.ws.rs.core.MediaType;<br><span class="hljs-keyword">import</span> java.util.Properties;<br><br><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * <span class="hljs-doctag">@author</span> zyh</span><br><span class="hljs-comment"> * <span class="hljs-doctag">@Description</span>:</span><br><span class="hljs-comment"> * <span class="hljs-doctag">@date</span> 2020/12/1510:46 下午</span><br><span class="hljs-comment"> */</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Example6</span> &#123;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span> <span class="hljs-keyword">throws</span> Exception&#123;<br>        <span class="hljs-type">Injector</span> <span class="hljs-variable">injector</span> <span class="hljs-operator">=</span> Guice.createInjector(<span class="hljs-keyword">new</span> <span class="hljs-title class_">JettyServerModule</span>(), <span class="hljs-keyword">new</span> <span class="hljs-title class_">JsonConfigModule</span>(), <span class="hljs-keyword">new</span> <span class="hljs-title class_">Module</span>() &#123;<br>            <span class="hljs-meta">@Override</span><br>            <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">configure</span><span class="hljs-params">(Binder binder)</span> &#123;<br><br>                Jerseys.addResource(binder, IndexResource.class);<br>            &#125;<br><br>            Properties <span class="hljs-title function_">init</span><span class="hljs-params">()</span> &#123;<br>                <span class="hljs-type">Properties</span> <span class="hljs-variable">prop</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Properties</span>();<br>                prop.put(<span class="hljs-string">&quot;server.http.host&quot;</span>, <span class="hljs-string">&quot;0.0.0.0&quot;</span>);<br>                prop.put(<span class="hljs-string">&quot;server.http.port&quot;</span>, <span class="hljs-number">8080</span>);<br>                <span class="hljs-keyword">return</span> prop;<br>            &#125;<br><br>        &#125;);<br>        <span class="hljs-type">JerseyJettyServer</span> <span class="hljs-variable">jerseyJettyServer</span> <span class="hljs-operator">=</span> injector.getInstance(JerseyJettyServer.class);<br>        jerseyJettyServer.start();<br>        Thread.currentThread().join();<br>    &#125;<br><br><br><br>    <span class="hljs-meta">@Singleton</span><br>    <span class="hljs-meta">@Path(&quot;/index&quot;)</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">IndexResource</span> &#123;<br>        <span class="hljs-keyword">private</span> ServerConfig serverConfig;<br>        <span class="hljs-meta">@Inject</span><br>        <span class="hljs-keyword">public</span> <span class="hljs-title function_">IndexResource</span><span class="hljs-params">(ServerConfig serverConfig)</span> &#123;<br>            <span class="hljs-built_in">this</span>.serverConfig = serverConfig;<br>        &#125;<br><br>        <span class="hljs-meta">@GET</span><br>        <span class="hljs-meta">@Produces(MediaType.APPLICATION_JSON)</span><br>        <span class="hljs-keyword">public</span> ServerConfig <span class="hljs-title function_">doGet</span><span class="hljs-params">(<span class="hljs-meta">@Context</span> <span class="hljs-keyword">final</span> HttpServletRequest req)</span> &#123;<br>            <span class="hljs-keyword">return</span> serverConfig;<br>        &#125;<br>    &#125;<br><br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<p><a target="_blank" rel="noopener" href="https://github.com/Demo233/guice-example">源码</a>段落引用</p>
+
+              
+            </div>
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/" class="category-chain-item">大数据</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Apache-Druid/">#Apache Druid</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Apache Druid Guice</div>
+      <div>http://example.com/2020/12/15/2020年12月15日23:26:43_Apache Druid Guice/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>Author</div>
+          <div>Hoey</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>Posted on</div>
+          <div>December 15, 2020</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>Licensed under</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - Hoey">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2020/12/19/2020%E5%B9%B412%E6%9C%8819%E6%97%A519:33:29_AVLTree/" title="AVL Tree">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">AVL Tree</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2020/12/07/2020%E5%B9%B412%E6%9C%8807%E6%97%A521:00:20_ThreadLocal/" title="ThreadLocal">
+                        <span class="hidden-mobile">ThreadLocal</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;Table of Contents</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
+</body>
+</html>

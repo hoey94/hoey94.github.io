@@ -1,0 +1,685 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Hoey">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="需求:后台编辑推送消息，前台实时接收消息 下面是js实现 12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152535455565758596061626364656667686970$(function() &amp;#123;	bdipOnline();&amp;#125;)">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Spring WebSocket消息推送">
+<meta property="og:url" content="http://example.com/2018/11/14/2018-11-14-Spring%20WebSocket%E6%B6%88%E6%81%AF%E6%8E%A8%E9%80%81/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="需求:后台编辑推送消息，前台实时接收消息 下面是js实现 12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152535455565758596061626364656667686970$(function() &amp;#123;	bdipOnline();&amp;#125;)">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2018-11-13T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-11-14T05:58:36.317Z">
+<meta property="article:author" content="Hoey">
+<meta property="article:tag" content="WebSocket">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>Spring WebSocket消息推送 - Hexo</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.9.1","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+
+  
+<meta name="generator" content="Hexo 6.2.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Hoey</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                主页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="Spring WebSocket消息推送"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2018-11-14 00:00" pubdate>
+          November 14, 2018 am
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          8.3k words
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          70 mins
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">Spring WebSocket消息推送</h1>
+            
+            <div class="markdown-body">
+              
+              <p>需求:后台编辑推送消息，前台实时接收消息</p>
+<p>下面是js实现</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br></pre></td><td class="code"><pre><code class="hljs javascript"><br>$(<span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) &#123;<br>	<span class="hljs-title function_">bdipOnline</span>();<br>&#125;);<br><br><span class="hljs-keyword">var</span> bdipWebSocket;<br><span class="hljs-keyword">var</span> bdipReconnectTime = <span class="hljs-number">5000</span>;<br><span class="hljs-keyword">function</span> <span class="hljs-title function_">bdipOnline</span>(<span class="hljs-params"></span>) &#123;<br>	<span class="hljs-keyword">if</span> (<span class="hljs-variable language_">window</span>.<span class="hljs-property">WebSocket</span>) &#123;<br>		<span class="hljs-keyword">var</span> protocol = publicJS.<span class="hljs-property">protocol</span> == <span class="hljs-string">&quot;https&quot;</span>? <span class="hljs-string">&quot;wss&quot;</span>: <span class="hljs-string">&quot;ws&quot;</span>;<br>        <span class="hljs-keyword">try</span>&#123;<br>            bdipWebSocket = <span class="hljs-keyword">new</span> <span class="hljs-title class_">WebSocket</span>(<span class="hljs-built_in">encodeURI</span>(protocol + <span class="hljs-string">&#x27;://&#x27;</span> + publicJS.<span class="hljs-property">host</span> +<span class="hljs-string">&#x27;/ws&#x27;</span>)); <span class="hljs-comment">//cloud.bimbdip.com</span><br>        &#125;<span class="hljs-keyword">catch</span> (err)&#123;<br>            <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&quot;online链接websocket失败&quot;</span>);<br>        &#125;<br><br>        <span class="hljs-keyword">if</span>(bdipWebSocket)&#123;<br><br>			bdipWebSocket.<span class="hljs-property">onopen</span> = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) &#123;<br>				<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&quot;bdipWebSocket链接成功... bdipReconnectTime :&quot;</span> + bdipReconnectTime)<br>				<span class="hljs-comment">//连接成功</span><br>				<span class="hljs-comment">//bdipReconnectTime = 10000;</span><br>                <span class="hljs-built_in">setTimeout</span>(bdipOnline, bdipReconnectTime);<br>			&#125;;<br><br>			bdipWebSocket.<span class="hljs-property">onerror</span> = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) &#123;<br>				<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&quot;bdipWebSocket发生错误... bdipReconnectTime :&quot;</span> + bdipReconnectTime)<br>				<span class="hljs-comment">//连接失败</span><br>				<span class="hljs-built_in">setTimeout</span>(bdipOnline, bdipReconnectTime);<br>				bdipReconnectTime += <span class="hljs-number">5000</span>;<br>			&#125;;<br>			bdipWebSocket.<span class="hljs-property">onclose</span> = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) &#123;<br>				<span class="hljs-comment">//连接断开</span><br>				<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&quot;bdipWebSocket断开链接... bdipReconnectTime :&quot;</span> + bdipReconnectTime)<br>				<span class="hljs-built_in">setTimeout</span>(bdipOnline, bdipReconnectTime);<br>				bdipReconnectTime += <span class="hljs-number">5000</span>;<br>			&#125;;<br>			<span class="hljs-comment">//消息接收</span><br>			bdipWebSocket.<span class="hljs-property">onmessage</span> = <span class="hljs-keyword">function</span>(<span class="hljs-params">message</span>) &#123;<br>				<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&quot;接收到消息，消息内容为:&quot;</span> + message);<br>				<span class="hljs-keyword">var</span> data = <span class="hljs-title class_">JSON</span>.<span class="hljs-title function_">parse</span>(message.<span class="hljs-property">data</span>);<br>				<span class="hljs-keyword">if</span> (data.<span class="hljs-property">type</span> == <span class="hljs-string">&#x27;logMessage&#x27;</span>) &#123;<br>					<span class="hljs-title function_">notificate</span>(data.<span class="hljs-property">data</span>);<br>				&#125;<br>			&#125;;<br>        &#125;<br>	&#125;<br>&#125;<br><br><span class="hljs-comment">// 弹出消息框</span><br><span class="hljs-keyword">function</span> <span class="hljs-title function_">notificate</span>(<span class="hljs-params">_message</span>) &#123;<br>    <span class="hljs-keyword">var</span> msgContent = <span class="hljs-title class_">JSON</span>.<span class="hljs-title function_">parse</span>(_message.<span class="hljs-property">content</span>)<br>	<span class="hljs-keyword">var</span> title = msgContent.<span class="hljs-property">title</span>;<br>	<span class="hljs-keyword">if</span>(title == <span class="hljs-literal">null</span> || <span class="hljs-title function_">typeof</span>(title) == <span class="hljs-string">&#x27;undefined&#x27;</span> || title == <span class="hljs-string">&#x27;&#x27;</span>) &#123;<br>		title = <span class="hljs-string">&quot;通知中心&quot;</span>;<br>	&#125;<br>	<span class="hljs-keyword">var</span> content = msgContent.<span class="hljs-property">content</span>;<br>	<span class="hljs-keyword">if</span>(content.<span class="hljs-property">length</span> &gt; <span class="hljs-number">140</span>) &#123;<br>		content = content.<span class="hljs-title function_">substr</span>(<span class="hljs-number">0</span>, <span class="hljs-number">140</span>);<br>	&#125;<br>	$(<span class="hljs-string">&quot;#notification-title&quot;</span>).<span class="hljs-title function_">html</span>(title);<br>	$(<span class="hljs-string">&quot;#notification-content&quot;</span>).<span class="hljs-title function_">html</span>(content);<br>	<span class="hljs-comment">//$(&quot;.notification-panel&quot;).show();</span><br>    $(<span class="hljs-string">&quot;.notification-panel&quot;</span>).<span class="hljs-title function_">slideDown</span>(<span class="hljs-number">1000</span>);<br>	<span class="hljs-built_in">setTimeout</span>(<span class="hljs-keyword">function</span>(<span class="hljs-params"></span>)&#123;<br>		<span class="hljs-comment">//$(&quot;.notification-panel&quot;).hide();</span><br>        $(<span class="hljs-string">&quot;.notification-panel&quot;</span>).<span class="hljs-title function_">slideUp</span>(<span class="hljs-number">1000</span>);<br>	&#125;, <span class="hljs-number">5000</span>);<br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<p>下面是后台代码,先说一下实现思路:<br>1.在后台管理系统中编辑待推送数据并完成推送消息操作;<br>2.spring websocket 检测到用户登录，按某种规则将用户信息保存到redis；<br>3.定时轮训查看待推送信息，当检测到用户在线时进行推送，更新数据库为已推送；</p>
+<p>其中使用到了使用redis（订阅和发布）功能进行数据推送,下面上代码：</p>
+<p>spring websocket handler 监听用户登录的代码:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">package</span> com.bim.bdip.cloud.home.web;<br><br><span class="hljs-keyword">import</span> com.alibaba.fastjson.JSONObject;<br><span class="hljs-keyword">import</span> com.baomidou.mybatisplus.mapper.EntityWrapper;<br><span class="hljs-keyword">import</span> com.bim.bdip.cloud.home.constant.BizServiceDefine;<br><span class="hljs-keyword">import</span> com.bim.bdip.cloud.home.constant.ConstantDefine;<br><span class="hljs-keyword">import</span> com.bim.bdip.cloud.home.core.base.Parameter;<br><span class="hljs-keyword">import</span> com.bim.bdip.cloud.home.domain.api.ApiResultEntity;<br><span class="hljs-keyword">import</span> com.bim.bdip.cloud.home.model.BimMessageCenter;<br><span class="hljs-keyword">import</span> com.bim.bdip.cloud.home.model.BimUser;<br><span class="hljs-keyword">import</span> com.bim.bdip.cloud.home.provider.IBizProvider;<br><span class="hljs-keyword">import</span> org.apache.ibatis.session.RowBounds;<br><span class="hljs-keyword">import</span> org.apache.log4j.LogManager;<br><span class="hljs-keyword">import</span> org.apache.log4j.Logger;<br><span class="hljs-keyword">import</span> org.redisson.api.RTopic;<br><span class="hljs-keyword">import</span> org.redisson.api.RedissonClient;<br><span class="hljs-keyword">import</span> org.redisson.api.listener.MessageListener;<br><span class="hljs-keyword">import</span> org.springframework.beans.factory.annotation.Autowired;<br><span class="hljs-keyword">import</span> org.springframework.stereotype.Controller;<br><span class="hljs-keyword">import</span> org.springframework.web.socket.CloseStatus;<br><span class="hljs-keyword">import</span> org.springframework.web.socket.TextMessage;<br><span class="hljs-keyword">import</span> org.springframework.web.socket.WebSocketMessage;<br><span class="hljs-keyword">import</span> org.springframework.web.socket.WebSocketSession;<br><span class="hljs-keyword">import</span> org.springframework.web.socket.handler.TextWebSocketHandler;<br><span class="hljs-keyword">import</span> org.springframework.web.socket.server.support.HttpSessionHandshakeInterceptor;<br><br><span class="hljs-keyword">import</span> java.io.IOException;<br><span class="hljs-keyword">import</span> java.util.List;<br><span class="hljs-keyword">import</span> java.util.Map;<br><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">WebSocketHandler</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">TextWebSocketHandler</span> &#123;<br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> <span class="hljs-type">Logger</span> <span class="hljs-variable">logger</span> <span class="hljs-operator">=</span> LogManager.getLogger(WebSocketHandler.class);<br>    <span class="hljs-meta">@Autowired</span><br>    <span class="hljs-keyword">private</span> RedissonClient redissonClient;<br><br>    <span class="hljs-meta">@Autowired</span><br>    <span class="hljs-keyword">private</span> IBizProvider bizProvider;<br><br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-keyword">protected</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">handleTextMessage</span><span class="hljs-params">(WebSocketSession session, TextMessage message)</span> <span class="hljs-keyword">throws</span> Exception &#123;<br><br>    &#125;<br><br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">afterConnectionEstablished</span><span class="hljs-params">(WebSocketSession session)</span> <span class="hljs-keyword">throws</span> Exception &#123;<br><br>        <span class="hljs-built_in">super</span>.afterConnectionEstablished(session);<br>        Map&lt;String, Object&gt; attributes = session.getAttributes();<br><br>        <span class="hljs-type">BimUser</span> <span class="hljs-variable">user</span> <span class="hljs-operator">=</span> (BimUser) attributes.get(ConstantDefine.LOGIN_SESSION_USER);<br><br>        <span class="hljs-keyword">if</span> (user == <span class="hljs-literal">null</span>) &#123;<br>            session.close();<br>        &#125; <span class="hljs-keyword">else</span> &#123;<br>            System.out.println(<span class="hljs-string">&quot;检测到用户登录:&quot;</span> + user.getId() + <span class="hljs-string">&quot;当前线程ID为:&quot;</span> + Thread.currentThread().getId());<br>            <span class="hljs-type">Long</span> <span class="hljs-variable">userId</span> <span class="hljs-operator">=</span> user.getId();<br>            <span class="hljs-type">String</span> <span class="hljs-variable">topic</span> <span class="hljs-operator">=</span> String.format(<span class="hljs-string">&quot;notification:%d&quot;</span>, userId);<br>            RTopic&lt;BimMessageCenter&gt; rtopic = redissonClient.getTopic(topic);<br>            rtopic.removeAllListeners();<br><br>            <span class="hljs-type">String</span> <span class="hljs-variable">listenerKey</span> <span class="hljs-operator">=</span> String.format(<span class="hljs-string">&quot;notification:%d:listeners&quot;</span>, user.getId());<br>            redissonClient.getSet(listenerKey).delete();<br>            <span class="hljs-type">Integer</span> <span class="hljs-variable">listenerId</span> <span class="hljs-operator">=</span> rtopic.addListener(<span class="hljs-keyword">new</span> <span class="hljs-title class_">MessageListener</span>&lt;BimMessageCenter&gt;() &#123;<br>                <span class="hljs-meta">@Override</span><br>                <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">onMessage</span><span class="hljs-params">(String channel, BimMessageCenter msg)</span> &#123;<br>                    System.out.println(<span class="hljs-string">&quot;向用户推送消息:&quot;</span> + msg);<br>                    <span class="hljs-type">JSONObject</span> <span class="hljs-variable">jsonObject</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">JSONObject</span>();<br>                    jsonObject.put(<span class="hljs-string">&quot;type&quot;</span>, <span class="hljs-string">&quot;logMessage&quot;</span>);<br>                    jsonObject.put(<span class="hljs-string">&quot;data&quot;</span>, msg);<br>                    <span class="hljs-type">TextMessage</span> <span class="hljs-variable">textMessage</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">TextMessage</span>(jsonObject.toJSONString());<br>                    <span class="hljs-keyword">try</span> &#123;<br>                        session.sendMessage(textMessage);<br>                    &#125; <span class="hljs-keyword">catch</span> (IOException e) &#123;<br>                        logger.error(<span class="hljs-string">&quot;Websocket Error.&quot;</span>, e);<br>                    &#125;<br>                &#125;<br>            &#125;);<br><br>            redissonClient.getSet(listenerKey).add(listenerId);<br>            attributes.put(ConstantDefine.LISTENER_ID, listenerId);<br>        &#125;<br>    &#125;<br><br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">afterConnectionClosed</span><span class="hljs-params">(WebSocketSession session, CloseStatus status)</span> <span class="hljs-keyword">throws</span> Exception &#123;<br>        Map&lt;String, Object&gt; attributes = session.getAttributes();<br><br>        <span class="hljs-type">BimUser</span> <span class="hljs-variable">user</span> <span class="hljs-operator">=</span> (BimUser) attributes.get(ConstantDefine.LOGIN_SESSION_USER);<br>        <span class="hljs-type">Integer</span> <span class="hljs-variable">listenerId</span> <span class="hljs-operator">=</span> (Integer) attributes.get(ConstantDefine.LISTENER_ID);<br>        <span class="hljs-keyword">if</span> (user != <span class="hljs-literal">null</span>) &#123;<br>            System.out.println(<span class="hljs-string">&quot;用户退出:&quot;</span> + user.getId());<br>            <span class="hljs-built_in">super</span>.afterConnectionClosed(session, status);<br>            <span class="hljs-type">String</span> <span class="hljs-variable">topic</span> <span class="hljs-operator">=</span> String.format(<span class="hljs-string">&quot;notification:%d&quot;</span>, user.getId());<br>            <span class="hljs-type">String</span> <span class="hljs-variable">listenerKey</span> <span class="hljs-operator">=</span> String.format(<span class="hljs-string">&quot;notification:%d:listeners&quot;</span>, user.getId());<br>            redissonClient.getSet(listenerKey).remove(listenerId);<br>            RTopic&lt;BimMessageCenter&gt; rtopic = redissonClient.getTopic(topic);<br>            rtopic.removeListener(listenerId);<br>        &#125;<br>    &#125;<br><br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<p>下面是定时任务,定时任务轮训待推送数据，如果检测到用户登录(通过redis)，就进行数据推送(通过redis topic):</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">package</span> com.bim.bdip.cloud.home.scheduled;<br><br><span class="hljs-keyword">import</span> com.baomidou.mybatisplus.mapper.EntityWrapper;<br><span class="hljs-keyword">import</span> com.bim.bdip.cloud.home.model.BimMessageCenter;<br><span class="hljs-keyword">import</span> com.bim.bdip.cloud.home.service.IBimMessageCenterService;<br><span class="hljs-keyword">import</span> org.apache.ibatis.session.RowBounds;<br><span class="hljs-keyword">import</span> org.redisson.api.RTopic;<br><span class="hljs-keyword">import</span> org.redisson.api.RedissonClient;<br><span class="hljs-keyword">import</span> org.springframework.beans.factory.annotation.Autowired;<br><span class="hljs-keyword">import</span> org.springframework.scheduling.annotation.EnableScheduling;<br><span class="hljs-keyword">import</span> org.springframework.scheduling.annotation.Scheduled;<br><span class="hljs-keyword">import</span> org.springframework.stereotype.Service;<br><br><span class="hljs-keyword">import</span> java.util.Date;<br><span class="hljs-keyword">import</span> java.util.List;<br><br><span class="hljs-meta">@Service</span><br><span class="hljs-meta">@EnableScheduling</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">NotificationTask</span> &#123;<br><br>    <span class="hljs-meta">@Autowired</span><br>    <span class="hljs-keyword">private</span> RedissonClient redissonClient;<br><br>    <span class="hljs-meta">@Autowired</span><br>    <span class="hljs-keyword">private</span> IBimMessageCenterService messageCenterService;<br><br>    <span class="hljs-meta">@Scheduled(cron=&quot;1 * * * * ?&quot;)</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">scanNotifications</span><span class="hljs-params">()</span> &#123;EntityWrapper&lt;BimMessageCenter&gt; wrapper = <span class="hljs-keyword">new</span> <span class="hljs-title class_">EntityWrapper</span>&lt;&gt;();<br>        <span class="hljs-type">RowBounds</span> <span class="hljs-variable">rowBounds</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">RowBounds</span>(<span class="hljs-number">0</span>, <span class="hljs-number">10000000</span>);<br>        wrapper.where(<span class="hljs-string">&quot;read_status = &#123;0&#125;&quot;</span>, <span class="hljs-number">0</span>).and(<span class="hljs-string">&quot;notification_status = &#123;0&#125;&quot;</span>, <span class="hljs-number">0</span>).and(<span class="hljs-string">&quot;message_type = &#123;0&#125;&quot;</span>, <span class="hljs-string">&quot;logMessage&quot;</span>);<br><br>        List&lt;BimMessageCenter&gt; messageList = messageCenterService.selectPage(rowBounds, wrapper);<br>        System.out.println(<span class="hljs-string">&quot;轮训检测数据库数据&quot;</span> + messageList.size() + <span class="hljs-string">&quot;当前线程ID为:&quot;</span> + Thread.currentThread().getId() + <span class="hljs-string">&quot;当前时间为&quot;</span> + <span class="hljs-keyword">new</span> <span class="hljs-title class_">Date</span>().getTime());<br>        <span class="hljs-keyword">for</span>(BimMessageCenter message : messageList) &#123;<br>            <span class="hljs-type">String</span> <span class="hljs-variable">listenerKey</span> <span class="hljs-operator">=</span> String.format(<span class="hljs-string">&quot;notification:%d:listeners&quot;</span>, message.getReceiveId());<br>            <span class="hljs-keyword">if</span>(redissonClient.getSet(listenerKey).size() &gt; <span class="hljs-number">0</span>) &#123;<br>                System.out.println(<span class="hljs-string">&quot;检测到用户&quot;</span> + message.getReceiveId() + <span class="hljs-string">&quot;在线，推送消息&quot;</span>);<br>                <span class="hljs-type">String</span> <span class="hljs-variable">topic</span> <span class="hljs-operator">=</span> String.format(<span class="hljs-string">&quot;notification:%d&quot;</span>, message.getReceiveId());<br>                RTopic&lt;BimMessageCenter&gt; rTopic = redissonClient.getTopic(topic);<br>                rTopic.publish(message);<br>                <span class="hljs-keyword">if</span>(message.getNotificationStatus() != <span class="hljs-number">2</span>)&#123;<br>                    message.setNotificationStatus(<span class="hljs-number">2</span>); <span class="hljs-comment">// 已推送</span><br>                    <span class="hljs-built_in">this</span>.messageCenterService.update(message);<br>                &#125;<br>            &#125;<br>        &#125;<br>        System.out.println(<span class="hljs-string">&quot;轮训结束，当前时间为:&quot;</span> + <span class="hljs-keyword">new</span> <span class="hljs-title class_">Date</span>().getTime());<br>    &#125;<br><br>&#125;<br><br></code></pre></td></tr></table></figure>
+              
+            </div>
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E5%90%8E%E7%AB%AF/" class="category-chain-item">后端</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/WebSocket/">#WebSocket</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Spring WebSocket消息推送</div>
+      <div>http://example.com/2018/11/14/2018-11-14-Spring WebSocket消息推送/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>Author</div>
+          <div>Hoey</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>Posted on</div>
+          <div>November 14, 2018</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>Licensed under</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - Hoey">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2018/11/15/2018-11-15-Ngnix%20Websocket%20400%20%E9%94%99%E8%AF%AF/" title="Ngnix Websocket 400 错误">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Ngnix Websocket 400 错误</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2018/11/06/2018-11-06-hive%E5%90%84%E7%A7%8Djoin/" title="Hive 各种Join总计汇总">
+                        <span class="hidden-mobile">Hive 各种Join总计汇总</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;Table of Contents</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
+</body>
+</html>

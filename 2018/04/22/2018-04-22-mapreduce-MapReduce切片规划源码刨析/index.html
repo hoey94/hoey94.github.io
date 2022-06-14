@@ -1,0 +1,755 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Hoey">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="切片规划最终会形成一个文件job.split。里面存放这切片信息，首先要明确一点是maptask的数量于切片的数量有直接对应关系。mrappmaster在启动maptask时，会去job.split文件中找切片信息，有几个切片就启动几个maptask，每个切片分配一个maptask并行实例。我们通过追源码，找到了这个文件。 MapReduce框架会把它存在我们本机的某个路径。它是MapReduce">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MapReduce切片规划源码剖析">
+<meta property="og:url" content="http://example.com/2018/04/22/2018-04-22-mapreduce-MapReduce%E5%88%87%E7%89%87%E8%A7%84%E5%88%92%E6%BA%90%E7%A0%81%E5%88%A8%E6%9E%90/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="切片规划最终会形成一个文件job.split。里面存放这切片信息，首先要明确一点是maptask的数量于切片的数量有直接对应关系。mrappmaster在启动maptask时，会去job.split文件中找切片信息，有几个切片就启动几个maptask，每个切片分配一个maptask并行实例。我们通过追源码，找到了这个文件。 MapReduce框架会把它存在我们本机的某个路径。它是MapReduce">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://i.loli.net/2019/07/02/5d1aaf3d1623e18146.jpg">
+<meta property="og:image" content="https://i.loli.net/2019/07/02/5d1aaf4a3e7fb29757.jpg">
+<meta property="og:image" content="https://i.loli.net/2019/07/02/5d1aaf55c689225911.jpg">
+<meta property="og:image" content="https://i.loli.net/2019/07/02/5d1aaf608a04477982.jpg">
+<meta property="og:image" content="https://i.loli.net/2019/07/02/5d1aaf6f0d49492866.jpg">
+<meta property="og:image" content="https://i.loli.net/2019/07/02/5d1aaf7bc14b539508.jpg">
+<meta property="og:image" content="https://i.loli.net/2019/07/02/5d1aaf837122867524.jpg">
+<meta property="article:published_time" content="2018-04-21T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-11-14T05:58:36.307Z">
+<meta property="article:author" content="Hoey">
+<meta property="article:tag" content="MapReduce">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://i.loli.net/2019/07/02/5d1aaf3d1623e18146.jpg">
+  
+  
+  
+  <title>MapReduce切片规划源码剖析 - Hexo</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.9.1","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+
+  
+<meta name="generator" content="Hexo 6.2.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Hoey</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                主页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="MapReduce切片规划源码剖析"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2018-04-22 00:00" pubdate>
+          April 22, 2018 am
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          5.6k words
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          47 mins
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">MapReduce切片规划源码剖析</h1>
+            
+            <div class="markdown-body">
+              
+              <p>切片规划最终会形成一个文件job.split。里面存放这切片信息，首先要明确一点是maptask的数量于切片的数量有直接对应关系。mrappmaster在启动maptask时，会去job.split文件中找切片信息，有几个切片就启动几个maptask，每个切片分配一个maptask并行实例。我们通过追源码，找到了这个文件。<br><img src="https://i.loli.net/2019/07/02/5d1aaf3d1623e18146.jpg" srcset="/img/loading.gif" lazyload alt="image"></p>
+<p>MapReduce框架会把它存在我们本机的某个路径。它是MapReduce对于待处理数据的一个描述信息文件。</p>
+<p>关于切片需要注意的几点:</p>
+<ol>
+<li>文件是怎么进行切分的？</li>
+<li>切片的大小是怎么控制的？</li>
+</ol>
+<hr>
+<h2 id="源码追踪"><a href="#源码追踪" class="headerlink" title="源码追踪"></a>源码追踪</h2><p>根据源码追踪，发现切片的划分是在FileInputFormat的getSplits()方法中完成的。getSplits的大致业务逻辑可分为下列几个阶段</p>
+<ul>
+<li>根据配置文件拿到切片大小，源码Math.max(minSize, Math.min(maxSize, blockSize));(如果我们没有设置过mapreduce.input.fileinputformat.split.minsize，mapreduce.input.fileinputformat.split.maxsize,那么默认的切片大小为128M，及为hdfs中block块大小)</li>
+<li>根据不同的文件系统，获取文件规划的上传目录。（hdfs-&gt; hdfs:&#x2F;&#x2F;…..&#x2F;.staging&#x2F;jobid或file-&gt;file:&#x2F;&#x2F;…..&#x2F;.staging&#x2F;jobid）</li>
+<li>根据用户指定的hdfs目录找到对应的所有文件</li>
+<li>遍历所有文件，拿到文件的元数据，对每个文件进行切片规划</li>
+<li>规划的一个策略：根据拿到的切片大小来切每个文件,假如文件大小为300M,切片大小为128M,那么走完循环后文件会被分为3块(0-128,128-256,256-300)</li>
+<li>将切片封装为job.split</li>
+<li>生成其他信息,比如job.xml(所有的参数信息)。</li>
+<li>将生成的所有文件以流的形式写到指定上传目录，也就是hdfs:&#x2F;&#x2F;….&#x2F;.staging&#x2F;jobid</li>
+</ul>
+<hr>
+<p>一步一步断点调试,通过本地运行MapReduce程序,进入debug。先在<code>job.waitForCompletion(true);</code>打断点。</p>
+<p><img src="https://i.loli.net/2019/07/02/5d1aaf4a3e7fb29757.jpg" srcset="/img/loading.gif" lazyload alt="image"></p>
+<p>发现会进入<code>submitter.submitJobInternal()</code>,跳进去</p>
+<p><img src="https://i.loli.net/2019/07/02/5d1aaf55c689225911.jpg" srcset="/img/loading.gif" lazyload alt="image"></p>
+<p>可以看到拿到了<code>jobStagingArea</code>,后续拿到了<code>jobId</code>,最后拼成了<code>submitJobDir</code>。这个目录就是上面提到的job.split存放的目录。</p>
+<p><img src="https://i.loli.net/2019/07/02/5d1aaf608a04477982.jpg" srcset="/img/loading.gif" lazyload alt="image"></p>
+<p>拿到submitJobDir以后，MapReduce开始调用<code>this.writeSplits(job, submitJobDir)</code>对文件进行逻辑切分，形成job.split文件(后续详细解析里面的内部详情)</p>
+<p><img src="https://i.loli.net/2019/07/02/5d1aaf6f0d49492866.jpg" srcset="/img/loading.gif" lazyload alt="image"></p>
+<p>后续获取配置信息。形成job.xml文件，这个文件里面定义了hadoop中各种各样的配置信息</p>
+<p><img src="https://i.loli.net/2019/07/02/5d1aaf7bc14b539508.jpg" srcset="/img/loading.gif" lazyload alt="image"></p>
+<p>最后将job.split,job.xml,写到对应的submitJobDir目录下。</p>
+<hr>
+<h2 id="深入writeSplits逻辑"><a href="#深入writeSplits逻辑" class="headerlink" title="深入writeSplits逻辑"></a>深入writeSplits逻辑</h2><p>在this.writeSplites()我们如何跳到具体方法中，我们直接ctrl+左键点进取以后会发现是一个抽象类InputFormat。</p>
+<p>是这样如果你在初始化job是没有指定用哪个inputFormat,那么mapreduce框架默认会使用TextInputFormat</p>
+<p>使用快捷键<code>ctrl+shift+T</code>搜索TextInputFormat,我们会发现找不到<code>getSplits</code>方法，这是因为方法在父类里面，进去父类<code>FileInputFormat</code>中就可以找到了，在第一行打断点运行就可以跳进去了。</p>
+<p>InputFormat的类结构图</p>
+<p><img src="https://i.loli.net/2019/07/02/5d1aaf837122867524.jpg" srcset="/img/loading.gif" lazyload alt="image"></p>
+<p>来看看getSplits方法的具体逻辑，我直接把源码粘过来了,我在关键的地方加了注释</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> List&lt;InputSplit&gt; <span class="hljs-title function_">getSplits</span><span class="hljs-params">(JobContext job)</span> <span class="hljs-keyword">throws</span> IOException &#123;<br>    <span class="hljs-type">StopWatch</span> <span class="hljs-variable">sw</span> <span class="hljs-operator">=</span> (<span class="hljs-keyword">new</span> <span class="hljs-title class_">StopWatch</span>()).start();<br>	<span class="hljs-comment">// 调节切片大小的参数1</span><br>    <span class="hljs-type">long</span> <span class="hljs-variable">minSize</span> <span class="hljs-operator">=</span> Math.max(<span class="hljs-built_in">this</span>.getFormatMinSplitSize(), getMinSplitSize(job));<br>    <span class="hljs-comment">// 调节切片大小的参数1        </span><br>	<span class="hljs-type">long</span> <span class="hljs-variable">maxSize</span> <span class="hljs-operator">=</span> getMaxSplitSize(job);<br>    <span class="hljs-type">ArrayList</span> <span class="hljs-variable">splits</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">ArrayList</span>();<br>    <span class="hljs-comment">// 拿到待处理的文件</span><br>    <span class="hljs-type">List</span> <span class="hljs-variable">files</span> <span class="hljs-operator">=</span> <span class="hljs-built_in">this</span>.listStatus(job);<br>    <span class="hljs-type">Iterator</span> <span class="hljs-variable">i$</span> <span class="hljs-operator">=</span> files.iterator();<br><br>    <span class="hljs-keyword">while</span>(<span class="hljs-literal">true</span>) &#123;<br>        <span class="hljs-keyword">while</span>(<span class="hljs-literal">true</span>) &#123;<br>	        <span class="hljs-comment">// 循环处理每个文件</span><br>            <span class="hljs-keyword">while</span>(i$.hasNext()) &#123;<br>                <span class="hljs-type">FileStatus</span> <span class="hljs-variable">file</span> <span class="hljs-operator">=</span> (FileStatus)i$.next();<br>                <span class="hljs-type">Path</span> <span class="hljs-variable">path</span> <span class="hljs-operator">=</span> file.getPath();<br>                <span class="hljs-type">long</span> <span class="hljs-variable">length</span> <span class="hljs-operator">=</span> file.getLen();<br>                <span class="hljs-keyword">if</span>(length != <span class="hljs-number">0L</span>) &#123;<br>                    BlockLocation[] blkLocations;<br>                    <span class="hljs-keyword">if</span>(file <span class="hljs-keyword">instanceof</span> LocatedFileStatus) &#123;<br>                        blkLocations = ((LocatedFileStatus)file).getBlockLocations();<br>                    &#125; <span class="hljs-keyword">else</span> &#123;<br>                        <span class="hljs-type">FileSystem</span> <span class="hljs-variable">blockSize</span> <span class="hljs-operator">=</span> path.getFileSystem(job.getConfiguration());<br>                        blkLocations = blockSize.getFileBlockLocations(file, <span class="hljs-number">0L</span>, length);<br>                    &#125;<br><br>                    <span class="hljs-keyword">if</span>(<span class="hljs-built_in">this</span>.isSplitable(job, path)) &#123;<br>                        <span class="hljs-type">long</span> <span class="hljs-variable">blockSize1</span> <span class="hljs-operator">=</span> file.getBlockSize();<br>		                <span class="hljs-comment">// splitSize是一个重要的参数，它根据minSize和maxSize计算出切片的大小（点进查看计算方式）</span><br>                        <span class="hljs-type">long</span> <span class="hljs-variable">splitSize</span> <span class="hljs-operator">=</span> <span class="hljs-built_in">this</span>.computeSplitSize(blockSize1, minSize, maxSize);<br><br>                        <span class="hljs-type">long</span> bytesRemaining;<br>                        <span class="hljs-type">int</span> blkIndex;<br>		                <span class="hljs-comment">// 到底切不切就看这行代码了，这边的计算方式是判断如果文件的大小比splitSize大的话就对文件进行切分，否则就不要在切了，因为它已经很小了。</span><br>                        <span class="hljs-keyword">for</span>(bytesRemaining = length; (<span class="hljs-type">double</span>)bytesRemaining / (<span class="hljs-type">double</span>)splitSize &gt; <span class="hljs-number">1.1D</span>; bytesRemaining -= splitSize) &#123;<br>                            blkIndex = <span class="hljs-built_in">this</span>.getBlockIndex(blkLocations, length - bytesRemaining);<br>                            splits.add(<span class="hljs-built_in">this</span>.makeSplit(path, length - bytesRemaining, splitSize, blkLocations[blkIndex].getHosts(), blkLocations[blkIndex].getCachedHosts()));<br>                        &#125;<br>                        <span class="hljs-comment">// 如果这个文件已经很小了，就不需要在切了直接放到splits中。</span><br>                        <span class="hljs-keyword">if</span>(bytesRemaining != <span class="hljs-number">0L</span>) &#123;<br>                            blkIndex = <span class="hljs-built_in">this</span>.getBlockIndex(blkLocations, length - bytesRemaining);<br>                            splits.add(<span class="hljs-built_in">this</span>.makeSplit(path, length - bytesRemaining, bytesRemaining, blkLocations[blkIndex].getHosts(), blkLocations[blkIndex].getCachedHosts()));<br>                        &#125;<br>                    &#125; <span class="hljs-keyword">else</span> &#123;<br>                        splits.add(<span class="hljs-built_in">this</span>.makeSplit(path, <span class="hljs-number">0L</span>, length, blkLocations[<span class="hljs-number">0</span>].getHosts(), blkLocations[<span class="hljs-number">0</span>].getCachedHosts()));<br>                    &#125;<br>                &#125; <span class="hljs-keyword">else</span> &#123;<br>                    splits.add(<span class="hljs-built_in">this</span>.makeSplit(path, <span class="hljs-number">0L</span>, length, <span class="hljs-keyword">new</span> <span class="hljs-title class_">String</span>[<span class="hljs-number">0</span>]));<br>                &#125;<br>            &#125;<br><br>            job.getConfiguration().setLong(<span class="hljs-string">&quot;mapreduce.input.fileinputformat.numinputfiles&quot;</span>, (<span class="hljs-type">long</span>)files.size());<br>            sw.stop();<br>            <span class="hljs-keyword">if</span>(LOG.isDebugEnabled()) &#123;<br>                LOG.debug(<span class="hljs-string">&quot;Total # of splits generated by getSplits: &quot;</span> + splits.size() + <span class="hljs-string">&quot;, TimeTaken: &quot;</span> + sw.now(TimeUnit.MILLISECONDS));<br>            &#125;<br><br>            <span class="hljs-keyword">return</span> splits;<br>        &#125;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+<hr>
+<h2 id="切片的计算方式"><a href="#切片的计算方式" class="headerlink" title="切片的计算方式"></a>切片的计算方式</h2><p>首先会计算出minSize，默认1</p>
+<blockquote>
+<p>long minSize &#x3D; Math.max(this.getFormatMinSplitSize(), getMinSplitSize(job));</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">protected</span> <span class="hljs-type">long</span> <span class="hljs-title function_">getFormatMinSplitSize</span><span class="hljs-params">()</span> &#123;<br>    <span class="hljs-keyword">return</span> <span class="hljs-number">1L</span>;<br>&#125;<br><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-type">long</span> <span class="hljs-title function_">getMinSplitSize</span><span class="hljs-params">(JobContext job)</span> &#123;<br>    <span class="hljs-keyword">return</span> job.getConfiguration().getLong(<span class="hljs-string">&quot;mapreduce.input.fileinputformat.split.minsize&quot;</span>, <span class="hljs-number">1L</span>);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>计算maxSize，默认128M</p>
+<blockquote>
+<p>long maxSize &#x3D; getMaxSplitSize(job);</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-type">long</span> <span class="hljs-title function_">getMaxSplitSize</span><span class="hljs-params">(JobContext context)</span> &#123;<br>        <span class="hljs-keyword">return</span> context.getConfiguration().getLong(<span class="hljs-string">&quot;mapreduce.input.fileinputformat.split.maxsize&quot;</span>, <span class="hljs-number">9223372036854775807L</span>);<br>    &#125;<br></code></pre></td></tr></table></figure>
+
+<p>最后计算splitSize</p>
+<blockquote>
+<p>long splitSize &#x3D; this.computeSplitSize(blockSize1, minSize, maxSize);</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs java"> <span class="hljs-keyword">protected</span> <span class="hljs-type">long</span> <span class="hljs-title function_">computeSplitSize</span><span class="hljs-params">(<span class="hljs-type">long</span> blockSize, <span class="hljs-type">long</span> minSize, <span class="hljs-type">long</span> maxSize)</span> &#123;<br>    <span class="hljs-keyword">return</span> Math.max(minSize, Math.min(maxSize, blockSize));<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>在切文件是采用这样的判断方式</p>
+<blockquote>
+<p>(double)bytesRemaining &#x2F; (double)splitSize &gt; 1.1D</p>
+</blockquote>
+<p>只要<code>文件的大小/splitSize &gt; 1.1倍</code>时就会对文件进行切分</p>
+<hr>
+<h2 id="问题总结"><a href="#问题总结" class="headerlink" title="问题总结"></a>问题总结</h2><p>归结一点就是mapreduce主程序运行后，会将每个文件进行逻辑切分，这里的逻辑切分的意思就是说并非真的对文件进行切分，只是生成一些描述信息,存到job.split文件中。</p>
+<p>有几个切片就会生成几个maptask。maptask数量和切片的数量一一对应，因为yarnRunner会把job.split发给yarn,yarn收到这个文件以后会读取里面的切片信息，然后初始化maptask。</p>
+<p>文件切分的方法是InputFormat类提供的，在getSplits方法中我们可以看到<code>(double)bytesRemaining / (double)splitSize &gt; 1.1D</code>，只要<code>文件的大小/splitSize &gt; 1.1倍</code>时就会对文件进行切分,splitSize默认是128M。</p>
+<p>通过查看源码我们可以知道通过两个参数<code>mapreduce.input.fileinputformat.split.minsize</code>和<code>mapreduce.input.fileinputformat.split.maxsize</code>就可以调节。</p>
+<p>了解了切片后，我们到底切多大？是比HDFS block大好还是比他小好？为什么要对文件进行切分？要明白切片规划的其中一个重要的原因就是mapreduce期望，在运行每个maptask时，任务所需要的输入数据恰好能在本地，这样就能保证每次maptask于hdfs的数据交互时，直接可以从本地拿到数据。理想状态（切片的大小&#x3D;blocksize,减少maptask于hdfs的跨网络数据传输）。</p>
+<p>本人水平有限，不当之处希望各位高手指正。邮箱<a href="mailto:&#x63;&#x6e;&#x6e;&#x71;&#x6a;&#x62;&#97;&#x6e;&#53;&#x32;&#x31;&#x40;&#103;&#109;&#97;&#105;&#108;&#x2e;&#99;&#111;&#x6d;">&#x63;&#x6e;&#x6e;&#x71;&#x6a;&#x62;&#97;&#x6e;&#53;&#x32;&#x31;&#x40;&#103;&#109;&#97;&#105;&#108;&#x2e;&#99;&#111;&#x6d;</a>。</p>
+
+              
+            </div>
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/" class="category-chain-item">大数据</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/MapReduce/">#MapReduce</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>MapReduce切片规划源码剖析</div>
+      <div>http://example.com/2018/04/22/2018-04-22-mapreduce-MapReduce切片规划源码刨析/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>Author</div>
+          <div>Hoey</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>Posted on</div>
+          <div>April 22, 2018</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>Licensed under</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - Hoey">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2018/04/25/2018-04-25-thread-FTP%E5%A4%9A%E7%BA%BF%E7%A8%8B%E6%89%B9%E9%87%8F%E6%96%87%E4%BB%B6%E4%B8%8B%E8%BD%BD/" title="FTP多线程批量文件下载">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">FTP多线程批量文件下载</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2018/04/22/2018-04-22-mapreduce-mapreduce%E7%9A%84shuffle%E6%9C%BA%E5%88%B6/" title="MapReduce的Shuffle机制">
+                        <span class="hidden-mobile">MapReduce的Shuffle机制</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;Table of Contents</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
+</body>
+</html>

@@ -1,0 +1,1568 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Hoey">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="Author：Eric  Version：9.0.1 From : 转载  看到Eric哥们在b站中分享的Docker视频，觉得讲的很好，这里提供一下讲义方便大家学习。 [TOC] 一、引言 1.1 环境不一致 我本地运行没问题啊：由于环境不一致，导致相同的程序，运行结果却不一致。  1.2 隔离性 哪个哥们又写死循环了，怎么这么卡：在多用户的操作系统下，会因为其他用户的操作失误影响到你自己编">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Docker">
+<meta property="og:url" content="http://example.com/2020/09/19/2020%E2%80%9309-19-Docker/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="Author：Eric  Version：9.0.1 From : 转载  看到Eric哥们在b站中分享的Docker视频，觉得讲的很好，这里提供一下讲义方便大家学习。 [TOC] 一、引言 1.1 环境不一致 我本地运行没问题啊：由于环境不一致，导致相同的程序，运行结果却不一致。  1.2 隔离性 哪个哥们又写死循环了，怎么这么卡：在多用户的操作系统下，会因为其他用户的操作失误影响到你自己编">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://qgw3wcroi.hn-bkt.clouddn.com/1586333742105.png">
+<meta property="og:image" content="http://qgw3wcroi.hn-bkt.clouddn.com/1586340594252.png">
+<meta property="og:image" content="http://qgw3wcroi.hn-bkt.clouddn.com/1586340639934.png">
+<meta property="og:image" content="http://qgw3wcroi.hn-bkt.clouddn.com/1586420176720.png">
+<meta property="og:image" content="http://qgw3wcroi.hn-bkt.clouddn.com/1588671760385.png">
+<meta property="og:image" content="http://qgw3wcroi.hn-bkt.clouddn.com/1588674040060.png">
+<meta property="og:image" content="http://qgw3wcroi.hn-bkt.clouddn.com/1588677492583.png">
+<meta property="og:image" content="http://qgw3wcroi.hn-bkt.clouddn.com/image-20200708232643961.png">
+<meta property="og:image" content="http://qgw3wcroi.hn-bkt.clouddn.com/image-20200708232614918.png">
+<meta property="og:image" content="http://qgw3wcroi.hn-bkt.clouddn.com/image-20200708232754318.png">
+<meta property="og:image" content="http://qgw3wcroi.hn-bkt.clouddn.com/image-20200708232800931.png">
+<meta property="og:image" content="http://qgw3wcroi.hn-bkt.clouddn.com/image-20200708232842803.png">
+<meta property="og:image" content="http://qgw3wcroi.hn-bkt.clouddn.com/image-20200708232910197.png">
+<meta property="og:image" content="http://qgw3wcroi.hn-bkt.clouddn.com/image-20200708232922638.png">
+<meta property="og:image" content="http://qgw3wcroi.hn-bkt.clouddn.com/1588681196639.png">
+<meta property="og:image" content="http://qgw3wcroi.hn-bkt.clouddn.com/image-20200708233023116.png">
+<meta property="og:image" content="http://qgw3wcroi.hn-bkt.clouddn.com/image-20200708233031967.png">
+<meta property="og:image" content="http://qgw3wcroi.hn-bkt.clouddn.com/1588681954779.png">
+<meta property="og:image" content="http://qgw3wcroi.hn-bkt.clouddn.com/1588681970621.png">
+<meta property="og:image" content="http://qgw3wcroi.hn-bkt.clouddn.com/1588682011820.png">
+<meta property="og:image" content="http://qgw3wcroi.hn-bkt.clouddn.com/1588682092002.png">
+<meta property="og:image" content="http://qgw3wcroi.hn-bkt.clouddn.com/1588683585249.png">
+<meta property="og:image" content="http://qgw3wcroi.hn-bkt.clouddn.com/1588684490466.png">
+<meta property="og:image" content="http://qgw3wcroi.hn-bkt.clouddn.com/1588684458028.png">
+<meta property="og:image" content="http://qgw3wcroi.hn-bkt.clouddn.com/1588685220324.png">
+<meta property="og:image" content="http://qgw3wcroi.hn-bkt.clouddn.com/1588686481506.png">
+<meta property="og:image" content="http://qgw3wcroi.hn-bkt.clouddn.com/1588686489821.png">
+<meta property="og:image" content="http://qgw3wcroi.hn-bkt.clouddn.com/1588686591351.png">
+<meta property="og:image" content="http://qgw3wcroi.hn-bkt.clouddn.com/1588686553880.png">
+<meta property="og:image" content="http://qgw3wcroi.hn-bkt.clouddn.com/1588687382594.png">
+<meta property="og:image" content="http://qgw3wcroi.hn-bkt.clouddn.com/1588693533099.png">
+<meta property="og:image" content="http://qgw3wcroi.hn-bkt.clouddn.com/1588696879059.png">
+<meta property="og:image" content="http://qgw3wcroi.hn-bkt.clouddn.com/1588697752850.png">
+<meta property="og:image" content="http://qgw3wcroi.hn-bkt.clouddn.com/1588697770621.png">
+<meta property="og:image" content="http://qgw3wcroi.hn-bkt.clouddn.com/1588700462690.png">
+<meta property="article:published_time" content="2020-09-19T03:49:00.000Z">
+<meta property="article:modified_time" content="2020-11-26T17:17:18.632Z">
+<meta property="article:author" content="Hoey">
+<meta property="article:tag" content="Docker">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://qgw3wcroi.hn-bkt.clouddn.com/1586333742105.png">
+  
+  
+  
+  <title>Docker - Hexo</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.9.1","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+
+  
+<meta name="generator" content="Hexo 6.2.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Hoey</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                主页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="Docker"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2020-09-19 11:49" pubdate>
+          September 19, 2020 am
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          15k words
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          129 mins
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">Docker</h1>
+            
+            <div class="markdown-body">
+              
+              <p><img src="http://qgw3wcroi.hn-bkt.clouddn.com/1586333742105.png" srcset="/img/loading.gif" lazyload alt="1586333742105"></p>
+<blockquote>
+<p>Author：Eric </p>
+<p>Version：9.0.1</p>
+<p>From : 转载</p>
+</blockquote>
+<p>看到Eric哥们在b站中分享的Docker视频，觉得讲的很好，这里提供一下讲义方便大家学习。</p>
+<p>[TOC]</p>
+<h3 id="一、引言"><a href="#一、引言" class="headerlink" title="一、引言"></a>一、引言</h3><hr>
+<h4 id="1-1-环境不一致"><a href="#1-1-环境不一致" class="headerlink" title="1.1 环境不一致"></a>1.1 环境不一致</h4><blockquote>
+<p>我本地运行没问题啊：由于环境不一致，导致相同的程序，运行结果却不一致。</p>
+</blockquote>
+<h4 id="1-2-隔离性"><a href="#1-2-隔离性" class="headerlink" title="1.2 隔离性"></a>1.2 隔离性</h4><blockquote>
+<p>哪个哥们又写死循环了，怎么这么卡：在多用户的操作系统下，会因为其他用户的操作失误影响到你自己编写的程序。</p>
+</blockquote>
+<h4 id="1-3-弹性伸缩"><a href="#1-3-弹性伸缩" class="headerlink" title="1.3 弹性伸缩"></a>1.3 弹性伸缩</h4><blockquote>
+<p>淘宝在双11，用户量暴增：需要很多很多的运维人员去增加部署的服务器，运维成本过高。</p>
+</blockquote>
+<h4 id="1-4-学习成本"><a href="#1-4-学习成本" class="headerlink" title="1.4 学习成本"></a>1.4 学习成本</h4><blockquote>
+<p>学习一门技术，得先安装啊：学习每一门技术都要先安装响应的软件，但是还有他所依赖的各种环境，安装软件成本快高过学习成本啦。</p>
+</blockquote>
+<h3 id="二、Docker介绍"><a href="#二、Docker介绍" class="headerlink" title="二、Docker介绍"></a>二、Docker介绍</h3><hr>
+<h4 id="2-1-Docker的由来"><a href="#2-1-Docker的由来" class="headerlink" title="2.1 Docker的由来"></a>2.1 Docker的由来</h4><blockquote>
+<p>Docker 最初是 dotCloud 公司创始人Solomon Hykes 在法国期间发起的一个公司内部项目。</p>
+<p>2010年的专门做PAAS平台，但是到了2013年的时候，像亚马逊，微软，Google都开始做PAAS平台。</p>
+<p>到了2013年，公司资金链断裂，不得不倒闭，于是将公司内的核心技术对外开源，核心技术就是Docker。</p>
+<p>由于开源了Docker，到了2014年的时候，得到了各轮融资，于是公司开始全神贯注的维护Docker。</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th align="center">Docker主要作者-Solomon</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center"><img src="http://qgw3wcroi.hn-bkt.clouddn.com/1586340594252.png" srcset="/img/loading.gif" lazyload alt="1586340594252"></td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center">现在Solomon已经离开了维护Docker的团队</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center"><img src="http://qgw3wcroi.hn-bkt.clouddn.com/1586340639934.png" srcset="/img/loading.gif" lazyload alt="1586340639934"></td>
+</tr>
+</tbody></table>
+<h4 id="2-2-Docker的思想"><a href="#2-2-Docker的思想" class="headerlink" title="2.2 Docker的思想"></a>2.2 Docker的思想</h4><blockquote>
+<ul>
+<li><p>封装：将需要的操作系统，环境，软件封装到一个镜像中。</p>
+</li>
+<li><p>标准化：</p>
+<ul>
+<li>运输的标准化：Docker提供了中央仓库，所有官方的镜像都放在了这个中央仓库中，当需要使用某一个镜像时，通过相应的方式拉取即可。</li>
+<li>命令的标准化：Docker提供了一些列的命令，帮助我们去获取镜像，管理容器等等操作。</li>
+<li>提供了REST的API：基于标准REST的API衍生出了很多的图形化界面，如Rancher等。</li>
+</ul>
+</li>
+<li><p>隔离性：Docker在运行镜像时，会在Linux的内核中，单独的开辟一片空间，这片空间不会影响到其他程序。</p>
+</li>
+</ul>
+</blockquote>
+<h3 id="三、Docker的安装"><a href="#三、Docker的安装" class="headerlink" title="三、Docker的安装"></a>三、Docker的安装</h3><hr>
+<h4 id="3-1-下载Docker依赖的环境"><a href="#3-1-下载Docker依赖的环境" class="headerlink" title="3.1 下载Docker依赖的环境"></a>3.1 下载Docker依赖的环境</h4><blockquote>
+<p>安装Docker，需要先将依赖的环境全部下载，就像Maven依赖JDK一样。</p>
+</blockquote>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sh">yum -y install yum-utils device-mapper-persistent-data lvm2<br></code></pre></td></tr></table></figure>
+
+
+
+<h4 id="3-2-指定Docker镜像源"><a href="#3-2-指定Docker镜像源" class="headerlink" title="3.2 指定Docker镜像源"></a>3.2 指定Docker镜像源</h4><blockquote>
+<p>默认情况下，下载Docker会从国外服务器下载，速度较慢，我们可以设置为阿里云镜像源，速度更快。</p>
+</blockquote>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sh">yum-config-manager --add-repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo<br></code></pre></td></tr></table></figure>
+
+
+
+<h4 id="3-3-安装Docker"><a href="#3-3-安装Docker" class="headerlink" title="3.3 安装Docker"></a>3.3 安装Docker</h4><blockquote>
+<p>采用yum的方式安装。</p>
+</blockquote>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sh">yum makecache fast<br>yum -y install docker-ce<br></code></pre></td></tr></table></figure>
+
+<p>Docker 安装不了可能是源的问题,我的机器是ubuntu，这里参考了链接完成了安装<a target="_blank" rel="noopener" href="https://www.runoob.com/docker/ubuntu-docker-install.html">https://www.runoob.com/docker/ubuntu-docker-install.html</a></p>
+<h4 id="3-4-启动Docker并测试"><a href="#3-4-启动Docker并测试" class="headerlink" title="3.4 启动Docker并测试"></a>3.4 启动Docker并测试</h4><blockquote>
+<p>安装成功后，需要手动启动，设置为开机自启，并测试。</p>
+</blockquote>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs sh"><span class="hljs-comment"># 启动Docker服务</span><br>systemctl start docker<br><span class="hljs-comment"># 设置开机自动启动</span><br>systemctl <span class="hljs-built_in">enable</span> docker<br><span class="hljs-comment"># 测试</span><br>docker run hello-world<br></code></pre></td></tr></table></figure>
+
+
+
+<h3 id="四、Docker的中央仓库【重点】"><a href="#四、Docker的中央仓库【重点】" class="headerlink" title="四、Docker的中央仓库【重点】"></a>四、Docker的中央仓库【<code>重点</code>】</h3><hr>
+<blockquote>
+<ul>
+<li><p>Docker官方的中央仓库：这个仓库是镜像最全的，但是下载速度较慢。</p>
+<p>   <a target="_blank" rel="noopener" href="https://hub.docker.com/">https://hub.docker.com/</a></p>
+</li>
+<li><p>国内的镜像网站：网易蜂巢，daoCloud等，下载速度快，但是镜像相对不全。</p>
+<p>   <a target="_blank" rel="noopener" href="https://c.163yun.com/hub#/home">https://c.163yun.com/hub#/home</a></p>
+<p>   <a target="_blank" rel="noopener" href="http://hub.daocloud.io/">http://hub.daocloud.io/</a>     （推荐使用）</p>
+</li>
+<li><p>在公司内部会采用私服的方式拉取镜像，需要添加配置，如下……</p>
+</li>
+</ul>
+</blockquote>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs json"># 需要创建或修改/etc/docker/daemon.json，并添加如下内容，<span class="hljs-string">&quot;ip:port&quot;</span>可以编写多个。<br><span class="hljs-punctuation">&#123;</span><br>	<span class="hljs-attr">&quot;registry-mirrors&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;https://registry.docker-cn.com&quot;</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span><br>	<span class="hljs-attr">&quot;insecure-registries&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;ip:port&quot;</span><span class="hljs-punctuation">]</span>   <br><span class="hljs-punctuation">&#125;</span><br># 重启docker服务<br>systemctl restart docker<br></code></pre></td></tr></table></figure>
+
+
+
+<h3 id="五、镜像的操作"><a href="#五、镜像的操作" class="headerlink" title="五、镜像的操作"></a>五、镜像的操作</h3><hr>
+<h4 id="5-1-拉取镜像"><a href="#5-1-拉取镜像" class="headerlink" title="5.1 拉取镜像"></a>5.1 拉取镜像</h4><blockquote>
+<p>从中央仓库拉取镜像到本地</p>
+</blockquote>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs sh">docker pull 镜像名称[:tag]<br><br><span class="hljs-comment"># 举个栗子：docker pull daocloud.io/library/tomcat:8.5.15-jre8</span><br></code></pre></td></tr></table></figure>
+
+
+
+<h4 id="5-2-查看本地全部镜像"><a href="#5-2-查看本地全部镜像" class="headerlink" title="5.2 查看本地全部镜像"></a>5.2 查看本地全部镜像</h4><blockquote>
+<p>查看本地已经安装过的镜像信息，包含标识，名称，版本，更新时间，大小</p>
+</blockquote>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sh">docker images<br></code></pre></td></tr></table></figure>
+
+
+
+<h4 id="5-3-删除本地镜像"><a href="#5-3-删除本地镜像" class="headerlink" title="5.3 删除本地镜像"></a>5.3 删除本地镜像</h4><blockquote>
+<p>镜像会占用磁盘空间，可以直接手动删除，表示通过查看获取</p>
+</blockquote>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs sh">docker rmi 镜像的标识 | 镜像名称:tag<br>docker rmi b8dfe9ade316<br>docker rmi daocloud.io/library/tomcat:8.5.15-jre8<br></code></pre></td></tr></table></figure>
+
+
+
+<h4 id="5-4-镜像的导入导出"><a href="#5-4-镜像的导入导出" class="headerlink" title="5.4 镜像的导入导出"></a>5.4 镜像的导入导出</h4><blockquote>
+<ul>
+<li>如果出现网络故障，可以采过硬盘的方式传输镜像，虽然不规范，但是有效。</li>
+<li>但是这种方式导出的镜像名称和版本都是null，需要手动修改</li>
+</ul>
+</blockquote>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs sh"><span class="hljs-comment"># 将本地的镜像导出</span><br>docker save -o 导出的路径 镜像<span class="hljs-built_in">id</span><br>doeker save -o /usr/local/abc.tar b8dfe9ade316<br><span class="hljs-comment"># 加载本地的镜像文件</span><br>docker load -i 镜像文件<br>docker load -i /usr/local/abc.tar<br><span class="hljs-comment"># 修改镜像名称</span><br>docker tag 镜像<span class="hljs-built_in">id</span> 新镜像名称:版本<br>docker tag b8dfe9ade316  mytomcat:1.0<br></code></pre></td></tr></table></figure>
+
+
+
+<h3 id="六、容器操作【重点】"><a href="#六、容器操作【重点】" class="headerlink" title="六、容器操作【重点】"></a>六、容器操作【<code>重点</code>】</h3><hr>
+<h4 id="6-1-运行容器"><a href="#6-1-运行容器" class="headerlink" title="6.1 运行容器"></a>6.1 运行容器</h4><blockquote>
+<p>运行容器需要指定具体镜像，如果镜像不存在，会直接下载</p>
+</blockquote>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs sh"><span class="hljs-comment"># 简单操作</span><br>docker run 镜像的标识 | 镜像名称[:tag]<br>docker run b8dfe9ade316<br>docker run daocloud.io/library/tomcat:8.5.15-jre8<br><span class="hljs-comment"># 常用的参数</span><br>docker run -d -p 宿主机端口:容器端口 --name 容器名称 镜像的标识|镜像名称[:tag]<br>docker run -d -p 8090:8080 --name my_container b8dfe9ade316<br><span class="hljs-comment"># -d：代表后台运行容器</span><br><span class="hljs-comment"># -p 宿主机端口:容器端口：为了映射当前Linux的端口和容器的端口</span><br><span class="hljs-comment"># --name 容器名称：指定容器的名称</span><br></code></pre></td></tr></table></figure>
+
+
+
+<h4 id="6-2-查看正在运行的容器"><a href="#6-2-查看正在运行的容器" class="headerlink" title="6.2 查看正在运行的容器"></a>6.2 查看正在运行的容器</h4><blockquote>
+<p>查看全部正在运行的容器信息</p>
+</blockquote>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs sh">docker ps [-qa]<br><span class="hljs-comment"># -a：查看全部的容器，包括没有运行</span><br><span class="hljs-comment"># -q：只查看容器的标识</span><br></code></pre></td></tr></table></figure>
+
+
+
+<h4 id="6-3-查看容器日志"><a href="#6-3-查看容器日志" class="headerlink" title="6.3 查看容器日志"></a>6.3 查看容器日志</h4><blockquote>
+<p>查看容器日志，以查看容器运行的信息</p>
+</blockquote>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sh">docker logs -f 容器<span class="hljs-built_in">id</span><br><span class="hljs-comment"># -f：可以滚动查看日志的最后几行</span><br></code></pre></td></tr></table></figure>
+
+
+
+<h4 id="6-4-进入容器内容部"><a href="#6-4-进入容器内容部" class="headerlink" title="6.4 进入容器内容部"></a>6.4 进入容器内容部</h4><blockquote>
+<p>可以进入容器内部进行操作</p>
+</blockquote>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sh">docker <span class="hljs-built_in">exec</span> -it 容器<span class="hljs-built_in">id</span> bash<br>docker <span class="hljs-built_in">exec</span> -it 容器名称 bash<br></code></pre></td></tr></table></figure>
+
+
+
+<h4 id="6-5-复制内容到容器"><a href="#6-5-复制内容到容器" class="headerlink" title="6.5 复制内容到容器"></a>6.5 复制内容到容器</h4><blockquote>
+<p>将宿主机的文件复制到容器内部的指定目录</p>
+</blockquote>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sh">docker <span class="hljs-built_in">cp</span> 文件名称 容器<span class="hljs-built_in">id</span>:容器内部路径<br></code></pre></td></tr></table></figure>
+
+
+
+<h4 id="6-6-重启-amp-启动-amp-停止-amp-删除容器"><a href="#6-6-重启-amp-启动-amp-停止-amp-删除容器" class="headerlink" title="6.6 重启&amp;启动&amp;停止&amp;删除容器"></a>6.6 重启&amp;启动&amp;停止&amp;删除容器</h4><blockquote>
+<p>容器的启动，停止，删除等操作，后续经常会使用到</p>
+</blockquote>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs sh"><span class="hljs-comment"># 重新启动容器</span><br>docker restart 容器<span class="hljs-built_in">id</span><br><br><span class="hljs-comment"># 启动停止运行的容器</span><br>docker start 容器<span class="hljs-built_in">id</span><br><br><span class="hljs-comment"># 停止指定的容器（删除容器前，需要先停止容器）</span><br>docker stop 容器<span class="hljs-built_in">id</span><br><span class="hljs-comment"># 停止全部容器</span><br>docker stop $(docker ps -qa)<br><br><span class="hljs-comment"># 删除指定容器</span><br>docker <span class="hljs-built_in">rm</span> 容器<span class="hljs-built_in">id</span><br><span class="hljs-comment"># 删除全部容器</span><br>docker <span class="hljs-built_in">rm</span> $(docker ps -qa)<br></code></pre></td></tr></table></figure>
+
+
+
+
+
+<h3 id="七、Docker应用"><a href="#七、Docker应用" class="headerlink" title="七、Docker应用"></a>七、Docker应用</h3><hr>
+<h4 id="7-1-Docker安装Tomcat"><a href="#7-1-Docker安装Tomcat" class="headerlink" title="7.1 Docker安装Tomcat"></a>7.1 Docker安装Tomcat</h4><blockquote>
+<p>运行Tomcat容器，为部署SSM工程做准备</p>
+</blockquote>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sh">docker run -d -p 8080:8080 --name tomcat daocloud.io/library/tomcat:8.5.15-jre8<br></code></pre></td></tr></table></figure>
+
+
+
+<h4 id="7-2-Docker安装MySQL"><a href="#7-2-Docker安装MySQL" class="headerlink" title="7.2 Docker安装MySQL"></a>7.2 Docker安装MySQL</h4><blockquote>
+<p>运行MySQL容器，为部署SSM工程做准备</p>
+</blockquote>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs sh">docker run -d -p 3366:3306 --name mysql -e MYSQL_ROOT_PASSWORD=root daocloud.io/library/mysql:5.7.4<br><br><span class="hljs-comment"># 宿主机中通过 3366连接 容器中的mysql</span><br>[root@localhost logs]<span class="hljs-comment"># mysql -uroot -P 3366 -proot -h 192.168.1.135</span><br></code></pre></td></tr></table></figure>
+
+
+
+<h4 id="7-3-部署SSM工程"><a href="#7-3-部署SSM工程" class="headerlink" title="7.3 部署SSM工程"></a>7.3 部署SSM工程</h4><blockquote>
+<ul>
+<li>修改SSM工程环境，设置为Linux中Docker容器的信息</li>
+<li>通过Maven的package重新打成war包</li>
+<li>将Windows下的war包复制到Linux中</li>
+<li>通过docker命令将宿主机的war包复制到容器内部</li>
+<li>测试访问SSM工程</li>
+</ul>
+</blockquote>
+<h3 id="八、数据卷【重点】"><a href="#八、数据卷【重点】" class="headerlink" title="八、数据卷【重点】"></a>八、数据卷【<code>重点</code>】</h3><hr>
+<blockquote>
+<ul>
+<li><p>为部署SSM的工程，需要使用到Docker的cp命令将宿主机内的ssm.war文件复制到容器内部，操作麻烦。</p>
+</li>
+<li><p><a href="">数据卷</a>：</p>
+</li>
+<li><p>将宿主机的一个目录映射到容器的一个目录中。</p>
+</li>
+<li><p>可以在宿主机中操作目录中的内容，容器内部映射的文件会跟着一起改变。</p>
+</li>
+</ul>
+</blockquote>
+<h4 id="8-1-创建数据卷"><a href="#8-1-创建数据卷" class="headerlink" title="8.1 创建数据卷"></a>8.1 创建数据卷</h4><blockquote>
+<p>创建数据卷之后，默认会存放在一个目录下 &#x2F;var&#x2F;lib&#x2F;docker&#x2F;volumes&#x2F;数据卷名称&#x2F;_data</p>
+</blockquote>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sh">docker volume create 数据卷名称<br></code></pre></td></tr></table></figure>
+
+
+
+<h4 id="8-2-查看数据卷详情"><a href="#8-2-查看数据卷详情" class="headerlink" title="8.2 查看数据卷详情"></a>8.2 查看数据卷详情</h4><blockquote>
+<p>查看数据卷的详细信息，可以查询到存放路径，创建时间等等</p>
+</blockquote>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sh">docker volume inspect 数据卷名称<br></code></pre></td></tr></table></figure>
+
+
+
+<h4 id="8-3-查看全部数据卷"><a href="#8-3-查看全部数据卷" class="headerlink" title="8.3 查看全部数据卷"></a>8.3 查看全部数据卷</h4><blockquote>
+<p>查看全部数据卷信息</p>
+</blockquote>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sh">docker volume <span class="hljs-built_in">ls</span><br></code></pre></td></tr></table></figure>
+
+
+
+<h4 id="8-4-删除数据卷"><a href="#8-4-删除数据卷" class="headerlink" title="8.4 删除数据卷"></a>8.4 删除数据卷</h4><blockquote>
+<p>删除指定数据卷</p>
+</blockquote>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sh">docker volume <span class="hljs-built_in">rm</span> 数据卷名称<br></code></pre></td></tr></table></figure>
+
+
+
+<h4 id="8-5-容器映射数据卷"><a href="#8-5-容器映射数据卷" class="headerlink" title="8.5 容器映射数据卷"></a>8.5 容器映射数据卷</h4><blockquote>
+<p>映射有两种方式：</p>
+<ul>
+<li>通过数据卷名称映射，如果数据卷不存在。Docker会帮你自动创建，会将容器内部自带的文件，存储在默认的存放路径中。</li>
+<li>通过路径映射数据卷，直接指定一个路径作为数据卷的存放位置。但是这个路径下是空的。</li>
+</ul>
+</blockquote>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs sh"><span class="hljs-comment"># 通过数据卷名称映射</span><br>docker run -v 数据卷名称:容器内部的路径 镜像<span class="hljs-built_in">id</span><br>docker run -v webapps2004:/usr/local/tomcat/webappss 镜像<span class="hljs-built_in">id</span><br><span class="hljs-comment"># 通过路径映射数据卷</span><br>docker run -v 路径:容器内部的路径 镜像<span class="hljs-built_in">id</span><br>docker run -v /usr/local/tomcat_webapps2004:/usr/local/tomcat/webapps 镜像<span class="hljs-built_in">id</span><br></code></pre></td></tr></table></figure>
+
+
+
+<h3 id="九、Dockerfile自定义镜像【重点】"><a href="#九、Dockerfile自定义镜像【重点】" class="headerlink" title="九、Dockerfile自定义镜像【重点】"></a>九、Dockerfile自定义镜像【<code>重点</code>】</h3><hr>
+<blockquote>
+<p>我们可以从中央仓库下载一个镜像，也可以自己手动去制作一个镜像，需要通过Dockerfile去指定自定义镜像的信息</p>
+</blockquote>
+<h4 id="9-1-Dockerfile"><a href="#9-1-Dockerfile" class="headerlink" title="9.1 Dockerfile"></a>9.1 Dockerfile</h4><blockquote>
+<p>创建自定义镜像就需要创建一个Dockerfile，如下为Dockerfile的常用配置</p>
+</blockquote>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs sh">from: 指定当前自定义镜像依赖的环境<br>copy: 将相对路径下的内容复制到自定义镜像中<br>workdir: 声明镜像的默认工作目录<br>run: 执行的命令，可以编写多个<br>cmd: 需要执行的命令（在workdir下执行的，cmd可以写多个，但是只以最后一个为准）<br><br><span class="hljs-comment"># 举个例子，制作SSM容器镜像，而且ssm.war要放在Dockerfile的同级目录下</span><br>from daocloud.io/library/tomcat:8.5.15-jre8<br>copy ssm.war /usr/local/tomcat/webapps<br></code></pre></td></tr></table></figure>
+
+
+
+<h4 id="9-2-通过Dockerfile制作镜像"><a href="#9-2-通过Dockerfile制作镜像" class="headerlink" title="9.2 通过Dockerfile制作镜像"></a>9.2 通过Dockerfile制作镜像</h4><blockquote>
+<p>编写完Dockerfile后需要Dockerfile所在目录通过命令将其制作为镜像，注意最后的 <a href="">.</a>  代表当前目录。</p>
+</blockquote>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sh">docker build -t 镜像名称[:tag] .<br></code></pre></td></tr></table></figure>
+
+
+
+<h3 id="十-Docker-Compose【重点】"><a href="#十-Docker-Compose【重点】" class="headerlink" title="十. Docker-Compose【重点】"></a>十. Docker-Compose【<code>重点</code>】</h3><hr>
+<blockquote>
+<ul>
+<li>运行一个容器，我们需要添加大量的参数，可以通过Docker-Compose文件配置参数。</li>
+<li>参数信息通过docker-compose.yml文件去维护。</li>
+<li>Docker-Compose可以批量管理容器。</li>
+</ul>
+</blockquote>
+<h4 id="10-1-下载并安装Docker-Compose"><a href="#10-1-下载并安装Docker-Compose" class="headerlink" title="10.1 下载并安装Docker-Compose"></a>10.1 下载并安装Docker-Compose</h4><h5 id="10-1-1-下载Docker-Compose"><a href="#10-1-1-下载Docker-Compose" class="headerlink" title="10.1.1 下载Docker-Compose"></a>10.1.1 下载Docker-Compose</h5><blockquote>
+<p>去github官网搜索docker-compose，下载1.24.1版本的Docker-Compose</p>
+<p>下载路径：<a href="">https://github.com/docker/compose/releases/download/1.24.1/docker-compose-Linux-x86_64</a></p>
+</blockquote>
+<h5 id="10-1-2-设置权限"><a href="#10-1-2-设置权限" class="headerlink" title="10.1.2 设置权限"></a>10.1.2 设置权限</h5><blockquote>
+<p>需要将DockerCompose文件的名称修改一下，给予DockerCompose文件一个可执行的权限</p>
+</blockquote>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sh"><span class="hljs-built_in">mv</span> docker-compose-Linux-x86_64 docker-compose<br><span class="hljs-built_in">chmod</span> 777 docker-compose<br></code></pre></td></tr></table></figure>
+
+
+
+<h5 id="10-1-3-移动到-x2F-usr-x2F-local-x2F-bin目录下"><a href="#10-1-3-移动到-x2F-usr-x2F-local-x2F-bin目录下" class="headerlink" title="10.1.3 移动到&#x2F;usr&#x2F;local&#x2F;bin目录下"></a>10.1.3 移动到&#x2F;usr&#x2F;local&#x2F;bin目录下</h5><blockquote>
+<p> 方便后期操作，将docker-compose文件移动到了&#x2F;usr&#x2F;local&#x2F;bin</p>
+</blockquote>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sh"><span class="hljs-built_in">mv</span> docker-compose /usr/local/bin<br></code></pre></td></tr></table></figure>
+
+
+
+<h5 id="10-1-4-测试"><a href="#10-1-4-测试" class="headerlink" title="10.1.4 测试"></a>10.1.4 测试</h5><blockquote>
+<p>在任意目录下输入docker-compose</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th align="center">测试效果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center"><img src="http://qgw3wcroi.hn-bkt.clouddn.com/1586420176720.png" srcset="/img/loading.gif" lazyload alt="1586420176720"></td>
+</tr>
+</tbody></table>
+<h4 id="10-2-Docker-Compose管理MySQL和Tomcat容器"><a href="#10-2-Docker-Compose管理MySQL和Tomcat容器" class="headerlink" title="10.2 Docker-Compose管理MySQL和Tomcat容器"></a>10.2 Docker-Compose管理MySQL和Tomcat容器</h4><blockquote>
+<ul>
+<li><p>yml文件以key: value方式来指定配置信息</p>
+</li>
+<li><p>多个配置信息以换行+缩进的方式来区分</p>
+</li>
+<li><p>在docker-compose.yml文件中，不要使用制表符</p>
+</li>
+</ul>
+</blockquote>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><code class="hljs yml"><span class="hljs-attr">version:</span> <span class="hljs-string">&#x27;3.1&#x27;</span><br><span class="hljs-attr">services:</span><br>  <span class="hljs-attr">mysql:</span>           <span class="hljs-comment"># 服务的名称</span><br>    <span class="hljs-attr">restart:</span> <span class="hljs-string">always</span>   <span class="hljs-comment"># 代表只要docker启动，那么这个容器就跟着一起启动</span><br>    <span class="hljs-attr">image:</span> <span class="hljs-string">daocloud.io/library/mysql:5.7.4</span>  <span class="hljs-comment"># 指定镜像路径</span><br>    <span class="hljs-attr">container_name:</span> <span class="hljs-string">mysql</span>  <span class="hljs-comment"># 指定容器名称</span><br>    <span class="hljs-attr">ports:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-number">3306</span><span class="hljs-string">:3306</span>   <span class="hljs-comment">#  指定端口号的映射</span><br>    <span class="hljs-attr">environment:</span><br>      <span class="hljs-attr">MYSQL_ROOT_PASSWORD:</span> <span class="hljs-string">root</span>   <span class="hljs-comment"># 指定MySQL的ROOT用户登录密码</span><br>      <span class="hljs-attr">TZ:</span> <span class="hljs-string">Asia/Shanghai</span>        <span class="hljs-comment"># 指定时区</span><br>    <span class="hljs-attr">volumes:</span><br>     <span class="hljs-bullet">-</span> <span class="hljs-string">/opt/docker_mysql_tomcat/mysql_data:/var/lib/mysql</span>   <span class="hljs-comment"># 映射数据卷</span><br>  <span class="hljs-attr">tomcat:</span><br>    <span class="hljs-attr">restart:</span> <span class="hljs-string">always</span><br>    <span class="hljs-attr">image:</span> <span class="hljs-string">daocloud.io/library/tomcat:8.5.15-jre8</span><br>    <span class="hljs-attr">container_name:</span> <span class="hljs-string">tomcat</span><br>    <span class="hljs-attr">ports:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-number">8080</span><span class="hljs-string">:8080</span><br>    <span class="hljs-attr">environment:</span><br>      <span class="hljs-attr">TZ:</span> <span class="hljs-string">Asia/Shanghai</span><br>    <span class="hljs-attr">volumes:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-string">/opt/docker_mysql_tomcat/tomcat_webapps:/usr/local/tomcat/webapps</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-string">/opt/docker_mysql_tomcat/tomcat_logs:/usr/local/tomcat/logs</span><br></code></pre></td></tr></table></figure>
+
+
+
+<h4 id="10-3-使用docker-compose命令管理容器"><a href="#10-3-使用docker-compose命令管理容器" class="headerlink" title="10.3 使用docker-compose命令管理容器"></a>10.3 使用docker-compose命令管理容器</h4><blockquote>
+<p>在docker-compose.yml文件目录下使用docker-compose的命令时 </p>
+</blockquote>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs sh"><span class="hljs-comment"># 1. 基于docker-compose.yml启动管理的容器</span><br>docker-compose up -d<br><br><span class="hljs-comment"># 2. 关闭并删除容器</span><br>docker-compose down<br><br><span class="hljs-comment"># 3. 开启|关闭|重启已经存在的由docker-compose维护的容器</span><br>docker-compose start|stop|restart<br><br><span class="hljs-comment"># 4. 查看由docker-compose管理的容器</span><br>docker-compose ps<br><br><span class="hljs-comment"># 5. 查看日志</span><br>docker-compose logs -f<br></code></pre></td></tr></table></figure>
+
+
+
+<h4 id="10-4-docker-compose配合Dockerfile使用"><a href="#10-4-docker-compose配合Dockerfile使用" class="headerlink" title="10.4 docker-compose配合Dockerfile使用"></a>10.4 docker-compose配合Dockerfile使用</h4><blockquote>
+<p>使用docker-compose.yml文件以及Dockerfile文件在生成自定义镜像的同时启动当前镜像，并且由docker-compose去管理容器</p>
+</blockquote>
+<h5 id="10-4-1-docker-compose文件"><a href="#10-4-1-docker-compose文件" class="headerlink" title="10.4.1 docker-compose文件"></a>10.4.1 docker-compose文件</h5><blockquote>
+<p>编写docker-compose.yml文件</p>
+</blockquote>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs yml"><span class="hljs-comment"># yml文件</span><br><span class="hljs-attr">version:</span> <span class="hljs-string">&#x27;3.1&#x27;</span><br><span class="hljs-attr">services:</span><br>  <span class="hljs-attr">ssm:</span><br>    <span class="hljs-attr">restart:</span> <span class="hljs-string">always</span><br>    <span class="hljs-attr">build:</span>            <span class="hljs-comment"># 构建自定义镜像</span><br>      <span class="hljs-attr">context:</span> <span class="hljs-string">../</span>      <span class="hljs-comment"># 指定dockerfile文件的所在路径</span><br>      <span class="hljs-attr">dockerfile:</span> <span class="hljs-string">Dockerfile</span>   <span class="hljs-comment"># 指定Dockerfile文件名称</span><br>    <span class="hljs-attr">image:</span> <span class="hljs-string">ssm:1.0.1</span><br>    <span class="hljs-attr">container_name:</span> <span class="hljs-string">ssm</span><br>    <span class="hljs-attr">ports:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-number">8081</span><span class="hljs-string">:8080</span><br>    <span class="hljs-attr">environment:</span><br>      <span class="hljs-attr">TZ:</span> <span class="hljs-string">Asia/Shanghai</span><br></code></pre></td></tr></table></figure>
+
+
+
+<h5 id="10-4-2-Dockerfile文件"><a href="#10-4-2-Dockerfile文件" class="headerlink" title="10.4.2 Dockerfile文件"></a>10.4.2 Dockerfile文件</h5><blockquote>
+<p>编写Dockerfile文件</p>
+</blockquote>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs gradle"><span class="hljs-keyword">from</span> daocloud.io<span class="hljs-regexp">/library/</span>tomcat:<span class="hljs-number">8.5</span>.<span class="hljs-number">15</span>-jre8<br><span class="hljs-keyword">copy</span> ssm.war <span class="hljs-regexp">/usr/</span>local<span class="hljs-regexp">/tomcat/</span>webapps<br></code></pre></td></tr></table></figure>
+
+
+
+<h5 id="10-4-3-运行"><a href="#10-4-3-运行" class="headerlink" title="10.4.3 运行"></a>10.4.3 运行</h5><blockquote>
+<p>测试效果</p>
+</blockquote>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs sh"><span class="hljs-comment"># 可以直接启动基于docker-compose.yml以及Dockerfile文件构建的自定义镜像</span><br>docker-compose up -d<br><span class="hljs-comment"># 如果自定义镜像不存在，会帮助我们构建出自定义镜像，如果自定义镜像已经存在，会直接运行这个自定义镜像</span><br><br><span class="hljs-comment"># 重新构建自定义镜像</span><br>docker-compose build<br><br><span class="hljs-comment"># 运行当前内容，并重新构建</span><br>docker-compose up -d --build<br></code></pre></td></tr></table></figure>
+
+
+
+<h3 id="十一-Docker-CI、CD"><a href="#十一-Docker-CI、CD" class="headerlink" title="十一. Docker CI、CD"></a>十一. Docker CI、CD</h3><hr>
+<h4 id="11-1-CI、CD引言"><a href="#11-1-CI、CD引言" class="headerlink" title="11.1 CI、CD引言"></a>11.1 CI、CD引言</h4><blockquote>
+<p>项目部署</p>
+<ul>
+<li>将项目通过maven进行编译打包</li>
+<li>将文件上传到指定的服务器中</li>
+<li>将war包放到tomcat的目录中</li>
+<li>通过Dockerfile将Tomcat和war包转成一个镜像，由DockerCompose去运行容器</li>
+</ul>
+<p>项目更新后，需要将上述流程再次的从头到尾的执行一次，如果每次更新一次都执行一次上述操作，很费时，费力。我们就可以通过CI、CD帮助我们实现持续集成，持续交付和部署。</p>
+</blockquote>
+<h4 id="11-2-CI介绍"><a href="#11-2-CI介绍" class="headerlink" title="11.2 CI介绍"></a>11.2 CI介绍</h4><blockquote>
+<p>CI（continuous intergration）持续集成</p>
+<p>持续集成：编写代码时，完成了一个功能后，立即提交代码到Git仓库中，将项目重新的构建并且测试。</p>
+<ul>
+<li>快速发现错误。</li>
+<li>防止代码偏离主分支。</li>
+</ul>
+</blockquote>
+<h4 id="11-3-搭建Gitlab服务器"><a href="#11-3-搭建Gitlab服务器" class="headerlink" title="11.3 搭建Gitlab服务器"></a>11.3 搭建Gitlab服务器</h4><blockquote>
+<p>实现CI，需要使用到Gitlab远程仓库，先通过Docker搭建Gitlab</p>
+</blockquote>
+<h5 id="11-3-1-准备工作"><a href="#11-3-1-准备工作" class="headerlink" title="11.3.1 准备工作"></a>11.3.1 准备工作</h5><blockquote>
+<ul>
+<li>创建一个全新的虚拟机，并且至少指定4G的运行内存，4G运行内存是Gitlab推荐的内存大小。</li>
+<li>并且安装Docker以及Docker-Compose</li>
+</ul>
+</blockquote>
+<h5 id="11-3-2-修改ssh的22端口"><a href="#11-3-2-修改ssh的22端口" class="headerlink" title="11.3.2 修改ssh的22端口"></a>11.3.2 修改ssh的22端口</h5><blockquote>
+<p>将ssh的默认22端口，修改为60022端口，因为Gitlab需要占用22端口</p>
+</blockquote>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">vi</span> /etc/ssh/sshd_config<br>  <span class="hljs-attribute">PORT</span> <span class="hljs-number">22</span> -&gt; <span class="hljs-number">60022</span><br><span class="hljs-attribute">systemctl</span> restart sshd<br></code></pre></td></tr></table></figure>
+
+
+
+<h5 id="11-3-3-编写docker-compose-yml"><a href="#11-3-3-编写docker-compose-yml" class="headerlink" title="11.3.3 编写docker-compose.yml"></a>11.3.3 编写docker-compose.yml</h5><blockquote>
+<p>docker-compose.yml文件去安装gitlab（下载和运行的时间比较长的）</p>
+</blockquote>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><code class="hljs yml"><span class="hljs-attr">version:</span> <span class="hljs-string">&#x27;3.1&#x27;</span><br><span class="hljs-attr">services:</span><br> <span class="hljs-attr">gitlab:</span><br>  <span class="hljs-attr">image:</span> <span class="hljs-string">&#x27;twang2218/gitlab-ce-zh:11.1.4&#x27;</span><br>  <span class="hljs-attr">container_name:</span> <span class="hljs-string">&quot;gitlab&quot;</span><br>  <span class="hljs-attr">restart:</span> <span class="hljs-string">always</span><br>  <span class="hljs-attr">privileged:</span> <span class="hljs-literal">true</span><br>  <span class="hljs-attr">hostname:</span> <span class="hljs-string">&#x27;gitlab&#x27;</span><br>  <span class="hljs-attr">environment:</span><br>   <span class="hljs-attr">TZ:</span> <span class="hljs-string">&#x27;Asia/Shanghai&#x27;</span><br>   <span class="hljs-attr">GITLAB_OMNIBUS_CONFIG:</span> <span class="hljs-string">|</span><br><span class="hljs-string">    external_url &#x27;http://192.168.199.110&#x27;</span><br><span class="hljs-string">    gitlab_rails[&#x27;time_zone&#x27;] = &#x27;Asia/Shanghai&#x27;</span><br><span class="hljs-string">    gitlab_rails[&#x27;smtp_enable&#x27;] = true</span><br><span class="hljs-string">    gitlab_rails[&#x27;gitlab_shell_ssh_port&#x27;] = 22</span><br><span class="hljs-string"></span>  <span class="hljs-attr">ports:</span><br>   <span class="hljs-bullet">-</span> <span class="hljs-string">&#x27;80:80&#x27;</span><br>   <span class="hljs-bullet">-</span> <span class="hljs-string">&#x27;443:443&#x27;</span><br>   <span class="hljs-bullet">-</span> <span class="hljs-string">&#x27;22:22&#x27;</span><br>  <span class="hljs-attr">volumes:</span><br>   <span class="hljs-bullet">-</span> <span class="hljs-string">/opt/docker_gitlab/config:/etc/gitlab</span><br>   <span class="hljs-bullet">-</span> <span class="hljs-string">/opt/docker_gitlab/data:/var/opt/gitlab</span><br>   <span class="hljs-bullet">-</span> <span class="hljs-string">/opt/docker_gitlab/logs:/var/log/gitlab</span><br></code></pre></td></tr></table></figure>
+
+
+
+<h4 id="11-4-搭建GitlabRunner"><a href="#11-4-搭建GitlabRunner" class="headerlink" title="11.4 搭建GitlabRunner"></a>11.4 搭建GitlabRunner</h4><h5 id="11-4-1-配置私服信息"><a href="#11-4-1-配置私服信息" class="headerlink" title="11.4.1 配置私服信息"></a>11.4.1 配置私服信息</h5><blockquote>
+<p>创建或修改&#x2F;etc&#x2F;docker&#x2F;daemon.json，并添加如下内容。</p>
+</blockquote>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs json"><span class="hljs-punctuation">&#123;</span><br>  <span class="hljs-attr">&quot;registry-mirrors&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><br>    <span class="hljs-string">&quot;https://registry.docker-cn.com&quot;</span><br>  <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span><br>  <span class="hljs-attr">&quot;insecure-registries&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><br>    <span class="hljs-string">&quot;baseservice.qfjava.cn:60001&quot;</span> <br>  <span class="hljs-punctuation">]</span><br><span class="hljs-punctuation">&#125;</span><br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<p>重启两个服务</p>
+</blockquote>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sh">systemctl daemon-reload<br>systemctl restart docker<br></code></pre></td></tr></table></figure>
+
+
+
+<h5 id="11-4-2-添加docker-compose-yml文件"><a href="#11-4-2-添加docker-compose-yml文件" class="headerlink" title="11.4.2 添加docker-compose.yml文件"></a>11.4.2 添加docker-compose.yml文件</h5><blockquote>
+<ul>
+<li>创建工作目录 &#x2F;opt&#x2F;docker_gitlab-runner</li>
+<li>在 &#x2F;opt&#x2F;docker_gitlab-runner添加docker-compose.yml文件</li>
+</ul>
+</blockquote>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs yml"><span class="hljs-attr">version:</span> <span class="hljs-string">&#x27;3.1&#x27;</span><br><span class="hljs-attr">services:</span><br>  <span class="hljs-attr">gitlab-runner:</span><br>    <span class="hljs-attr">build:</span> <span class="hljs-string">environment</span><br>    <span class="hljs-attr">restart:</span> <span class="hljs-string">always</span><br>    <span class="hljs-attr">container_name:</span> <span class="hljs-string">gitlab-runner</span><br>    <span class="hljs-attr">privileged:</span> <span class="hljs-literal">true</span><br>    <span class="hljs-attr">volumes:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-string">./config:/etc/gitlab-runner</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-string">/var/run/docker.sock:/var/run/docker.sock</span><br></code></pre></td></tr></table></figure>
+
+
+
+<h5 id="11-4-3-在yml文件目录添加环境目录"><a href="#11-4-3-在yml文件目录添加环境目录" class="headerlink" title="11.4.3 在yml文件目录添加环境目录"></a>11.4.3 在yml文件目录添加环境目录</h5><blockquote>
+<p>创建environment目录，在目录中逐个添加各个配置及软件</p>
+</blockquote>
+<blockquote>
+<p>Dockerfile</p>
+</blockquote>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><code class="hljs awk">FROM baseservice.qfjava.cn:<span class="hljs-number">60001</span>/gitlab-runner:bleeding<br><span class="hljs-comment"># 修改软件源</span><br>RUN echo <span class="hljs-string">&#x27;deb http://mirrors.aliyun.com/ubuntu/ xenial main restricted universe multiverse&#x27;</span> &gt; <span class="hljs-regexp">/etc/</span>apt/sources.list &amp;&amp; \<br>    echo <span class="hljs-string">&#x27;deb http://mirrors.aliyun.com/ubuntu/ xenial-security main restricted universe multiverse&#x27;</span> &gt;&gt; <span class="hljs-regexp">/etc/</span>apt/sources.list &amp;&amp; \<br>    echo <span class="hljs-string">&#x27;deb http://mirrors.aliyun.com/ubuntu/ xenial-updates main restricted universe multiverse&#x27;</span> &gt;&gt; <span class="hljs-regexp">/etc/</span>apt/sources.list &amp;&amp; \<br>    echo <span class="hljs-string">&#x27;deb http://mirrors.aliyun.com/ubuntu/ xenial-backports main restricted universe multiverse&#x27;</span> &gt;&gt; <span class="hljs-regexp">/etc/</span>apt/sources.list &amp;&amp; \<br>    <span class="hljs-comment">#下面的地址需要根据实际情况变化</span><br>    wget https:<span class="hljs-regexp">//</span>http.kali.org<span class="hljs-regexp">/kali/</span>pool<span class="hljs-regexp">/main/</span>k<span class="hljs-regexp">/kali-archive-keyring/</span>kali-archive-keyring_2018.<span class="hljs-number">2</span>_all.deb --no-check-certificate &amp;&amp; \<br>    apt install -y ./kali-archive-keyring_2018.<span class="hljs-number">2</span>_all.deb &amp;&amp; \<br>    apt-get update -y &amp;&amp; \<br>    apt install -y  gnupg  &amp;&amp; \<br>    apt-get clean<br><br><span class="hljs-comment"># 安装 Docker</span><br>RUN curl -fsSL http:<span class="hljs-regexp">//mi</span>rrors.aliyun.com<span class="hljs-regexp">/docker-ce/</span>linux<span class="hljs-regexp">/ubuntu/g</span>pg | apt-key add - &amp;&amp; \<br>    apt-get install -y python-software-properties software-properties-common &amp;&amp; \<br>    echo <span class="hljs-string">&#x27;deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable&#x27;</span> &gt;&gt; <span class="hljs-regexp">/etc/</span>apt<span class="hljs-regexp">/sources.list.d/</span>docker.list &amp;&amp; \<br>    apt-get update -y &amp;&amp; \<br>    apt-get install -y docker-ce<br><br>COPY daemon.json <span class="hljs-regexp">/etc/</span>docker/daemon.json<br><br><span class="hljs-comment"># 安装 Docker Compose,因为下载不下来，所以我们本地上传一份docker-compose到environment目录</span><br>WORKDIR <span class="hljs-regexp">/usr/</span>local/bin<br><span class="hljs-comment">#RUN wget https://raw.githubusercontent.com/topsale/resources/master/docker/docker-compose</span><br>COPY docker-compose docker-compose<br>RUN chmod +x docker-compose<br><br><span class="hljs-comment"># 安装 Java</span><br>RUN mkdir -p <span class="hljs-regexp">/usr/</span>local/java<br>WORKDIR <span class="hljs-regexp">/usr/</span>local/java<br>COPY jdk-<span class="hljs-number">8</span>u231-linux-x64.tar.gz <span class="hljs-regexp">/usr/</span>local/java<br>RUN tar -zxvf jdk-<span class="hljs-number">8</span>u231-linux-x64.tar.gz &amp;&amp; \<br>    rm -fr jdk-<span class="hljs-number">8</span>u231-linux-x64.tar.gz<br><br><span class="hljs-comment"># 安装 Maven</span><br>RUN mkdir -p <span class="hljs-regexp">/usr/</span>local/maven<br>WORKDIR <span class="hljs-regexp">/usr/</span>local/maven<br><span class="hljs-comment"># RUN wget https://raw.githubusercontent.com/topsale/resources/master/maven/apache-maven-3.6.3-bin.tar.gz</span><br>COPY apache-maven-<span class="hljs-number">3.6</span>.<span class="hljs-number">3</span>-bin.tar.gz <span class="hljs-regexp">/usr/</span>local/maven<br>RUN tar -zxvf apache-maven-<span class="hljs-number">3.6</span>.<span class="hljs-number">3</span>-bin.tar.gz &amp;&amp; \<br>    rm -fr apache-maven-<span class="hljs-number">3.6</span>.<span class="hljs-number">3</span>-bin.tar.gz<br><span class="hljs-comment">#需要配置maven 私服的话,不需要就加#注释掉</span><br><span class="hljs-comment">#COPY settings.xml /usr/local/maven/apache-maven-3.6.3/conf/settings.xml</span><br><br><br><br><span class="hljs-comment"># 配置环境变量</span><br>ENV JAVA_HOME <span class="hljs-regexp">/usr/</span>local<span class="hljs-regexp">/java/</span>jdk1.<span class="hljs-number">8.0</span>_231<br>ENV MAVEN_HOME <span class="hljs-regexp">/usr/</span>local<span class="hljs-regexp">/maven/</span>apache-maven-<span class="hljs-number">3.6</span>.<span class="hljs-number">3</span><br>ENV PATH <span class="hljs-variable">$PATH</span>:<span class="hljs-variable">$JAVA_HOME</span><span class="hljs-regexp">/bin:$MAVEN_HOME/</span>bin<br><br>WORKDIR /<br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<p>daemon.json</p>
+</blockquote>
+<figure class="highlight prolog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs prolog">&#123;<br>  <span class="hljs-string">&quot;registry-mirrors&quot;</span>: [<br>    <span class="hljs-string">&quot;https://registry.docker-cn.com&quot;</span><br>  ],<br>  <span class="hljs-string">&quot;insecure-registries&quot;</span>: [<br>    <span class="hljs-string">&quot;baseservice.qfjava.cn:60001&quot;</span> <br>  ]<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<p>docker-compose可执行文件。</p>
+</blockquote>
+<blockquote>
+<p><a href="">apache-maven-3.6.3-bin.tar.gz</a>，以及<a href="">jdk-8u231-linux-x64.tar.gz</a>压缩包文件。</p>
+</blockquote>
+<h5 id="11-4-4-设置Docker权限"><a href="#11-4-4-设置Docker权限" class="headerlink" title="11.4.4 设置Docker权限"></a>11.4.4 设置Docker权限</h5><blockquote>
+<ul>
+<li>在宿主机启动docker程序后先执行 <a href="">sudo chown root:root &#x2F;var&#x2F;run&#x2F;docker.sock</a>。</li>
+<li>在<a href="">&#x2F;opt&#x2F;docker_gitlab-runner</a>目录中执行<a href="">docker-compose up -d –build</a>启动容器。</li>
+<li>启动容器成功后，添加容器权限，保证容器可以使用宿主机的docker：<a href="">docker exec -it gitlab-runner usermod -aG root gitlab-runner</a></li>
+</ul>
+</blockquote>
+<h5 id="11-4-5-注册Runner信息到gitlab"><a href="#11-4-5-注册Runner信息到gitlab" class="headerlink" title="11.4.5 注册Runner信息到gitlab"></a>11.4.5 注册Runner信息到gitlab</h5><blockquote>
+<p>注册信息整个过程</p>
+</blockquote>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><code class="hljs sh">docker <span class="hljs-built_in">exec</span> -it gitlab-runner gitlab-runner register<br><br><span class="hljs-comment"># 输入 GitLab 地址</span><br>Please enter the gitlab-ci coordinator URL (e.g. https://gitlab.com/):<br>http://192.168.199.109/  <span class="hljs-comment"># 根据gitlab地址添加</span><br><br><span class="hljs-comment"># 输入 GitLab Token</span><br>Please enter the gitlab-ci token <span class="hljs-keyword">for</span> this runner:<br>1Lxq_f1NRfCfeNbE5WRh<br><br><span class="hljs-comment"># 输入 Runner 的说明</span><br>Please enter the gitlab-ci description <span class="hljs-keyword">for</span> this runner:<br>可以为空<br><br><span class="hljs-comment"># 设置 Tag，可以用于指定在构建规定的 tag 时触发 ci</span><br>Please enter the gitlab-ci tags <span class="hljs-keyword">for</span> this runner (comma separated):<br>deploy<br><br><span class="hljs-comment"># 这里选择 true ，可以用于代码上传后直接执行（根据版本，也会没有次选项）</span><br>Whether to run untagged builds [<span class="hljs-literal">true</span>/false]:<br><span class="hljs-literal">true</span><br><br><span class="hljs-comment"># 这里选择 false，可以直接回车，默认为 false（根据版本，也会没有次选项）</span><br>Whether to lock Runner to current project [<span class="hljs-literal">true</span>/false]:<br><span class="hljs-literal">false</span><br><br><span class="hljs-comment"># 选择 runner 执行器，这里我们选择的是 shell</span><br>Please enter the executor: virtualbox, docker+machine, parallels, shell, ssh, docker-ssh+machine, kubernetes, docker, docker-ssh:<br>shell<br></code></pre></td></tr></table></figure>
+
+
+
+<h4 id="11-5-整合项目入门测试"><a href="#11-5-整合项目入门测试" class="headerlink" title="11.5 整合项目入门测试"></a>11.5 整合项目入门测试</h4><h5 id="11-5-1-创建项目"><a href="#11-5-1-创建项目" class="headerlink" title="11.5.1 创建项目"></a>11.5.1 创建项目</h5><blockquote>
+<p>创建maven工程，添加web.xml文件，编写html页面</p>
+</blockquote>
+<h5 id="11-5-2-编写-gitlab-ci-yml"><a href="#11-5-2-编写-gitlab-ci-yml" class="headerlink" title="11.5.2 编写.gitlab-ci.yml"></a>11.5.2 编写.gitlab-ci.yml</h5><blockquote>
+<p>编写<a href="">.gitlab-ci.yml</a>文件</p>
+</blockquote>
+<figure class="highlight subunit"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs subunit">stages:<br>  - test<br><br><span class="hljs-keyword">test:</span><br><span class="hljs-keyword">  </span>stage: test<br>  script:<br>    - echo first test ci   # 测试回声命令，测试效果<br></code></pre></td></tr></table></figure>
+
+
+
+<h5 id="11-5-3-将maven工程推送到gitlab中"><a href="#11-5-3-将maven工程推送到gitlab中" class="headerlink" title="11.5.3 将maven工程推送到gitlab中"></a>11.5.3 将maven工程推送到gitlab中</h5><blockquote>
+<p>执行git命令推送到Gitlab</p>
+</blockquote>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sh">git push origin master<br></code></pre></td></tr></table></figure>
+
+
+
+<h5 id="11-5-4-查看效果"><a href="#11-5-4-查看效果" class="headerlink" title="11.5.4 查看效果"></a>11.5.4 查看效果</h5><blockquote>
+<p>可以在gitlab中查看到gitlab-ci.yml编写的内容</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th align="center">效果图</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center"><img src="http://qgw3wcroi.hn-bkt.clouddn.com/1588671760385.png" srcset="/img/loading.gif" lazyload alt="1588671760385"></td>
+</tr>
+</tbody></table>
+<h4 id="11-6-完善项目配置"><a href="#11-6-完善项目配置" class="headerlink" title="11.6 完善项目配置"></a>11.6 完善项目配置</h4><blockquote>
+<p>添加Dockerfile以及docker-compose.yml， 并修改<a href="">.gitlab-ci.yml</a>文件</p>
+</blockquote>
+<h5 id="11-6-1-创建Dockerfile"><a href="#11-6-1-创建Dockerfile" class="headerlink" title="11.6.1 创建Dockerfile"></a>11.6.1 创建Dockerfile</h5><figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs gradle"># Dockerfile<br><span class="hljs-keyword">FROM</span> daocloud.io<span class="hljs-regexp">/library/</span>tomcat:<span class="hljs-number">8.5</span>.<span class="hljs-number">15</span>-jre8<br><span class="hljs-keyword">COPY</span> testci.war <span class="hljs-regexp">/usr/</span>local<span class="hljs-regexp">/tomcat/</span>webapps<br></code></pre></td></tr></table></figure>
+
+
+
+<h5 id="11-6-2-创建docker-compose-yml"><a href="#11-6-2-创建docker-compose-yml" class="headerlink" title="11.6.2 创建docker-compose.yml"></a>11.6.2 创建docker-compose.yml</h5><figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs yml"><span class="hljs-comment"># docker-compose.yml</span><br><span class="hljs-attr">version:</span> <span class="hljs-string">&quot;3.1&quot;</span><br><span class="hljs-attr">services:</span><br>  <span class="hljs-attr">testci:</span><br>    <span class="hljs-attr">build:</span> <span class="hljs-string">docker</span><br>    <span class="hljs-attr">restart:</span> <span class="hljs-string">always</span><br>    <span class="hljs-attr">container_name:</span> <span class="hljs-string">testci</span><br>    <span class="hljs-attr">ports:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-number">8080</span><span class="hljs-string">:8080</span><br></code></pre></td></tr></table></figure>
+
+
+
+<h5 id="11-6-3-修改-gitlab-ci-yml"><a href="#11-6-3-修改-gitlab-ci-yml" class="headerlink" title="11.6.3 修改.gitlab-ci.yml"></a>11.6.3 修改.gitlab-ci.yml</h5><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># ci.yml</span><br>stages:<br>  - <span class="hljs-built_in">test</span><br><br><span class="hljs-built_in">test</span>:<br>  stage: <span class="hljs-built_in">test</span><br>  script:<br>    - <span class="hljs-built_in">echo</span> first <span class="hljs-built_in">test</span> ci<br>    - /usr/local/maven/apache-maven-3.6.3/bin/mvn package<br>    - <span class="hljs-built_in">cp</span> target/testci-1.0-SNAPSHOT.war docker/testci.war<br>    - docker-compose down<br>    - docker-compose up -d --build<br>    - docker rmi $(docker images -qf dangling=<span class="hljs-literal">true</span>)<br></code></pre></td></tr></table></figure>
+
+
+
+<h5 id="11-6-4-测试"><a href="#11-6-4-测试" class="headerlink" title="11.6.4 测试"></a>11.6.4 测试</h5><table>
+<thead>
+<tr>
+<th align="center">测试效果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center"><img src="http://qgw3wcroi.hn-bkt.clouddn.com/1588674040060.png" srcset="/img/loading.gif" lazyload alt="1588674040060"></td>
+</tr>
+</tbody></table>
+<h4 id="11-7-CD介绍"><a href="#11-7-CD介绍" class="headerlink" title="11.7 CD介绍"></a>11.7 CD介绍</h4><blockquote>
+<p>CD（持续交付，持续部署）</p>
+<p>持续交付：将代码交付给专业的测试团队去测试</p>
+<p>持续部署：可以直接将指定好tag的代码直接部署到生产环境中</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th align="center">CICD图</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center"><img src="http://qgw3wcroi.hn-bkt.clouddn.com/1588677492583.png" srcset="/img/loading.gif" lazyload alt="1588677492583"></td>
+</tr>
+</tbody></table>
+<h4 id="11-8-安装Jenkins"><a href="#11-8-安装Jenkins" class="headerlink" title="11.8 安装Jenkins"></a>11.8 安装Jenkins</h4><h5 id="11-8-1-编写docker-compose-yml"><a href="#11-8-1-编写docker-compose-yml" class="headerlink" title="11.8.1 编写docker-compose.yml"></a>11.8.1 编写docker-compose.yml</h5><blockquote>
+<p>官网：<a target="_blank" rel="noopener" href="https://www.jenkins.io/">https://www.jenkins.io/</a></p>
+</blockquote>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs yml"><span class="hljs-attr">version:</span> <span class="hljs-string">&quot;3.1&quot;</span><br><span class="hljs-attr">services:</span><br>  <span class="hljs-attr">jenkins:</span><br>   <span class="hljs-attr">image:</span> <span class="hljs-string">jenkins/jenkins</span><br>   <span class="hljs-attr">restart:</span> <span class="hljs-string">always</span><br>   <span class="hljs-attr">container_name:</span> <span class="hljs-string">jenkins</span><br>   <span class="hljs-attr">ports:</span><br>     <span class="hljs-bullet">-</span> <span class="hljs-number">8888</span><span class="hljs-string">:8080</span><br>     <span class="hljs-bullet">-</span> <span class="hljs-number">50000</span><span class="hljs-string">:50000</span><br>   <span class="hljs-attr">volumes:</span><br>     <span class="hljs-bullet">-</span> <span class="hljs-string">./data:/var/jenkins_home</span><br></code></pre></td></tr></table></figure>
+
+
+
+<h5 id="11-8-2-运行并访问Jenkins"><a href="#11-8-2-运行并访问Jenkins" class="headerlink" title="11.8.2 运行并访问Jenkins"></a>11.8.2 运行并访问Jenkins</h5><blockquote>
+<p>第一次运行时，会因为data目录没有权限，导致启动失败</p>
+</blockquote>
+<figure class="highlight haskell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs haskell"><span class="hljs-title">chmod</span> <span class="hljs-number">777</span> <span class="hljs-class"><span class="hljs-keyword">data</span></span><br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<p>访问<a target="_blank" rel="noopener" href="http://192.168.199.109:8888/">http://192.168.199.109:8888</a></p>
+</blockquote>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs">访问速度奇慢无比。。。。。<br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<p>访问成功后，需要输入密码，可在日志中查看</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>查看日志,以及Jenkins页面</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><img src="http://qgw3wcroi.hn-bkt.clouddn.com/image-20200708232643961.png" srcset="/img/loading.gif" lazyload alt="image-20200708232643961"></td>
+</tr>
+<tr>
+<td><img src="http://qgw3wcroi.hn-bkt.clouddn.com/image-20200708232614918.png" srcset="/img/loading.gif" lazyload alt="image-20200708232614918"></td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center">选择安装插件方式</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">手动选择插件.</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>查看需要实现安装<a href="">Publish Over SSH</a> 以及 <a href="">Git Parameter</a></p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th align="center">安装插件</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center"><img src="http://qgw3wcroi.hn-bkt.clouddn.com/image-20200708232754318.png" srcset="/img/loading.gif" lazyload alt="image-20200708232754318"></td>
+</tr>
+<tr>
+<td align="center"><img src="http://qgw3wcroi.hn-bkt.clouddn.com/image-20200708232800931.png" srcset="/img/loading.gif" lazyload alt="image-20200708232800931"></td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>安装成功后，需要指定上用户名和密码等信息</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th align="center">指定用户名密码信息</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center"><img src="http://qgw3wcroi.hn-bkt.clouddn.com/image-20200708232842803.png" srcset="/img/loading.gif" lazyload alt="image-20200708232842803"></td>
+</tr>
+<tr>
+<td align="center"><img src="http://qgw3wcroi.hn-bkt.clouddn.com/image-20200708232910197.png" srcset="/img/loading.gif" lazyload alt="image-20200708232910197"></td>
+</tr>
+<tr>
+<td align="center"><img src="http://qgw3wcroi.hn-bkt.clouddn.com/image-20200708232922638.png" srcset="/img/loading.gif" lazyload alt="image-20200708232922638"></td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>登陆成功</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th align="center">登录成功</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center"><img src="http://qgw3wcroi.hn-bkt.clouddn.com/1588681196639.png" srcset="/img/loading.gif" lazyload alt="1588681196639"></td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>登录成功后,还需要单独安装<a href="">Persistent Parameter</a>插件</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th align="center">安装方式及安装成功图</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center"><img src="http://qgw3wcroi.hn-bkt.clouddn.com/image-20200708233023116.png" srcset="/img/loading.gif" lazyload alt="image-20200708233023116"></td>
+</tr>
+<tr>
+<td align="center"><img src="http://qgw3wcroi.hn-bkt.clouddn.com/image-20200708233031967.png" srcset="/img/loading.gif" lazyload alt="image-20200708233031967"></td>
+</tr>
+</tbody></table>
+<h4 id="11-9-配置Jenkins的目标服务器"><a href="#11-9-配置Jenkins的目标服务器" class="headerlink" title="11.9 配置Jenkins的目标服务器"></a>11.9 配置Jenkins的目标服务器</h4><blockquote>
+<p>执行过程：代码提交到Gitlab，Jenkins会从Gitlab中拉取代码，并在Jenkins中打包并发布到目标服务器中。</p>
+</blockquote>
+<h5 id="11-9-1-点击左侧的系统设置"><a href="#11-9-1-点击左侧的系统设置" class="headerlink" title="11.9.1 点击左侧的系统设置"></a>11.9.1 点击左侧的系统设置</h5><table>
+<thead>
+<tr>
+<th align="center">左侧导航</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center"><img src="http://qgw3wcroi.hn-bkt.clouddn.com/1588681954779.png" srcset="/img/loading.gif" lazyload alt="1588681954779"></td>
+</tr>
+</tbody></table>
+<h5 id="11-9-2-选中中间区域的系统设置"><a href="#11-9-2-选中中间区域的系统设置" class="headerlink" title="11.9.2 选中中间区域的系统设置"></a>11.9.2 选中中间区域的系统设置</h5><table>
+<thead>
+<tr>
+<th align="center">系统设置</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center"><img src="http://qgw3wcroi.hn-bkt.clouddn.com/1588681970621.png" srcset="/img/loading.gif" lazyload alt="1588681970621"></td>
+</tr>
+</tbody></table>
+<h5 id="11-9-3-搜索Publish-over-SSH"><a href="#11-9-3-搜索Publish-over-SSH" class="headerlink" title="11.9.3 搜索Publish over SSH"></a>11.9.3 搜索Publish over SSH</h5><table>
+<thead>
+<tr>
+<th align="center">Publish over SSH</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center"><img src="http://qgw3wcroi.hn-bkt.clouddn.com/1588682011820.png" srcset="/img/loading.gif" lazyload alt="1588682011820"></td>
+</tr>
+</tbody></table>
+<h5 id="11-9-4-点击上图新增"><a href="#11-9-4-点击上图新增" class="headerlink" title="11.9.4 点击上图新增"></a>11.9.4 点击上图新增</h5><table>
+<thead>
+<tr>
+<th>新增SSH连接</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><img src="http://qgw3wcroi.hn-bkt.clouddn.com/1588682092002.png" srcset="/img/loading.gif" lazyload alt="1588682092002"></td>
+</tr>
+</tbody></table>
+<h4 id="11-10-配置GitLab免密码登录"><a href="#11-10-配置GitLab免密码登录" class="headerlink" title="11.10 配置GitLab免密码登录"></a>11.10 配置GitLab免密码登录</h4><blockquote>
+<p>链接Gitlab需要使用密码，我们可以通过SSH的方式，免密码登陆Gitlab拉取代码，避免每次都输入密码。</p>
+</blockquote>
+<h5 id="11-10-1登录Jenkins容器内部"><a href="#11-10-1登录Jenkins容器内部" class="headerlink" title="11.10.1登录Jenkins容器内部"></a>11.10.1登录Jenkins容器内部</h5><figure class="highlight applescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs applescript">docker exec -<span class="hljs-keyword">it</span> jenkins bash<br></code></pre></td></tr></table></figure>
+
+
+
+<h5 id="11-10-2-输入生成SSH秘钥命令"><a href="#11-10-2-输入生成SSH秘钥命令" class="headerlink" title="11.10.2 输入生成SSH秘钥命令"></a>11.10.2 输入生成SSH秘钥命令</h5><figure class="highlight excel"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs excel">ssh-keygen -<span class="hljs-built_in">t</span> rsa -C <span class="hljs-string">&quot;邮箱（随便写）&quot;</span><br></code></pre></td></tr></table></figure>
+
+
+
+<h5 id="11-10-3将秘钥复制到GitLab的SSH中"><a href="#11-10-3将秘钥复制到GitLab的SSH中" class="headerlink" title="11.10.3将秘钥复制到GitLab的SSH中"></a>11.10.3将秘钥复制到GitLab的SSH中</h5><table>
+<thead>
+<tr>
+<th align="center">配置密钥</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center"><img src="http://qgw3wcroi.hn-bkt.clouddn.com/1588683585249.png" srcset="/img/loading.gif" lazyload alt="1588683585249"></td>
+</tr>
+</tbody></table>
+<h4 id="11-11-配置JDK和Maven"><a href="#11-11-配置JDK和Maven" class="headerlink" title="11.11 配置JDK和Maven"></a>11.11 配置JDK和Maven</h4><blockquote>
+<p>我们需要再Jenkins中将代码打包，需要依赖JDK和Maven的环境</p>
+</blockquote>
+<h5 id="11-11-1-复制软件到data目录下"><a href="#11-11-1-复制软件到data目录下" class="headerlink" title="11.11.1 复制软件到data目录下"></a>11.11.1 复制软件到data目录下</h5><table>
+<thead>
+<tr>
+<th align="center">效果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center"><img src="http://qgw3wcroi.hn-bkt.clouddn.com/1588684490466.png" srcset="/img/loading.gif" lazyload alt="1588684490466"></td>
+</tr>
+</tbody></table>
+<h5 id="11-11-2-在监控界面中配置JDK和Maven"><a href="#11-11-2-在监控界面中配置JDK和Maven" class="headerlink" title="11.11.2 在监控界面中配置JDK和Maven"></a>11.11.2 在监控界面中配置JDK和Maven</h5><table>
+<thead>
+<tr>
+<th align="center">配置环境变量</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center"><img src="http://qgw3wcroi.hn-bkt.clouddn.com/1588684458028.png" srcset="/img/loading.gif" lazyload alt="1588684458028"></td>
+</tr>
+</tbody></table>
+<h5 id="11-11-3-手动拉取gitlab项目"><a href="#11-11-3-手动拉取gitlab项目" class="headerlink" title="11.11.3 手动拉取gitlab项目"></a>11.11.3 手动拉取gitlab项目</h5><blockquote>
+<p> 使用SSH无密码连接时，第一次连接需要手动确定</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th align="center">手动拉取一次</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center"><img src="http://qgw3wcroi.hn-bkt.clouddn.com/1588685220324.png" srcset="/img/loading.gif" lazyload alt="1588685220324"></td>
+</tr>
+</tbody></table>
+<h4 id="11-12-创建maven任务"><a href="#11-12-创建maven任务" class="headerlink" title="11.12 创建maven任务"></a>11.12 创建maven任务</h4><blockquote>
+<p>实现通过Jenkins的Maven任务，自动去Gitlab拉取代码，并在本地打包，发布到目标服务器上</p>
+</blockquote>
+<h5 id="11-12-1-创建maven工程，推送到GitLab中"><a href="#11-12-1-创建maven工程，推送到GitLab中" class="headerlink" title="11.12.1 创建maven工程，推送到GitLab中"></a>11.12.1 创建maven工程，推送到GitLab中</h5><blockquote>
+<p>随便创建一个即可……</p>
+</blockquote>
+<h5 id="11-12-2-Jenkins的监控页面中创建maven任务"><a href="#11-12-2-Jenkins的监控页面中创建maven任务" class="headerlink" title="11.12.2 Jenkins的监控页面中创建maven任务"></a>11.12.2 Jenkins的监控页面中创建maven任务</h5><table>
+<thead>
+<tr>
+<th align="center">指定GitLab地址</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center"><img src="http://qgw3wcroi.hn-bkt.clouddn.com/1588686481506.png" srcset="/img/loading.gif" lazyload alt="1588686481506"></td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center">指定maven打包方式</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center"><img src="http://qgw3wcroi.hn-bkt.clouddn.com/1588686489821.png" srcset="/img/loading.gif" lazyload alt="1588686489821"></td>
+</tr>
+</tbody></table>
+<h5 id="11-12-3-执行maven任务"><a href="#11-12-3-执行maven任务" class="headerlink" title="11.12.3 执行maven任务"></a>11.12.3 执行maven任务</h5><table>
+<thead>
+<tr>
+<th align="center">立即构建，并查看日志</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center"><img src="http://qgw3wcroi.hn-bkt.clouddn.com/1588686591351.png" srcset="/img/loading.gif" lazyload alt="1588686591351"></td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center">控制台查看日志信息</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center"><img src="http://qgw3wcroi.hn-bkt.clouddn.com/1588686553880.png" srcset="/img/loading.gif" lazyload alt="1588686553880"></td>
+</tr>
+</tbody></table>
+<h5 id="11-12-4-最终效果"><a href="#11-12-4-最终效果" class="headerlink" title="11.12.4 最终效果"></a>11.12.4 最终效果</h5><table>
+<thead>
+<tr>
+<th align="center">打包成功</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center"><img src="http://qgw3wcroi.hn-bkt.clouddn.com/1588687382594.png" srcset="/img/loading.gif" lazyload alt="1588687382594"></td>
+</tr>
+</tbody></table>
+<h4 id="11-13-实现持续交付持续部署"><a href="#11-13-实现持续交付持续部署" class="headerlink" title="11.13 实现持续交付持续部署"></a>11.13 实现持续交付持续部署</h4><blockquote>
+<p>实现根据tag标签，实现持续交付和持续部署</p>
+</blockquote>
+<h5 id="11-13-1-安装Persistent-Parameter的插件"><a href="#11-13-1-安装Persistent-Parameter的插件" class="headerlink" title="11.13.1 安装Persistent Parameter的插件"></a>11.13.1 安装Persistent Parameter的插件</h5><table>
+<thead>
+<tr>
+<th align="center">安装插件</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center"><img src="http://qgw3wcroi.hn-bkt.clouddn.com/1588693533099.png" srcset="/img/loading.gif" lazyload alt="1588693533099"></td>
+</tr>
+</tbody></table>
+<h5 id="11-13-2-重新指定构建项目的方式"><a href="#11-13-2-重新指定构建项目的方式" class="headerlink" title="11.13.2 重新指定构建项目的方式"></a>11.13.2 重新指定构建项目的方式</h5><table>
+<thead>
+<tr>
+<th align="center">根据标签构建项目</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center"><img src="http://qgw3wcroi.hn-bkt.clouddn.com/1588696879059.png" srcset="/img/loading.gif" lazyload alt="1588696879059"></td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center">自定义构建</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center"><img src="http://qgw3wcroi.hn-bkt.clouddn.com/1588697752850.png" srcset="/img/loading.gif" lazyload alt="1588697752850"></td>
+</tr>
+</tbody></table>
+<h5 id="11-13-3-构建项目成功后，需要将内容发布到目标服务器"><a href="#11-13-3-构建项目成功后，需要将内容发布到目标服务器" class="headerlink" title="11.13.3 构建项目成功后，需要将内容发布到目标服务器"></a>11.13.3 构建项目成功后，需要将内容发布到目标服务器</h5><table>
+<thead>
+<tr>
+<th align="center">发布服务器后执行的命令</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center"><img src="http://qgw3wcroi.hn-bkt.clouddn.com/1588697770621.png" srcset="/img/loading.gif" lazyload alt="1588697770621"></td>
+</tr>
+</tbody></table>
+<h5 id="11-13-4-添加程序代码"><a href="#11-13-4-添加程序代码" class="headerlink" title="11.13.4 添加程序代码"></a>11.13.4 添加程序代码</h5><blockquote>
+<p>指定目标服务器的Dockerfile以及docker-compose.yml文件。</p>
+</blockquote>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs yml"><span class="hljs-comment"># Dockerfile 文件</span><br><span class="hljs-string">FROM</span> <span class="hljs-string">daocloud.io/library/tomcat:8.5.15-jre8</span><br><span class="hljs-string">COPY</span> <span class="hljs-string">testcd-1.0-SNAPSHOT.war</span> <span class="hljs-string">/usr/local/tomcat/webapps</span><br><br><span class="hljs-comment"># docker-compose.yml文件</span><br><span class="hljs-attr">version:</span> <span class="hljs-string">&quot;3.1&quot;</span><br><span class="hljs-attr">services:</span><br>  <span class="hljs-attr">testcd:</span><br>    <span class="hljs-attr">build:</span> <span class="hljs-string">docker</span><br>    <span class="hljs-attr">restart:</span> <span class="hljs-string">always</span><br>    <span class="hljs-attr">container_name:</span> <span class="hljs-string">testcd</span><br>    <span class="hljs-attr">ports:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-number">8081</span><span class="hljs-string">:8080</span><br></code></pre></td></tr></table></figure>
+
+
+
+<h5 id="11-13-5-测试"><a href="#11-13-5-测试" class="headerlink" title="11.13.5 测试"></a>11.13.5 测试</h5><blockquote>
+<p>在Jenkins中指定Tag后，Jenkins会从Gitlab拉取指定版本分支，并打包推送到目标服务器。</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th align="center">根据标签修改发布版本</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center"><img src="http://qgw3wcroi.hn-bkt.clouddn.com/1588700462690.png" srcset="/img/loading.gif" lazyload alt="1588700462690"></td>
+</tr>
+</tbody></table>
+
+              
+            </div>
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E5%BE%AE%E6%9C%8D%E5%8A%A1/" class="category-chain-item">微服务</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Docker/">#Docker</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Docker</div>
+      <div>http://example.com/2020/09/19/2020–09-19-Docker/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>Author</div>
+          <div>Hoey</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>Posted on</div>
+          <div>September 19, 2020</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>Licensed under</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - Hoey">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2020/09/22/2020%E2%80%9309-22-docker%E4%BF%AE%E6%94%B9%E9%95%9C%E5%83%8F%E5%AD%98%E5%82%A8/" title="Docker修改镜像存储位置">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Docker修改镜像存储位置</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2020/07/24/2020%E2%80%9307-24-Wow%20%E6%8F%92%E4%BB%B6%E5%BC%80%E5%8F%91/" title="Wow 插件开发-清理背包插件">
+                        <span class="hidden-mobile">Wow 插件开发-清理背包插件</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;Table of Contents</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
+</body>
+</html>

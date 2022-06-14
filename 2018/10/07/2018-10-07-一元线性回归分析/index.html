@@ -1,0 +1,716 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Hoey">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="回归分析就是利用样本(已知数据),产生拟合方程,根据回归结果，得出各个因变量对目标变量产生的影响，还可以(对未知数据)进行预测。 计算实例下面参考薛毅的书例6.5进行阐述一元回归模型的计算过程。  画出散点图我们利用R画出散点图 123456789101112131415161718192021222324# 读取数据，生成矩阵X &lt;- matrix(c(194.5, 20.79, 1.31">
+<meta property="og:type" content="article">
+<meta property="og:title" content="一元线性回归分析(R语言)">
+<meta property="og:url" content="http://example.com/2018/10/07/2018-10-07-%E4%B8%80%E5%85%83%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92%E5%88%86%E6%9E%90/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="回归分析就是利用样本(已知数据),产生拟合方程,根据回归结果，得出各个因变量对目标变量产生的影响，还可以(对未知数据)进行预测。 计算实例下面参考薛毅的书例6.5进行阐述一元回归模型的计算过程。  画出散点图我们利用R画出散点图 123456789101112131415161718192021222324# 读取数据，生成矩阵X &lt;- matrix(c(194.5, 20.79, 1.31">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://i.loli.net/2019/06/30/5d1856588063e65219.jpg">
+<meta property="og:image" content="https://i.loli.net/2019/06/30/5d18565cd668975387.jpg">
+<meta property="og:image" content="https://i.loli.net/2019/06/30/5d18565d657c815265.jpg">
+<meta property="og:image" content="https://i.loli.net/2019/06/30/5d184719416bd24055.jpg">
+<meta property="og:image" content="https://i.loli.net/2019/06/30/5d18471d9afc277590.jpg">
+<meta property="article:published_time" content="2018-10-06T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-11-14T05:58:36.315Z">
+<meta property="article:author" content="Hoey">
+<meta property="article:tag" content="R">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://i.loli.net/2019/06/30/5d1856588063e65219.jpg">
+  
+  
+  
+  <title>一元线性回归分析(R语言) - Hexo</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.9.1","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+
+  
+<meta name="generator" content="Hexo 6.2.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Hoey</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                主页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="一元线性回归分析(R语言)"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2018-10-07 00:00" pubdate>
+          October 7, 2018 am
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          2.2k words
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          19 mins
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">一元线性回归分析(R语言)</h1>
+            
+            <div class="markdown-body">
+              
+              <p>回归分析就是利用样本(已知数据),产生拟合方程,根据回归结果，得出各个因变量对目标变量产生的影响，还可以(对未知数据)进行预测。</p>
+<h3 id="计算实例"><a href="#计算实例" class="headerlink" title="计算实例"></a>计算实例</h3><p>下面参考薛毅的书例6.5进行阐述一元回归模型的计算过程。</p>
+<p><img src="https://i.loli.net/2019/06/30/5d1856588063e65219.jpg" srcset="/img/loading.gif" lazyload alt="image"></p>
+<h4 id="画出散点图"><a href="#画出散点图" class="headerlink" title="画出散点图"></a>画出散点图</h4><p>我们利用R画出散点图</p>
+<figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><code class="hljs R"><span class="hljs-comment"># 读取数据，生成矩阵</span><br>X <span class="hljs-operator">&lt;-</span> matrix<span class="hljs-punctuation">(</span><span class="hljs-built_in">c</span><span class="hljs-punctuation">(</span><br><span class="hljs-number">194.5</span><span class="hljs-punctuation">,</span> <span class="hljs-number">20.79</span><span class="hljs-punctuation">,</span> <span class="hljs-number">1.3179</span><span class="hljs-punctuation">,</span> <span class="hljs-number">131.79</span><span class="hljs-punctuation">,</span><br><span class="hljs-number">194.3</span><span class="hljs-punctuation">,</span> <span class="hljs-number">20.79</span><span class="hljs-punctuation">,</span> <span class="hljs-number">1.3179</span><span class="hljs-punctuation">,</span> <span class="hljs-number">131.79</span><span class="hljs-punctuation">,</span><br><span class="hljs-number">197.9</span><span class="hljs-punctuation">,</span> <span class="hljs-number">22.40</span><span class="hljs-punctuation">,</span> <span class="hljs-number">1.3502</span><span class="hljs-punctuation">,</span> <span class="hljs-number">135.02</span><span class="hljs-punctuation">,</span><br><span class="hljs-number">198.4</span><span class="hljs-punctuation">,</span> <span class="hljs-number">22.67</span><span class="hljs-punctuation">,</span> <span class="hljs-number">1.3555</span><span class="hljs-punctuation">,</span> <span class="hljs-number">135.55</span><span class="hljs-punctuation">,</span><br><span class="hljs-number">199.4</span><span class="hljs-punctuation">,</span> <span class="hljs-number">23.15</span><span class="hljs-punctuation">,</span> <span class="hljs-number">1.3646</span><span class="hljs-punctuation">,</span> <span class="hljs-number">136.46</span><span class="hljs-punctuation">,</span><br><span class="hljs-number">199.9</span><span class="hljs-punctuation">,</span> <span class="hljs-number">23.35</span><span class="hljs-punctuation">,</span> <span class="hljs-number">1.3683</span><span class="hljs-punctuation">,</span> <span class="hljs-number">136.83</span><span class="hljs-punctuation">,</span><br><span class="hljs-number">200.9</span><span class="hljs-punctuation">,</span> <span class="hljs-number">23.89</span><span class="hljs-punctuation">,</span> <span class="hljs-number">1.3782</span><span class="hljs-punctuation">,</span> <span class="hljs-number">137.82</span><span class="hljs-punctuation">,</span><br><span class="hljs-number">201.1</span><span class="hljs-punctuation">,</span> <span class="hljs-number">23.99</span><span class="hljs-punctuation">,</span> <span class="hljs-number">1.3800</span><span class="hljs-punctuation">,</span> <span class="hljs-number">138.00</span><span class="hljs-punctuation">,</span><br><span class="hljs-number">201.4</span><span class="hljs-punctuation">,</span> <span class="hljs-number">24.02</span><span class="hljs-punctuation">,</span> <span class="hljs-number">1.3806</span><span class="hljs-punctuation">,</span> <span class="hljs-number">138.06</span><span class="hljs-punctuation">,</span><br><span class="hljs-number">201.3</span><span class="hljs-punctuation">,</span> <span class="hljs-number">24.01</span><span class="hljs-punctuation">,</span> <span class="hljs-number">1.3805</span><span class="hljs-punctuation">,</span> <span class="hljs-number">138.05</span><span class="hljs-punctuation">,</span><br><span class="hljs-number">203.6</span><span class="hljs-punctuation">,</span> <span class="hljs-number">25.14</span><span class="hljs-punctuation">,</span> <span class="hljs-number">1.4004</span><span class="hljs-punctuation">,</span> <span class="hljs-number">140.04</span><span class="hljs-punctuation">,</span><br><span class="hljs-number">204.6</span><span class="hljs-punctuation">,</span> <span class="hljs-number">26.57</span><span class="hljs-punctuation">,</span> <span class="hljs-number">1.4244</span><span class="hljs-punctuation">,</span> <span class="hljs-number">142.44</span><span class="hljs-punctuation">,</span><br><span class="hljs-number">209.5</span><span class="hljs-punctuation">,</span> <span class="hljs-number">28.49</span><span class="hljs-punctuation">,</span> <span class="hljs-number">1.4547</span><span class="hljs-punctuation">,</span> <span class="hljs-number">145.47</span><span class="hljs-punctuation">,</span><br><span class="hljs-number">208.6</span><span class="hljs-punctuation">,</span> <span class="hljs-number">27.76</span><span class="hljs-punctuation">,</span> <span class="hljs-number">1.4434</span><span class="hljs-punctuation">,</span> <span class="hljs-number">144.34</span><span class="hljs-punctuation">,</span><br><span class="hljs-number">210.7</span><span class="hljs-punctuation">,</span> <span class="hljs-number">29.04</span><span class="hljs-punctuation">,</span> <span class="hljs-number">1.4630</span><span class="hljs-punctuation">,</span> <span class="hljs-number">146.30</span><span class="hljs-punctuation">,</span><br><span class="hljs-number">211.9</span><span class="hljs-punctuation">,</span> <span class="hljs-number">29.88</span><span class="hljs-punctuation">,</span> <span class="hljs-number">1.4754</span><span class="hljs-punctuation">,</span> <span class="hljs-number">147.54</span><span class="hljs-punctuation">,</span><br><span class="hljs-number">212.2</span><span class="hljs-punctuation">,</span> <span class="hljs-number">30.06</span><span class="hljs-punctuation">,</span> <span class="hljs-number">1.4780</span><span class="hljs-punctuation">,</span> <span class="hljs-number">147.80</span><span class="hljs-punctuation">)</span><span class="hljs-punctuation">,</span><br>ncol<span class="hljs-operator">=</span><span class="hljs-number">4</span><span class="hljs-punctuation">,</span> byrow<span class="hljs-operator">=</span><span class="hljs-built_in">T</span><span class="hljs-punctuation">,</span><br><span class="hljs-built_in">dimnames</span> <span class="hljs-operator">=</span> <span class="hljs-built_in">list</span><span class="hljs-punctuation">(</span><span class="hljs-number">1</span><span class="hljs-operator">:</span><span class="hljs-number">17</span><span class="hljs-punctuation">,</span> <span class="hljs-built_in">c</span><span class="hljs-punctuation">(</span><span class="hljs-string">&quot;F&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;h&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;log&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;log100&quot;</span><span class="hljs-punctuation">)</span><span class="hljs-punctuation">)</span><span class="hljs-punctuation">)</span>;<br>forbes<span class="hljs-operator">&lt;-</span>as.data.frame<span class="hljs-punctuation">(</span>X<span class="hljs-punctuation">)</span>;<br><span class="hljs-comment"># 将F列映射在x轴和log100列映射在y轴描绘出散点图</span><br>plot<span class="hljs-punctuation">(</span>forbes<span class="hljs-operator">$</span><span class="hljs-built_in">F</span><span class="hljs-punctuation">,</span>forbes<span class="hljs-operator">$</span>log100<span class="hljs-punctuation">)</span>;<br></code></pre></td></tr></table></figure>
+
+<p><img src="https://i.loli.net/2019/06/30/5d18565cd668975387.jpg" srcset="/img/loading.gif" lazyload alt="image"></p>
+<p>可以大致看出图形乘线性增长趋势，做回归分析，设线性回归方程为:</p>
+<p>$$y&#x3D;ax+b$$</p>
+<p>根据线性回归方程，在R中描绘出log100关于F的函数</p>
+<figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs R"><br>lm.sol<span class="hljs-operator">&lt;-</span>lm<span class="hljs-punctuation">(</span>log100<span class="hljs-operator">~</span><span class="hljs-built_in">F</span><span class="hljs-punctuation">,</span>data<span class="hljs-operator">=</span>forbes<span class="hljs-punctuation">)</span>;<br><span class="hljs-comment"># 画出回归方程</span><br>abline<span class="hljs-punctuation">(</span>lm.sol<span class="hljs-punctuation">)</span>;<br><br></code></pre></td></tr></table></figure>
+
+<p><img src="https://i.loli.net/2019/06/30/5d18565d657c815265.jpg" srcset="/img/loading.gif" lazyload alt="image"></p>
+<h4 id="R是怎么画出这条线的？"><a href="#R是怎么画出这条线的？" class="headerlink" title="R是怎么画出这条线的？"></a>R是怎么画出这条线的？</h4><p><img src="https://i.loli.net/2019/06/30/5d184719416bd24055.jpg" srcset="/img/loading.gif" lazyload alt="image"></p>
+<p>首先做<strong>样本点</strong>到<strong>一元回归方程</strong>且平行与<strong>Y轴</strong>的一条线段，并求得每个样本点的<strong>误差值</strong>,这样问题就可以转换为<code>怎么画这条直线才能使得残差平方和最小</code></p>
+<blockquote>
+<p>什么是<strong>残差平方和</strong>,对于上图中每个误差值的绝对值的总和称为残差和，由于带着绝对值求解不太方便，所以对误差值的平方后求和，即为残差平方和</p>
+</blockquote>
+<p>$$f\left(a,b\right)&#x3D;\sum_{i&#x3D;1}^{n}{\left(Y_i - \left(\ aX_i + b \right)\right)^2}$$</p>
+<p>对于函数的极值问题，利用高等数学中偏导数定理，即$$\frac{\delta f}{\delta a}&#x3D;0$$和$$\frac{\delta f}{\delta b}&#x3D;0$$。下面为证明过程,由于公式太难打这边就插图了：</p>
+<p><img src="https://i.loli.net/2019/06/30/5d18471d9afc277590.jpg" srcset="/img/loading.gif" lazyload alt="image"></p>
+<p>最终求得a和b的值。有了这个公式，对于本例子，我们就可以算出拟合直线具体是什么。分别求出公式中的各种平均数，然后带入即可，最后算出a&#x3D;0.89546，b&#x3D;-42.13087</p>
+<p>最终的回归拟合直线为</p>
+<p>$$Y&#x3D;-42.13087 + 0.89546X$$</p>
+<h4 id="评价回归线拟合程度的好坏"><a href="#评价回归线拟合程度的好坏" class="headerlink" title="评价回归线拟合程度的好坏"></a>评价回归线拟合程度的好坏</h4><p>可以使用R里面的**summary()**函数解决这个问题。</p>
+<figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs R"><span class="hljs-operator">&gt;</span> summary<span class="hljs-punctuation">(</span>lm.sol<span class="hljs-punctuation">)</span><br><br>Call<span class="hljs-operator">:</span><br>lm<span class="hljs-punctuation">(</span>formula <span class="hljs-operator">=</span> log100 <span class="hljs-operator">~</span> <span class="hljs-built_in">F</span><span class="hljs-punctuation">,</span> data <span class="hljs-operator">=</span> forbes<span class="hljs-punctuation">)</span><br><br>Residuals<span class="hljs-operator">:</span><br>     Min       <span class="hljs-number">1</span>Q   Median       <span class="hljs-number">3</span>Q      Max <br><span class="hljs-operator">-</span><span class="hljs-number">0.32261</span> <span class="hljs-operator">-</span><span class="hljs-number">0.14530</span> <span class="hljs-operator">-</span><span class="hljs-number">0.06750</span>  <span class="hljs-number">0.02111</span>  <span class="hljs-number">1.35924</span> <br><br>Coefficients<span class="hljs-operator">:</span><br>             Estimate Std. Error t value Pr<span class="hljs-punctuation">(</span><span class="hljs-operator">&gt;</span><span class="hljs-operator">|</span>t<span class="hljs-operator">|</span><span class="hljs-punctuation">)</span>    <br><span class="hljs-punctuation">(</span>Intercept<span class="hljs-punctuation">)</span> <span class="hljs-operator">-</span><span class="hljs-number">42.13087</span>    <span class="hljs-number">3.33895</span>  <span class="hljs-operator">-</span><span class="hljs-number">12.62</span> <span class="hljs-number">2.17e-09</span> <span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><br><span class="hljs-built_in">F</span>             <span class="hljs-number">0.89546</span>    <span class="hljs-number">0.01645</span>   <span class="hljs-number">54.45</span>  <span class="hljs-operator">&lt;</span> <span class="hljs-number">2e-16</span> <span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><br><span class="hljs-operator">-</span><span class="hljs-operator">-</span><span class="hljs-operator">-</span><br>Signif. codes<span class="hljs-operator">:</span>  <span class="hljs-number">0</span> ‘<span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span>’ <span class="hljs-number">0.001</span> ‘<span class="hljs-operator">*</span><span class="hljs-operator">*</span>’ <span class="hljs-number">0.01</span> ‘<span class="hljs-operator">*</span>’ <span class="hljs-number">0.05</span> ‘.’ <span class="hljs-number">0.1</span> ‘ ’ <span class="hljs-number">1</span><br><br>Residual standard error<span class="hljs-operator">:</span> <span class="hljs-number">0.3789</span> on <span class="hljs-number">15</span> degrees of freedom<br>Multiple R<span class="hljs-operator">-</span>squared<span class="hljs-operator">:</span>  <span class="hljs-number">0.995</span><span class="hljs-punctuation">,</span>	Adjusted R<span class="hljs-operator">-</span>squared<span class="hljs-operator">:</span>  <span class="hljs-number">0.9946</span> <br><span class="hljs-built_in">F</span><span class="hljs-operator">-</span>statistic<span class="hljs-operator">:</span>  <span class="hljs-number">2965</span> on <span class="hljs-number">1</span> and <span class="hljs-number">15</span> DF<span class="hljs-punctuation">,</span>  p<span class="hljs-operator">-</span>value<span class="hljs-operator">:</span> <span class="hljs-operator">&lt;</span> <span class="hljs-number">2.2e-16</span><br><br></code></pre></td></tr></table></figure>
+
+<p>参数详述</p>
+<p><strong>Residuals</strong>: 列出了残差的最小值、下四分为数、中位数、上四分为数、最大值</p>
+<p><strong>Coefficients</strong> : -42.13087表示的是截距、0.89546表示的是斜率,推算的系数的标准差,t值,P-值(结合Signif做显著性检验)</p>
+<p><strong>Signif:显著性标记</strong>,三颗<em>表示极度显著,二颗</em>表示高度显著,一颗*表示显著,圆点表示不太显著,没有记号表示不显著</p>
+<p><strong>Residual standard error</strong> : 残差标准查</p>
+<p><strong>Multiple R-squared</strong> : 相关系数平方</p>
+<p><strong>F-statistic</strong>: F检验值</p>
+<p>推荐一篇不错的blog<a target="_blank" rel="noopener" href="https://www.cnblogs.com/nxld/p/6123239.html">回归分析法&amp;一元线性回归操作和解释</a></p>
+
+              
+            </div>
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/" class="category-chain-item">机器学习</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/R/">#R</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>一元线性回归分析(R语言)</div>
+      <div>http://example.com/2018/10/07/2018-10-07-一元线性回归分析/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>Author</div>
+          <div>Hoey</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>Posted on</div>
+          <div>October 7, 2018</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>Licensed under</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - Hoey">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2018/10/08/2018-10-08-%E8%87%AA%E5%88%B6%E7%99%BE%E5%BA%A6%E7%BD%91%E7%9B%98%E4%B8%8B%E8%BD%BD%E5%99%A8/" title="自制百度网盘下载器">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">自制百度网盘下载器</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2018/09/29/2018-09-29-kafka%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/" title="kafka基本概念">
+                        <span class="hidden-mobile">kafka基本概念</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;Table of Contents</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
+</body>
+</html>

@@ -1,0 +1,733 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Hoey">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="最近接到个业务需要使用FTP拉取服务器上数据。要求可以任意指定下载对应目录数据，并且目录结构保持要。处理的数据文件特点分散而且很大。处理的思路大概有两个，一个是在服务端压缩成zip，然后传过来。二是使用多线程单个单个文件传输。在这里我使用的是第二中方法。  思路1.服务端提供一个返回指定文件下的List&lt;String&gt; files 2.客户端拿到files文件列表，遍历单个单个文件请求">
+<meta property="og:type" content="article">
+<meta property="og:title" content="FTP多线程批量文件下载">
+<meta property="og:url" content="http://example.com/2018/04/25/2018-04-25-thread-FTP%E5%A4%9A%E7%BA%BF%E7%A8%8B%E6%89%B9%E9%87%8F%E6%96%87%E4%BB%B6%E4%B8%8B%E8%BD%BD/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="最近接到个业务需要使用FTP拉取服务器上数据。要求可以任意指定下载对应目录数据，并且目录结构保持要。处理的数据文件特点分散而且很大。处理的思路大概有两个，一个是在服务端压缩成zip，然后传过来。二是使用多线程单个单个文件传输。在这里我使用的是第二中方法。  思路1.服务端提供一个返回指定文件下的List&lt;String&gt; files 2.客户端拿到files文件列表，遍历单个单个文件请求">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2018-04-24T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-11-14T05:58:36.306Z">
+<meta property="article:author" content="Hoey">
+<meta property="article:tag" content="FTP">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>FTP多线程批量文件下载 - Hexo</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.9.1","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+
+  
+<meta name="generator" content="Hexo 6.2.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Hoey</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                主页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="FTP多线程批量文件下载"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2018-04-25 00:00" pubdate>
+          April 25, 2018 am
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          5.1k words
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          43 mins
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">FTP多线程批量文件下载</h1>
+            
+            <div class="markdown-body">
+              
+              <p>最近接到个业务需要使用FTP拉取服务器上数据。要求可以任意指定下载对应目录数据，并且目录结构保持要。处理的数据文件特点分散而且很大。处理的思路大概有两个，一个是在服务端压缩成zip，然后传过来。二是使用多线程单个单个文件传输。在这里我使用的是第二中方法。</p>
+<hr>
+<h2 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h2><p>1.服务端提供一个返回指定文件下的<code>List&lt;String&gt; files</code></p>
+<p>2.客户端拿到files文件列表，遍历单个单个文件请求服务端拉取数据</p>
+<h2 id="FTP下载使用"><a href="#FTP下载使用" class="headerlink" title="FTP下载使用"></a>FTP下载使用</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><code class="hljs java"><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-type">boolean</span> <span class="hljs-title function_">downloadFromFtp</span><span class="hljs-params">(String middlePath, String fileName, String localPath)</span> <span class="hljs-keyword">throws</span> IOException &#123;<br><br>        <span class="hljs-keyword">return</span> downloadFromFtp(url, port, username, password,middlePath, fileName, localPath);<br>    &#125;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-type">boolean</span> <span class="hljs-title function_">downloadFromFtp</span><span class="hljs-params">(String url, <span class="hljs-type">int</span> port, String</span><br><span class="hljs-params">            username, String password, String path, String fileName, String localpath)</span> <span class="hljs-keyword">throws</span> IOException &#123;<br>        <span class="hljs-type">boolean</span> <span class="hljs-variable">flag</span> <span class="hljs-operator">=</span> <span class="hljs-literal">false</span>;<br>        <span class="hljs-type">FTPClient</span> <span class="hljs-variable">ftp</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">FTPClient</span>();<span class="hljs-comment">//org.apache.commons.net.ftp</span><br>        <span class="hljs-type">int</span> reply;<br>        <span class="hljs-keyword">try</span> &#123;<br>            <span class="hljs-keyword">if</span> (port &gt; -<span class="hljs-number">1</span>) &#123;<br>                ftp.connect(url, port);<br>            &#125; <span class="hljs-keyword">else</span> &#123;<br>                ftp.connect(url);<span class="hljs-comment">//ftp默认的端口是21</span><br>            &#125;<br>            <span class="hljs-comment">//很多人写的是用ftp.getReplyCode()给获取连接的返回值,但是这样会导致storeFileStream返回null</span><br>            ftp.login(username, password);<br>            ftp.enterLocalActiveMode();<br>            ftp.setFileType(FTPClient.BINARY_FILE_TYPE);<br>            reply = ftp.getReplyCode();<br>            <span class="hljs-keyword">if</span> (!FTPReply.isPositiveCompletion(reply)) &#123;<br>                ftp.disconnect();<br>                <span class="hljs-keyword">return</span> flag;<br>            &#125;<br>            <span class="hljs-comment">//切换目录 此处可以判断,切换失败就说明ftp上面没有这个路径</span><br>            ftp.changeWorkingDirectory(path);<br>            <span class="hljs-comment">//上传文件</span><br>            <span class="hljs-type">OutputStream</span> <span class="hljs-variable">out</span> <span class="hljs-operator">=</span> <span class="hljs-literal">null</span>;<br>            <span class="hljs-type">InputStream</span> <span class="hljs-variable">in</span> <span class="hljs-operator">=</span> <span class="hljs-literal">null</span>;<br>            <span class="hljs-comment">//创建本地的文件时候要把编码格式转回来</span><br>            <span class="hljs-type">File</span> <span class="hljs-variable">localDir</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">File</span>(localpath +<span class="hljs-string">&quot;/&quot;</span> + path);<br>            <span class="hljs-keyword">if</span>(!localDir.exists())&#123;<br>                localDir.mkdirs();<br>            &#125;<br>            fileName = <span class="hljs-keyword">new</span> <span class="hljs-title class_">String</span>(fileName.getBytes(<span class="hljs-string">&quot;ISO-8859-1&quot;</span>), <span class="hljs-string">&quot;utf-8&quot;</span>);<br>            <span class="hljs-type">File</span> <span class="hljs-variable">localFile</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">File</span>(localpath + <span class="hljs-string">&quot;/&quot;</span> + path + <span class="hljs-string">&quot;/&quot;</span> + fileName);<br>            out = <span class="hljs-keyword">new</span> <span class="hljs-title class_">FileOutputStream</span>(localFile);<br>            <span class="hljs-comment">//ftp.enterLocalPassiveMode();</span><br>            in = ftp.retrieveFileStream(fileName);<br>            <span class="hljs-type">byte</span>[] byteArray = <span class="hljs-keyword">new</span> <span class="hljs-title class_">byte</span>[<span class="hljs-number">4096</span>];<br>            <span class="hljs-type">int</span> <span class="hljs-variable">read</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>;<br>            <span class="hljs-keyword">while</span> ((read = in.read(byteArray)) != -<span class="hljs-number">1</span>) &#123;<br>                out.write(byteArray, <span class="hljs-number">0</span>, read);<br>            &#125;<br>            <span class="hljs-comment">//这句很重要 要多次操作这个ftp的流的通道,要等他的每次命令完成</span><br>            ftp.completePendingCommand();<br>            out.flush();<br>            out.close();<br>            ftp.logout();<br>            flag = <span class="hljs-literal">true</span>;<br>        &#125; <span class="hljs-keyword">catch</span> (Exception e) &#123;<br>            e.printStackTrace();<br>        &#125; <span class="hljs-keyword">finally</span> &#123;<br>            <span class="hljs-keyword">if</span> (ftp.isConnected()) &#123;<br>                ftp.disconnect();<br>            &#125;<br>        &#125;<br>        <span class="hljs-keyword">return</span> flag;<br>    &#125;<br><br></code></pre></td></tr></table></figure>
+
+<p>downloadFromFtp传入参数说明String </p>
+<table>
+<tr>
+    <td>参数</td>
+    <td>解释</td>
+</tr>
+<tr>
+    <td>url</td>
+    <td>ftp的ip地址</td>
+</tr>
+<tr>
+    <td>port</td>
+    <td>ftp的端口(默认21)</td>
+</tr>
+<tr>
+    <td>usernameport</td>
+    <td>ftp用户名</td>
+</tr>
+<tr>
+    <td>password</td>
+    <td>ftp密码</td>
+</tr>
+<tr>
+    <td>path</td>
+    <td>特别重要，一开报输入流为null就是因为它写错了;假如你的ftp根目录为C:/ftp/,你想要下载C:/ftp/xxx/下的文件,那么path就要写xxx/</td>
+</tr>
+<tr>
+    <td>fileName</td>
+    <td>下载文件的名称</td>
+</tr>
+<tr>
+    <td>localpath</td>
+    <td>下载到本地的路径</td>
+</tr>
+</table>
+
+<h2 id="server返回制定文件列表"><a href="#server返回制定文件列表" class="headerlink" title="server返回制定文件列表"></a>server返回制定文件列表</h2><p>用户给定一个path，查处path下所有的文件，放在list，以json形式返回。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">// 递归查询所有的文件</span><br><span class="hljs-keyword">public</span> ArrayList <span class="hljs-title function_">listFiles</span><span class="hljs-params">(String path,ArrayList files)</span>&#123;<br>    <span class="hljs-type">File</span> <span class="hljs-variable">directory</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">File</span>(path);<br>    File[] currentFiles = directory.listFiles();<br>    <span class="hljs-keyword">for</span> (File file:currentFiles) &#123;<br>        <span class="hljs-keyword">if</span> (file.isDirectory())&#123;<br>            listFiles(file.getPath(),files);<br>        &#125;<span class="hljs-keyword">else</span>&#123;<br>            files.add(file);<br>        &#125;<br>    &#125;<br>    <span class="hljs-keyword">return</span> files;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h2 id="client获取返回列表下载文件"><a href="#client获取返回列表下载文件" class="headerlink" title="client获取返回列表下载文件"></a>client获取返回列表下载文件</h2><p>四类线程池基本的线程池概述，这边按需求选择，我这里选了定长线程池FixedThreadPool</p>
+<ul>
+<li>FixedThreadPool 定长的线程池，初始化时指定线程的个数，当线程池中线程被用完时，其他任务阻塞等待</li>
+<li>CachedThreadPool 不定长线程池，无限扩大的线程池，来几个任务分配几个线程。</li>
+<li>SimpleThreadPool 单例线程，底层采用LinkedBlockQueue实现，除了排在队列最前面的线程以外的其他线程都要等着。</li>
+<li>ScheduleThreadPol 在初始化时可以指定时间帮助我们处理延时任务和定时任务。</li>
+</ul>
+<p>客户端的思路:<br>1.使用HttpClient从后台发送请求获取待下载files列表<br>2.将DownloadThread分配给FixedThreadPool运行</p>
+<p>这边主要看DownloadThread.java如何编写，以及如何分配给fixedThreadPool</p>
+<p>DownloadThread.java</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">package</span> com.bim.task;<br><br><span class="hljs-keyword">import</span> com.bim.common.FtpUtils;<br><br><span class="hljs-keyword">import</span> java.util.List;<br><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">DownLoadThread</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">Runnable</span> &#123;<br><br>    <span class="hljs-type">List</span> <span class="hljs-variable">files</span> <span class="hljs-operator">=</span> <span class="hljs-literal">null</span>;<br>    <span class="hljs-type">String</span> <span class="hljs-variable">ftpPath</span> <span class="hljs-operator">=</span> <span class="hljs-literal">null</span>;<br>    <span class="hljs-type">String</span> <span class="hljs-variable">baseLocalPath</span> <span class="hljs-operator">=</span> <span class="hljs-literal">null</span>;<br><br>    <span class="hljs-keyword">public</span>  <span class="hljs-title function_">DownLoadThread</span><span class="hljs-params">(List files,String ftpPath,String baseLocalPath)</span>&#123;<br>        <span class="hljs-built_in">this</span>.files = files;<br>        <span class="hljs-built_in">this</span>.ftpPath = ftpPath;<br>        <span class="hljs-built_in">this</span>.baseLocalPath = baseLocalPath;<br>    &#125;<br><br>    <span class="hljs-comment">// 下载文件的具体业务</span><br>    <span class="hljs-comment">// ftpPath ftp地址（c:/ftp）</span><br>    <span class="hljs-comment">// baseLocalPath 目标地址</span><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">downloadFile</span><span class="hljs-params">(String file,String ftpPath,String baseLocalPath)</span> <span class="hljs-keyword">throws</span> Exception&#123;<br>        <span class="hljs-type">String</span> <span class="hljs-variable">dllPath</span> <span class="hljs-operator">=</span> file.toString().replaceAll(<span class="hljs-string">&quot;\\\\&quot;</span>,<span class="hljs-string">&quot;/&quot;</span>);<br>        <span class="hljs-type">int</span> <span class="hljs-variable">lastIndexOf</span> <span class="hljs-operator">=</span> dllPath.lastIndexOf(<span class="hljs-string">&quot;/&quot;</span>);<br>        <span class="hljs-type">String</span> <span class="hljs-variable">middlePath</span> <span class="hljs-operator">=</span> <span class="hljs-string">&quot;/&quot;</span>;<br>        <span class="hljs-keyword">if</span>(ftpPath.length() - <span class="hljs-number">1</span> &lt;= lastIndexOf)&#123;<br>            middlePath = dllPath.substring(ftpPath.length(),lastIndexOf+<span class="hljs-number">1</span>);<br>        &#125;<br>        <span class="hljs-type">String</span> <span class="hljs-variable">fileName</span> <span class="hljs-operator">=</span> dllPath.substring(lastIndexOf + <span class="hljs-number">1</span>,dllPath.length());<br>        System.out.println(<span class="hljs-string">&quot;filename&quot;</span> + fileName);<br>        System.out.println(<span class="hljs-string">&quot;baseLocalPath&quot;</span> + baseLocalPath);<br>        System.out.println(<span class="hljs-string">&quot;开始下载:&quot;</span> + middlePath + fileName + <span class="hljs-string">&quot;到本地&quot;</span> + baseLocalPath);<br>        <span class="hljs-comment">// 调用ftp下载文件</span><br>        FtpUtils.downloadFromFtp(middlePath,fileName,baseLocalPath);<br>        System.out.println(middlePath + fileName + <span class="hljs-string">&quot;下载成功&quot;</span>);<br><br>    &#125;<br>    <br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">run</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-keyword">try</span>&#123;<br>            <span class="hljs-keyword">while</span>(!files.isEmpty())&#123;<br>                <span class="hljs-type">String</span> <span class="hljs-variable">file</span> <span class="hljs-operator">=</span> <span class="hljs-literal">null</span>;<br>                <span class="hljs-keyword">synchronized</span>(files)&#123;<br>                    file = (String) files.get(<span class="hljs-number">0</span>);<br>                    files.remove(<span class="hljs-number">0</span>);<br>                &#125;<br>                downloadFile(file,ftpPath,baseLocalPath);<br>            &#125;<br>        &#125;<span class="hljs-keyword">catch</span> (Exception e)&#123;<br>            e.printStackTrace();<br>        &#125;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>主程序拿到files后的逻辑代码部分</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">PullFileClient</span> &#123;<br>     <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-type">ExecutorService</span> <span class="hljs-variable">fixedThreadPool</span> <span class="hljs-operator">=</span> Executors.newFixedThreadPool(<span class="hljs-number">10</span>);<br>    <br>     <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span> <span class="hljs-keyword">throws</span> IOException &#123;<br><br>        Map&lt;String,Object&gt; resultMap = client.sendGet(requestUrl);<br>        <span class="hljs-type">Object</span> <span class="hljs-variable">code</span> <span class="hljs-operator">=</span> resultMap.get(<span class="hljs-string">&quot;code&quot;</span>);<br>        <span class="hljs-comment">// 获取文件列表数据</span><br>        <span class="hljs-type">List</span> <span class="hljs-variable">files</span> <span class="hljs-operator">=</span> (List) resultMap.get(<span class="hljs-string">&quot;data&quot;</span>);<br>        <span class="hljs-comment">// ftp的根目录 (c:/ftp)</span><br>        <span class="hljs-type">String</span> <span class="hljs-variable">ftpPath</span> <span class="hljs-operator">=</span> <span class="hljs-string">&quot;c:/FTP/&quot;</span>;<br>        <span class="hljs-type">String</span> <span class="hljs-variable">baseLocalPath</span> <span class="hljs-operator">=</span> <span class="hljs-string">&quot;/home/zyh/Documents/tmp4/&quot;</span>;<br>        fixedThreadPool.execute(<span class="hljs-keyword">new</span> <span class="hljs-title class_">DownLoadThread</span>(files,ftpPath,baseLocalPath));<br>        fixedThreadPool.shutdown();<br>    &#125;<br>    <br>&#125;<br></code></pre></td></tr></table></figure>
+              
+            </div>
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E5%90%8E%E7%AB%AF/" class="category-chain-item">后端</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/FTP/">#FTP</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>FTP多线程批量文件下载</div>
+      <div>http://example.com/2018/04/25/2018-04-25-thread-FTP多线程批量文件下载/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>Author</div>
+          <div>Hoey</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>Posted on</div>
+          <div>April 25, 2018</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>Licensed under</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - Hoey">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2018/04/27/2018-04-27-hdfs-HDFS%E6%BA%90%E7%A0%81%E5%88%A8%E6%9E%90-FileSystem%E5%88%9D%E5%A7%8B%E5%8C%96/" title="HDFS源码刨析-FileSystem初始化">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">HDFS源码刨析-FileSystem初始化</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2018/04/22/2018-04-22-mapreduce-MapReduce%E5%88%87%E7%89%87%E8%A7%84%E5%88%92%E6%BA%90%E7%A0%81%E5%88%A8%E6%9E%90/" title="MapReduce切片规划源码剖析">
+                        <span class="hidden-mobile">MapReduce切片规划源码剖析</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;Table of Contents</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
+</body>
+</html>

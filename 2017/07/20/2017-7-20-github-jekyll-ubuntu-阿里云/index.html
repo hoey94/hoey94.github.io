@@ -1,0 +1,747 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Hoey">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="使用github和jekyll搭建的博客，运行环境是ubuntu 1.6.04使用的域名是阿里云 推荐: github Pages和Jekyll入门，Git教程 附录 附录 jekyll ruby rubyGems jekyll   创建并发布博客 无样式的博客 有样式的博客   注册域名  jekyllJekyll是一个简单的博客形态的静态站点生产机器。它有一个模版目录，其中包含原始文本格式的文">
+<meta property="og:type" content="article">
+<meta property="og:title" content="GITHUB-JEKYLL搭建个人博客网站">
+<meta property="og:url" content="http://example.com/2017/07/20/2017-7-20-github-jekyll-ubuntu-%E9%98%BF%E9%87%8C%E4%BA%91/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="使用github和jekyll搭建的博客，运行环境是ubuntu 1.6.04使用的域名是阿里云 推荐: github Pages和Jekyll入门，Git教程 附录 附录 jekyll ruby rubyGems jekyll   创建并发布博客 无样式的博客 有样式的博客   注册域名  jekyllJekyll是一个简单的博客形态的静态站点生产机器。它有一个模版目录，其中包含原始文本格式的文">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2017-07-19T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-06-14T11:37:43.847Z">
+<meta property="article:author" content="Hoey">
+<meta property="article:tag" content="Jekyll">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>GITHUB-JEKYLL搭建个人博客网站 - Hexo</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.9.1","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+
+  
+<meta name="generator" content="Hexo 6.2.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Hoey</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                主页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="GITHUB-JEKYLL搭建个人博客网站"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2017-07-20 00:00" pubdate>
+          July 20, 2017 am
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          2.9k words
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          25 mins
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">GITHUB-JEKYLL搭建个人博客网站</h1>
+            
+            <div class="markdown-body">
+              
+              <p>使用<strong>github</strong>和<strong>jekyll</strong>搭建的<a target="_blank" rel="noopener" href="http://www.zonegood.com/">博客</a>，运行环境是<strong>ubuntu 1.6.04</strong>使用的域名是<a target="_blank" rel="noopener" href="https://cn.aliyun.com/">阿里云</a></p>
+<p>推荐: <a target="_blank" rel="noopener" href="http://www.ruanyifeng.com/blog/2012/08/blogging_with_jekyll.html">github Pages和Jekyll入门</a>，<a target="_blank" rel="noopener" href="https://www.liaoxuefeng.com/wiki/0013739516305929606dd18361248578c67b8067c8c017b000">Git教程</a></p>
+<h2 id="附录"><a href="#附录" class="headerlink" title="附录"></a>附录</h2><ul>
+<li><a href="#%E9%99%84%E5%BD%95">附录</a></li>
+<li><a href="#jekyll">jekyll</a><ul>
+<li><a href="#ruby">ruby</a></li>
+<li><a href="#rubygems">rubyGems</a></li>
+<li><a href="#jekyll-1">jekyll</a></li>
+</ul>
+</li>
+<li><a href="#%E5%88%9B%E5%BB%BA%E5%B9%B6%E5%8F%91%E5%B8%83%E5%8D%9A%E5%AE%A2">创建并发布博客</a><ul>
+<li><a href="#%E6%97%A0%E6%A0%B7%E5%BC%8F%E7%9A%84%E5%8D%9A%E5%AE%A2">无样式的博客</a></li>
+<li><a href="#%E6%9C%89%E6%A0%B7%E5%BC%8F%E7%9A%84%E5%8D%9A%E5%AE%A2">有样式的博客</a></li>
+</ul>
+</li>
+<li><a href="#%E6%B3%A8%E5%86%8C%E5%9F%9F%E5%90%8D">注册域名</a></li>
+</ul>
+<h2 id="jekyll"><a href="#jekyll" class="headerlink" title="jekyll"></a>jekyll</h2><p>Jekyll是一个简单的博客形态的静态站点生产机器。它有一个模版目录，其中包含原始文本格式的文档，通过 <a target="_blank" rel="noopener" href="https://daringfireball.net/projects/markdown/">Markdown</a> （或者 <a target="_blank" rel="noopener" href="http://textile.sitemonks.com/">Textile</a>） 以及 <a target="_blank" rel="noopener" href="http://docs.shopify.com/themes/liquid-basics">Liquid</a> 转化成一个完整的可发布的静态网站，你可以发布在任何你喜爱的服务器上。Jekyll 也可以运行在 <a target="_blank" rel="noopener" href="https://pages.github.com/">GitHub Page</a> 上，也就是说，你可以使用 GitHub 的服务来搭建你的项目页面、博客或者网站，而且是完全免费的。</p>
+<p>安装jekyll之前呢，需要准备下面内容。</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://www.ruby-lang.org/en/downloads/">Ruby</a></li>
+<li><a target="_blank" rel="noopener" href="https://rubygems.org/pages/download">RubyGems</a></li>
+</ul>
+<h3 id="ruby"><a href="#ruby" class="headerlink" title="ruby"></a>ruby</h3><p>具体怎么可以到<a target="_blank" rel="noopener" href="https://www.ruby-lang.org/en/downloads/">Ruby官网</a>下载tar.gz安装包安装（注意有时候make install 报错的话，可能是权限问题，我就碰到咯，只要在代码前面加上sudo 就行了）</p>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs vim">wget https://cache.<span class="hljs-keyword">ruby</span>-lang.org/pub/<span class="hljs-keyword">ruby</span>/<span class="hljs-number">2.4</span>/<span class="hljs-keyword">ruby</span>-<span class="hljs-number">2.4</span>.<span class="hljs-number">1</span>.tar.gz<br>tar -zxvf <span class="hljs-keyword">ruby</span>-<span class="hljs-number">2.4</span>.<span class="hljs-number">1</span>.tar.gz<br><span class="hljs-keyword">cd</span> <span class="hljs-keyword">ruby</span>-<span class="hljs-number">2.4</span>.<span class="hljs-number">1</span>/<br>./configure<br><span class="hljs-keyword">make</span><br><span class="hljs-keyword">make</span> install<br><span class="hljs-keyword">make</span> clean<br>sudo <span class="hljs-keyword">make</span> distclean<br><span class="hljs-keyword">ruby</span> -v<br><br></code></pre></td></tr></table></figure>
+
+
+<h3 id="rubyGems"><a href="#rubyGems" class="headerlink" title="rubyGems"></a>rubyGems</h3><p>具体怎么可以到<a target="_blank" rel="noopener" href="https://rubygems.org/pages/download">RubyGems官网</a>，和Ruby安装是一样的，不做详细说明</p>
+<figure class="highlight gauss"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs gauss">wget https:<span class="hljs-comment">//rubygems.org/rubygems/rubygems-2.6.12.tgz</span><br>tar -zxvf rubygems<span class="hljs-number">-2.6</span><span class="hljs-number">.12</span>.tgz<br>cd rubygems<span class="hljs-number">-2.6</span><span class="hljs-number">.12</span><br>./configure<br><span class="hljs-built_in">make</span><br><span class="hljs-built_in">make</span> install<br><span class="hljs-built_in">make</span> clean<br>sudo <span class="hljs-built_in">make</span> distclean<br></code></pre></td></tr></table></figure>
+
+
+<h3 id="jekyll-1"><a href="#jekyll-1" class="headerlink" title="jekyll"></a>jekyll</h3><p><a target="_blank" rel="noopener" href="http://jekyll.com.cn/docs/installation/">jekyll官网</a>，jekyll的doc一栏中也提供了安装的参考</p>
+<figure class="highlight mipsasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs mipsasm">sudo gem <span class="hljs-keyword">install </span><span class="hljs-keyword">jekyll</span><br><span class="hljs-keyword"></span><br></code></pre></td></tr></table></figure>
+<p>可能会出现一些错误，这是因为少安装了一些插件，这里我也卡了很久，搜索了很多资料，试了很多次</p>
+<figure class="highlight subunit"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs subunit"><span class="hljs-keyword">ERROR: </span>Loading command: update (LoadError)<br>cannot load such file -- zlib<br><span class="hljs-keyword">ERROR: </span>While executing gem ... (NoMethodError)<br>undefined method `invoke_with_build_args&#x27; for nil:NilClass<br></code></pre></td></tr></table></figure>
+
+<p>解决办法</p>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs vim">sudo apt-<span class="hljs-built_in">get</span> <span class="hljs-keyword">update</span><br>sudo apt-<span class="hljs-built_in">get</span> install git-core curl zlib1g-dev build-essential libssl-dev libreadline-dev libyaml-dev libsqlite3-dev sqlite3 libxml2-dev libxslt1-dev libcurl4-openssl-dev <span class="hljs-keyword">python</span>-software-properties<br>sudo apt-<span class="hljs-built_in">get</span> install libgdbm-dev libncurses5-dev automake libtool bison libffi-dev<br>sudo apt-<span class="hljs-built_in">get</span> install zlib1g-dev<br><span class="hljs-keyword">cd</span> <span class="hljs-keyword">ruby</span>-<span class="hljs-number">2.4</span>.<span class="hljs-number">1</span>/ext/zlib/<br><span class="hljs-keyword">ruby</span> extconf.rb <br><span class="hljs-keyword">cd</span> /usr/<span class="hljs-keyword">ruby</span>-<span class="hljs-number">2.4</span>.<span class="hljs-number">1</span>/<br>./configure<br>sudo <span class="hljs-keyword">make</span> install<br>sudo <span class="hljs-keyword">make</span> clean<br>sudo <span class="hljs-keyword">make</span> distclean<br></code></pre></td></tr></table></figure>
+<h2 id="创建并发布博客"><a href="#创建并发布博客" class="headerlink" title="创建并发布博客"></a>创建并发布博客</h2><h3 id="无样式的博客"><a href="#无样式的博客" class="headerlink" title="无样式的博客"></a>无样式的博客</h3><ul>
+<li><p>创建一个无样式的博客</p>
+  <figure class="highlight mipsasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs mipsasm"><span class="hljs-keyword">jekyll </span>new <span class="hljs-keyword">blog</span><br><span class="hljs-keyword"></span>cd <span class="hljs-keyword">blog</span><br><span class="hljs-keyword"></span>git init <br>git <span class="hljs-keyword">add </span>.<br>git commit -m <span class="hljs-string">&quot;fist jekyll program&quot;</span><br>git status<br></code></pre></td></tr></table></figure></li>
+<li><p>将博客关联到github远程仓库<br>  这里不做详述，可以自行谷歌</p>
+</li>
+<li><p>将无样式的blog项目远程推送到github仓库中，这里以我的为例，我的username为hoey94，注意修改成自己的</p>
+  <figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs awk">cd blog/<br>git remote add origin https:<span class="hljs-regexp">//gi</span>thub.com<span class="hljs-regexp">/hoey94/</span>hoey94.github.io.git<br>git push origin master<br></code></pre></td></tr></table></figure>
+</li>
+<li><p>配置github pages，并运行</p>
+<ul>
+<li>进入到github.com&#x2F;hoey94&#x2F;hoey94.github.io项目中，在Settings选项卡中找到GitHub Pages面板，在Source中选择master branch，并save</li>
+<li>通过hoey94.github.io就可以成功访问我们的界面了！</li>
+</ul>
+</li>
+</ul>
+<h3 id="有样式的博客"><a href="#有样式的博客" class="headerlink" title="有样式的博客"></a>有样式的博客</h3><p>本次lz用到的样式是<a target="_blank" rel="noopener" href="https://github.com/poole/hyde">hyde</a>，以这个为例子进行推送部署。在github上网有学多jekyll的样式，你也可以下载并部署，<a target="_blank" rel="noopener" href="https://github.com/jekyll/jekyll/wiki/Themes">样式链接</a></p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs awk">git clone https:<span class="hljs-regexp">//gi</span>thub.com<span class="hljs-regexp">/poole/</span>hyde.git<br>cd hyde/<br></code></pre></td></tr></table></figure>
+
+<p>我们需要修改一些东西，不然会报错，之前lz同样卡在这里半天，网上搜索了半天资料才解决。</p>
+<ul>
+<li>修改_config.yml文件中的relative_permalinks: false，如果不改，会报XXX过期的错误，记不得了</li>
+<li>删除CNAME中的内容，如果不改会提示域名已经存在，因为这个是别人的项目，人家已经在github上注册了，后面会介绍怎么配置自己的域名</li>
+</ul>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs awk">rm -rm .git/ <span class="hljs-comment"># 删除原本的.git 文件使用自己的.git</span><br>git init<br>git add .<br>git commit -m <span class="hljs-string">&quot;beautiful jekyll theme&quot;</span><br>git remote add https:<span class="hljs-regexp">//gi</span>thub.com<span class="hljs-regexp">/hoey94/</span>hoey94.github.io.git <span class="hljs-comment"># 记得退回历史版本之后再进行这里的操作不然会报错的</span><br>git push origin master<br></code></pre></td></tr></table></figure>
+
+<p>后面的和无样式博客发布是一样的，只要注意修改_config.yml文件，其他应该没什么大碍了。</p>
+<blockquote>
+<p>Tip : 项目里面已经有一个.gitignore我们可以使用它来忽略上传内容</p>
+</blockquote>
+<h2 id="注册域名"><a href="#注册域名" class="headerlink" title="注册域名"></a>注册域名</h2><p>登录<a target="_blank" rel="noopener" href="https://www.aliyun.com/">阿里云</a>注册一个帐号，然后选择一个自己喜欢的域名并购买即可。</p>
+<p>我们买好域名以后，我们就可以去绑定github pages了</p>
+<figure class="highlight jboss-cli"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs jboss-cli"><span class="hljs-keyword">cd</span> hyde/<br>vim <span class="hljs-string">./CNAME</span><br></code></pre></td></tr></table></figure>
+
+<p>推送更改信息，更新项目</p>
+<figure class="highlight armasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs armasm"><span class="hljs-symbol">git</span> <span class="hljs-keyword">add</span> .<br><span class="hljs-symbol">git</span> commit -m <span class="hljs-string">&quot;modify CNAME file ，add hoey.com&quot;</span><br><span class="hljs-symbol">git</span> <span class="hljs-keyword">push</span> origin master<br></code></pre></td></tr></table></figure>
+
+<p>登录<a target="_blank" rel="noopener" href="https://home.console.aliyun.com/new#/">阿里云域名控制台</a></p>
+<p>在云解析DNS选项卡中找到自己购买的域名选项，并点击“解析”</p>
+<p>在“解析设置”一栏中选择“添加解析”，记录类型填写为CNAME，主机记录填写www，记录值在这里以我的为例填写hoey94.github.io之后保存。推荐一片博文<a target="_blank" rel="noopener" href="http://blog.csdn.net/pzasdq/article/details/51171424">解析域名的时候不同的项目代表什么含义？主机记录、记录类型、线路类型、记录值、MX优先级、TTL</a></p>
+<p>推荐 : <a target="_blank" rel="noopener" href="http://jmcglone.com/guides/github-pages/">http://jmcglone.com/guides/github-pages/</a></p>
+
+              
+            </div>
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E5%8D%9A%E5%AE%A2/" class="category-chain-item">博客</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Jekyll/">#Jekyll</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>GITHUB-JEKYLL搭建个人博客网站</div>
+      <div>http://example.com/2017/07/20/2017-7-20-github-jekyll-ubuntu-阿里云/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>Author</div>
+          <div>Hoey</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>Posted on</div>
+          <div>July 20, 2017</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>Licensed under</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - Hoey">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2017/07/23/2017-7-23-%E6%90%AD%E5%BB%BAftp%E6%9C%8D%E5%8A%A1%E5%99%A8/" title="搭建ftp服务器">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">搭建ftp服务器</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;Table of Contents</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
+</body>
+</html>

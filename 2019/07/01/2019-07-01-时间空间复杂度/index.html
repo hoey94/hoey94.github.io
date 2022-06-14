@@ -1,0 +1,755 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Hoey">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="算法与数据结构相辅相成，谁也离不开谁，学算法和数据结构可以说让我很痛苦，当然对于聪明的你来说，这可能不是什么难事,哈哈哈。这下面的图是算法的整个知识体系图，通过让我们对整个算法体系有个初步了解。  我总结了20个最常用的、最基础数据结构与算法,他们分别是10个数据结构：数组、链表、栈、队列、散列表、二叉树、堆、跳表、图、Trie树；10个算法：递归、排序、二分查找、搜索、哈希算法、贪心算法、分治算">
+<meta property="og:type" content="article">
+<meta property="og:title" content="时间空间复杂度">
+<meta property="og:url" content="http://example.com/2019/07/01/2019-07-01-%E6%97%B6%E9%97%B4%E7%A9%BA%E9%97%B4%E5%A4%8D%E6%9D%82%E5%BA%A6/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="算法与数据结构相辅相成，谁也离不开谁，学算法和数据结构可以说让我很痛苦，当然对于聪明的你来说，这可能不是什么难事,哈哈哈。这下面的图是算法的整个知识体系图，通过让我们对整个算法体系有个初步了解。  我总结了20个最常用的、最基础数据结构与算法,他们分别是10个数据结构：数组、链表、栈、队列、散列表、二叉树、堆、跳表、图、Trie树；10个算法：递归、排序、二分查找、搜索、哈希算法、贪心算法、分治算">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://i.loli.net/2019/07/01/5d197b9bcad7383009.jpg">
+<meta property="og:image" content="https://i.loli.net/2019/07/01/5d1990ab0c2ec77731.png">
+<meta property="og:image" content="https://i.loli.net/2019/07/01/5d1992d63e0b039265.jpg">
+<meta property="og:image" content="https://i.loli.net/2019/07/01/5d19935fd6bd034165.jpg">
+<meta property="og:image" content="https://i.loli.net/2019/07/01/5d19a5c4ada8311497.jpg">
+<meta property="og:image" content="https://i.loli.net/2019/07/01/5d199477cc53579735.jpg">
+<meta property="article:published_time" content="2019-07-01T03:15:05.000Z">
+<meta property="article:modified_time" content="2020-11-14T05:58:36.323Z">
+<meta property="article:author" content="Hoey">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://i.loli.net/2019/07/01/5d197b9bcad7383009.jpg">
+  
+  
+  
+  <title>时间空间复杂度 - Hexo</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.9.1","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+
+  
+<meta name="generator" content="Hexo 6.2.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Hoey</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                主页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="时间空间复杂度"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2019-07-01 11:15" pubdate>
+          July 1, 2019 am
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          6.5k words
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          55 mins
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">时间空间复杂度</h1>
+            
+            <div class="markdown-body">
+              
+              <p>算法与数据结构相辅相成，谁也离不开谁，学算法和数据结构可以说让我很痛苦，当然对于聪明的你来说，这可能不是什么难事,哈哈哈。这下面的图是算法的整个知识体系图，通过让我们对整个算法体系有个初步了解。</p>
+<p><a target="_blank" rel="noopener" href="https://i.loli.net/2019/07/01/5d197b9bcad7383009.jpg"><img src="https://i.loli.net/2019/07/01/5d197b9bcad7383009.jpg" srcset="/img/loading.gif" lazyload alt="sf_1.jpg"></a></p>
+<p>我总结了20个最常用的、最基础数据结构与算法,他们分别是10个数据结构：<font color="red">数组、</font><font color="red">链表、</font><font color="red">栈、</font><font color="red">队列、</font><font color="red">散列表、</font><font color="red">二叉树、</font><font color="red">堆、</font><font color="red">跳表、</font><font color="red">图、</font><font color="red">Trie树；10个算法：<font color="red">递归、</font><font color="red">排序、</font><font color="red">二分查找、</font><font color="red">搜索、</font><font color="red">哈希算法、</font><font color="red">贪心算法、</font><font color="red">分治算法、</font><font color="red">回溯算法、</font><font color="red">动态规划、</font><font color="red">字符串匹配</font>算法。</p>
+<p>如果想学好算法，就得掌握怎么分析代码的性能。业界中常用时间复杂度和空间复杂度来坑量，类似O(1)、O(n)、O(n^2)等。如果说不会求时间和空间复杂度，那只能说你和算法无缘了！下面我们来理理到底应该怎么算，另外算这些东西不需要什么很高深的数学，只需要高中数学知识就足够了。下面会牵扯到一些对数运算，如果你忘了，建议你回去复习一下。</p>
+<h3 id="大O复杂度表示法"><a href="#大O复杂度表示法" class="headerlink" title="大O复杂度表示法"></a>大O复杂度表示法</h3><p>这里有段非常简单的代码，求1,2,3…n的累加和。现在，我就带你一块来估算一下这段代码的执行时间。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-type">int</span> <span class="hljs-title function_">cal</span><span class="hljs-params">(<span class="hljs-type">int</span> n)</span> &#123;<br>	<span class="hljs-type">int</span> sum = <span class="hljs-number">0</span>;<br>	<span class="hljs-type">int</span> i = <span class="hljs-number">1</span>;<br>	<span class="hljs-keyword">for</span> (; i &lt;= n; ++i) &#123;<br>		sum = sum + i;<br>	&#125;<br>	<span class="hljs-keyword">return</span> sum;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>假设每行代码执行的时间都一样，为unit_time。在这个假设的基础之上，这段代码的总执行时间是多少呢？</p>
+<p>第2、3行代码分别需要1个unit_time的执行时间，第4、5行都运行了n遍，所以需要2n * unit_time的执行时间，所以这段代码总的执行时间就是(2n+2) * unit_time。可以看出来，<strong>所有代码的执行时间T(n)与每行代码的执行次数成正比</strong></p>
+<p>按照这个分析思路，我们再来看这段代码。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-type">int</span> <span class="hljs-title function_">cal</span><span class="hljs-params">(<span class="hljs-type">int</span> n)</span> &#123;<br>	<span class="hljs-type">int</span> sum = <span class="hljs-number">0</span>;<br>	<span class="hljs-type">int</span> i = <span class="hljs-number">1</span>;<br>	<span class="hljs-type">int</span> j = <span class="hljs-number">1</span>;<br>	<span class="hljs-keyword">for</span> (; i &lt;= n; ++i) &#123;<br>		j = <span class="hljs-number">1</span>;<br>		<span class="hljs-keyword">for</span> (; j &lt;= n; ++j) &#123;<br>			sum = sum +  i * j;<br>		&#125;<br>	&#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p>我们依旧假设每个语句的执行时间是unit_time。那这段代码的总执行时间T(n)是多少呢？</p>
+<p>第2、3、4行代码，每行都需要1个unit_time的执行时间，第5、6行代码循环执行了n遍，需要2n * unit_time的执行时间，第7、8行代码循环执行了n^2 遍，所以需要 2n^2 * unit_time的执行时间。所以，整段代码总的执行时间T(n) &#x3D; (2n ^ 2 + 2n+3)*unit_time</p>
+<p>尽管我们不知道unit_time的具体值，但是通过这两段代码执行时间的推导过程，我们可以得到一个非常重要的规律，那就是，<font color="red">所有代码的执行时间T(n)与每行代码的执行次数n成正比</font>。</p>
+<p>我们可以把这个规律总结成一个公式。注意，大O就要登场了！</p>
+<p><a target="_blank" rel="noopener" href="https://i.loli.net/2019/07/01/5d1990ab0c2ec77731.png"><img src="https://i.loli.net/2019/07/01/5d1990ab0c2ec77731.png" srcset="/img/loading.gif" lazyload alt="sf_2.png"></a></p>
+<p>我来具体解释一下这个公式。其中，T(n)我们已经讲过了，它表示代码执行的时间；n表示数据规模的大小；f(n)表示每行代码执行的次数总和。因为这是一个公式，所以用f(n)来表示。公式中的O，表示代码的执行时间T(n)与f(n)表达式成正比。</p>
+<p>所以，第一个例子中的T(n) &#x3D; O(2n+2)，第二个例子中的T(n) &#x3D; O(2n^2+2n+3)。这就是<strong>大O时间复杂度表示法</strong>。大O时间复杂度实际上并不具体表示代码真正的执行时间，而是表示<strong>代码执行时间随数据规模增长的变化趋势</strong>，所以，也叫作<strong>渐进时间复杂度</strong>（asymptotic time complexity），简称<strong>时间复杂度</strong>。</p>
+<p>当n很大时，你可以把它想象成10000、100000。而公式中的<font color="red">低阶、常量、系数三部分并不左右增长趋势，所以都可以忽略</font>。我们只需要记录一个最大量级就可以了，如果用大O表示法表示刚讲的那两段代码的时间复杂度，就可以记为：T(n) &#x3D; O(n)； T(n) &#x3D; O(n^2)。</p>
+<h3 id="时间复杂度分析"><a href="#时间复杂度分析" class="headerlink" title="时间复杂度分析"></a>时间复杂度分析</h3><p>前面介绍了大O时间复杂度的由来和表示方法。现在我们来看下，如何分析一段代码的时间复杂度？我这儿有三个比较实用的方法可以分享给你。</p>
+<h4 id="1-只关注循环执行次数最多的一段代码"><a href="#1-只关注循环执行次数最多的一段代码" class="headerlink" title="1.只关注循环执行次数最多的一段代码"></a>1.只关注循环执行次数最多的一段代码</h4><p>我刚才说了，大O这种复杂度表示方法只是表示一种变化趋势。我们通常会忽略掉公式中的常量、低阶、系数，只需要记录一个最大阶的量级就可以了。所以，<strong>我们在分析一个算法、一段代码的时间复杂度的时候，也只关注循环执行次数最多的那一段代码就可以了</strong>。这段核心代码执行次数的n的量级，就是整段要分析代码的时间复杂度。</p>
+<p>为了便于你理解，我还拿前面的例子来说明。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-type">int</span> <span class="hljs-title function_">cal</span><span class="hljs-params">(<span class="hljs-type">int</span> n)</span> &#123;<br>	<span class="hljs-type">int</span> sum = <span class="hljs-number">0</span>;<br>	<span class="hljs-type">int</span> i = <span class="hljs-number">1</span>;<br>	<span class="hljs-keyword">for</span> (; i &lt;= n; ++i) &#123;<br>		sum = sum + i;<br>	&#125;<br>	<span class="hljs-keyword">return</span> sum;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>其中第2、3行代码都是常量级的执行时间，与n的大小无关，所以对于复杂度并没有影响。循环执行次数最多的是第4、5行代码，所以这块代码要重点分析。前面我们也讲过，这两行代码被执行了n次，所以总的时间复杂度就是O(n)。</p>
+<h4 id="2-加法法则：总复杂度等于量级最大的那段代码的复杂度"><a href="#2-加法法则：总复杂度等于量级最大的那段代码的复杂度" class="headerlink" title="2.加法法则：总复杂度等于量级最大的那段代码的复杂度"></a>2.加法法则：总复杂度等于量级最大的那段代码的复杂度</h4><p>我这里还有一段代码。你可以先试着分析一下，然后再往下看跟我的分析思路是否一样</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-type">int</span> <span class="hljs-title function_">cal</span><span class="hljs-params">(<span class="hljs-type">int</span> n)</span> &#123;<br>	<span class="hljs-type">int</span> sum_1 = <span class="hljs-number">0</span>;<br>	<span class="hljs-type">int</span> p = <span class="hljs-number">1</span>;<br>	<span class="hljs-keyword">for</span> (; p &lt; <span class="hljs-number">100</span>; ++p) &#123;<br>		sum_1 = sum_1 + p;<br>	&#125;<br>	<br>	<span class="hljs-type">int</span> sum_2 = <span class="hljs-number">0</span>;<br>	<span class="hljs-type">int</span> q = <span class="hljs-number">1</span>;<br>	<span class="hljs-keyword">for</span> (; q &lt; n; ++q) &#123;<br>		sum_2 = sum_2 + q;<br>	&#125;<br>	<br>	<span class="hljs-type">int</span> sum_3 = <span class="hljs-number">0</span>;<br>	<span class="hljs-type">int</span> i = <span class="hljs-number">1</span>;<br>	<span class="hljs-type">int</span> j = <span class="hljs-number">1</span>;<br>	<span class="hljs-keyword">for</span> (; i &lt;= n; ++i) &#123;<br>		j = <span class="hljs-number">1</span>; <br>		<span class="hljs-keyword">for</span> (; j &lt;= n; ++j) &#123;<br>			sum_3 = sum_3 +  i * j;<br>		&#125;<br>	&#125;<br>	<br>	<span class="hljs-keyword">return</span> sum_1 + sum_2 + sum_3;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>这个代码分为三部分，分别是求sum_1、sum_2、sum_3。我们可以分别分析每一部分的时间复杂度，然后把它们放到一块儿，再取一个量级最大的作为整段代码的复杂度。</p>
+<p>第一段的时间复杂度是多少呢？这段代码循环执行了100次，所以是一个常量的执行时间，跟n的规模无关。</p>
+<p>这里我要再强调一下，即便这段代码循环10000次、100000次，只要是一个已知的数，跟n无关，照样也是常量级的执行时间。当n无限大的时候，就可以忽略。尽管对代码的执行时间会有很大影响，但是回到时间复杂度的概念来说，它表示的是一个算法执行效率与数据规模增长的变化趋势，所以不管常量的执行时间多大，我们都可以忽略掉。因为它本身对增长趋势并没有影响。</p>
+<p>那第二段代码和第三段代码的时间复杂度是多少呢？答案是O(n)和O(n^2)，你应该能容易就分析出来，我就不啰嗦了。</p>
+<p>综合这三段代码的时间复杂度，我们取其中最大的量级。所以，整段代码的时间复杂度就为O(n^2)。也就是说：<strong>总的时间复杂度就等于量级最大的那段代码的时间复杂度</strong>。那我们将这个规律抽象成公式就是：</p>
+<p>如果T1(n)&#x3D;O(f(n))，T2(n)&#x3D;O(g(n))；那么T(n)&#x3D;T1(n)+T2(n)&#x3D;max(O(f(n)), O(g(n))) &#x3D;O(max(f(n), g(n))).</p>
+<h4 id="3-乘法法则：嵌套代码的复杂度等于嵌套内外代码复杂度的乘积"><a href="#3-乘法法则：嵌套代码的复杂度等于嵌套内外代码复杂度的乘积" class="headerlink" title="3.乘法法则：嵌套代码的复杂度等于嵌套内外代码复杂度的乘积"></a>3.乘法法则：嵌套代码的复杂度等于嵌套内外代码复杂度的乘积</h4><p>我刚讲了一个复杂度分析中的加法法则，这儿还有一个<strong>乘法法则</strong>。类比一下，你应该能“猜到”公式是什么样子的吧？</p>
+<p>如果T1(n)&#x3D;O(f(n))，T2(n)&#x3D;O(g(n))；那么T(n)&#x3D;T1(n) * T2(n) &#x3D; O(f(n)) * O(g(n)) &#x3D; O(f(n) * g(n)).</p>
+<p>也就是说，假设T1(n) &#x3D; O(n)，T2(n) &#x3D; O(n^2)，则T1(n) * T2(n) &#x3D; O(n^3)。落实到具体的代码上，我们可以把乘法法则看成是<strong>嵌套循环</strong>，我举个例子给你解释一下。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-type">int</span> <span class="hljs-title function_">cal</span><span class="hljs-params">(<span class="hljs-type">int</span> n)</span> &#123;<br>	<span class="hljs-type">int</span> ret = <span class="hljs-number">0</span>; <br>	<span class="hljs-type">int</span> i = <span class="hljs-number">1</span>;<br>	<span class="hljs-keyword">for</span> (; i &lt; n; ++i) &#123;<br>		ret = ret + f(i);<br>	&#125; <br>&#125; <br> <br><span class="hljs-type">int</span> <span class="hljs-title function_">f</span><span class="hljs-params">(<span class="hljs-type">int</span> n)</span> &#123;<br>	<span class="hljs-type">int</span> sum = <span class="hljs-number">0</span>;<br>	<span class="hljs-type">int</span> i = <span class="hljs-number">1</span>;<br>	<span class="hljs-keyword">for</span> (; i &lt; n; ++i) &#123;<br>		sum = sum + i;<br>	&#125; <br>	<span class="hljs-keyword">return</span> sum;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>我们单独看cal()函数。假设f()只是一个普通的操作，那第4～6行的时间复杂度就是，T1(n) &#x3D; O(n)。但f()函数本身不是一个简单的操作，它的时间复杂度是T2(n) &#x3D; O(n)，所以，整个cal()函数的时间复杂度就是，T(n) &#x3D; T1(n) * T2(n) &#x3D; O(n*n) &#x3D; O(n^2)。</p>
+<p>我刚刚讲了三种复杂度的分析技巧。不过，你并不用刻意去记忆。实际上，复杂度分析这个东西关键在于“熟练”。你只要多看案例，多分析，就能做到“无招胜有招”。</p>
+<h3 id="几种常见时间复杂度实例分析"><a href="#几种常见时间复杂度实例分析" class="headerlink" title="几种常见时间复杂度实例分析"></a>几种常见时间复杂度实例分析</h3><p>虽然代码千差万别，但是常见的复杂度量级并不多。我稍微总结了一下，这些复杂度量级几乎涵盖了你今后可以接触的所有代码的复杂度量级。</p>
+<p><a target="_blank" rel="noopener" href="https://i.loli.net/2019/07/01/5d1992d63e0b039265.jpg"><img src="https://i.loli.net/2019/07/01/5d1992d63e0b039265.jpg" srcset="/img/loading.gif" lazyload alt="sf_3.jpg"></a></p>
+<p>对于刚罗列的复杂度量级，我们可以粗略地分为两类，<strong>多项式量级</strong>和<strong>非多项式量级</strong>。其中，非多项式量级只有两个：O(2^n)和O(n!)。</p>
+<p>当数据规模n越来越大时，非多项式量级算法的执行时间会急剧增加，求解问题的执行时间会无限增长。所以，非多项式时间复杂度的算法其实是非常低效的算法。因此，关于NP时间复杂度我就不展开讲了。我们主要来看几种常见的<strong>多项式时间复杂度</strong>。</p>
+<h4 id="1-O-1"><a href="#1-O-1" class="headerlink" title="1. O(1)"></a>1. O(1)</h4><p>首先你必须明确一个概念，O(1)只是常量级时间复杂度的一种表示方法，并不是指只执行了一行代码。比如这段代码，即便有3行，它的时间复杂度也是O(1），而不是O(3)。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-type">int</span> i = <span class="hljs-number">8</span>;<br><span class="hljs-type">int</span> j = <span class="hljs-number">6</span>;<br><span class="hljs-type">int</span> sum = i + j;<br></code></pre></td></tr></table></figure>
+
+<p>我稍微总结一下，只要代码的执行时间不随n的增大而增长，这样代码的时间复杂度我们都记作O(1)。或者说，**一般情况下，只要算法中不存在循环语句、递归语句，即使有成千上万行的代码，其时间复杂度也是Ο(1)**。</p>
+<h4 id="2-O-logn-、O-nlogn"><a href="#2-O-logn-、O-nlogn" class="headerlink" title="2. O(logn)、O(nlogn)"></a>2. O(logn)、O(nlogn)</h4><p>对数阶时间复杂度非常常见，同时也是最难分析的一种时间复杂度。我通过一个例子来说明一下。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs c">i=<span class="hljs-number">1</span>;<br><span class="hljs-keyword">while</span> (i &lt;= n)  &#123;<br>    i = i * <span class="hljs-number">2</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>根据我们前面讲的复杂度分析方法，第三行代码是循环执行次数最多的。所以，我们只要能计算出这行代码被执行了多少次，就能知道整段代码的时间复杂度。</p>
+<p>从代码中可以看出，变量i的值从1开始取，每循环一次就乘以2。当大于n时，循环结束。还记得我们高中学过的等比数列吗？实际上，变量i的取值就是一个等比数列。如果我把它一个一个列出来，就应该是这个样子的：</p>
+<p><a target="_blank" rel="noopener" href="https://i.loli.net/2019/07/01/5d19935fd6bd034165.jpg"><img src="https://i.loli.net/2019/07/01/5d19935fd6bd034165.jpg" srcset="/img/loading.gif" lazyload alt="sf_4.jpg"></a></p>
+<p>所以，我们只要知道x值是多少，就知道这行代码执行的次数了。通过2 ^ x&#x3D;n求解x这个问题我们想高中应该就学过了，我就不多说了。$x&#x3D;\log n$ <font color="red">(以2为底)</font>所以，这段代码的时间复杂度就是：$O(\log n)$<font color="red">(以2为底)</font></p>
+<p>现在，把代码稍微改下，你再看看，这段代码的时间复杂度是多少？</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs c">i=<span class="hljs-number">1</span>;<br><span class="hljs-keyword">while</span> (i &lt;= n)  &#123;<br>    i = i * <span class="hljs-number">3</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>根据我刚刚讲的思路，很简单就能看出来，这段代码的时间复杂度为$O(logn)$ <font color="red">(以3为底)</font>。</p>
+<p>实际上，不管是以2为底、以3为底，还是以10为底，我们可以把所有对数阶的时间复杂度都记为$O(logn)$<font color="red">(以2为底)</font>。为什么呢，我知道有些人忘了，下面我帮你论证了一下，用对数的换底公式就可以了！</p>
+<p><a target="_blank" rel="noopener" href="https://i.loli.net/2019/07/01/5d19a5c4ada8311497.jpg"><img src="https://i.loli.net/2019/07/01/5d19a5c4ada8311497.jpg" srcset="/img/loading.gif" lazyload alt="sf_6.jpg"></a></p>
+<p>基于我们前面的一个理论：**在采用大O标记复杂度的时候，可以忽略系数，即O(Cf(n)) &#x3D; O(f(n))**。所以，$O(logn)$ <font color="red">(以2为底)</font> 就等于$O(logn)$ <font color="red">(以3为底)</font>。因此，在对数阶时间复杂度的表示方法里，我们忽略对数的“底”，统一表示为$O(logn)$。</p>
+<p>如果你理解了我前面讲的$O(logn)$，那$O(nlogn)$就很容易理解了。还记得我们刚讲的乘法法则吗？如果一段代码的时间复杂度是$O(logn)$，我们循环执行n遍，时间复杂度就是$O(nlogn)$了。而且，$O(nlogn)$也是一种非常常见的算法时间复杂度。比如，归并排序、快速排序的时间复杂度都是$O(nlogn)$。</p>
+<h4 id="3-O-m-n-、O-m-n"><a href="#3-O-m-n-、O-m-n" class="headerlink" title="3.O(m+n)、O(m*n)"></a>3.O(m+n)、O(m*n)</h4><p>我们再来讲一种跟前面都不一样的时间复杂度，代码的复杂度<strong>由两个数据的规模</strong>来决定。老规矩，先看代码！</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-type">int</span> <span class="hljs-title function_">cal</span><span class="hljs-params">(<span class="hljs-type">int</span> m, <span class="hljs-type">int</span> n)</span> &#123;<br>	<span class="hljs-type">int</span> sum_1 = <span class="hljs-number">0</span>;<br>	<span class="hljs-type">int</span> i = <span class="hljs-number">1</span>;<br>	<span class="hljs-keyword">for</span> (; i &lt; m; ++i) &#123;<br>		sum_1 = sum_1 + i;<br>	&#125;<br><br>	<span class="hljs-type">int</span> sum_2 = <span class="hljs-number">0</span>;<br>	<span class="hljs-type">int</span> j = <span class="hljs-number">1</span>;<br>	<span class="hljs-keyword">for</span> (; j &lt; n; ++j) &#123;<br>		sum_2 = sum_2 + j;<br>	&#125;<br><br>	<span class="hljs-keyword">return</span> sum_1 + sum_2;<br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<p>从代码中可以看出，m和n是表示两个数据规模。我们无法事先评估m和n谁的量级大，所以我们在表示复杂度的时候，就不能简单地利用加法法则，省略掉其中一个。所以，上面代码的时间复杂度就是O(m+n)。</p>
+<p>针对这种情况，原来的加法法则就不正确了，我们需要将加法规则改为：T1(m) + T2(n) &#x3D; O(f(m) + g(n))。但是乘法法则继续有效：T1(m)*T2(n) &#x3D; O(f(m) * f(n))。</p>
+<h3 id="空间复杂度分析"><a href="#空间复杂度分析" class="headerlink" title="空间复杂度分析"></a>空间复杂度分析</h3><p>前面，咱们花了很长时间讲大O表示法和时间复杂度分析，理解了前面讲的内容，空间复杂度分析方法学起来就非常简单了</p>
+<p>前面我讲过，时间复杂度的全称是<strong>渐进时间复杂度，表示算法的执行时间与数据规模之间的增长关系</strong>。类比一下，空间复杂度全称就是<strong>渐进空间复杂度</strong>（asymptotic space complexity），<strong>表示算法的存储空间与数据规模之间的增长关系</strong>。</p>
+<p>我还是拿具体的例子来给你说明。（这段代码有点“傻”，一般没人会这么写，我这么写只是为了方便给你解释。）</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-type">void</span> <span class="hljs-title function_">print</span><span class="hljs-params">(<span class="hljs-type">int</span> n)</span> &#123;<br>	<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>;<br>	<span class="hljs-type">int</span>[] a = new <span class="hljs-type">int</span>[n];<br>	<span class="hljs-keyword">for</span> (i; i &lt;n; ++i) &#123;<br>		a[i] = i * i;<br>	&#125;<br><br>	<span class="hljs-keyword">for</span> (i = n<span class="hljs-number">-1</span>; i &gt;= <span class="hljs-number">0</span>; --i) &#123;<br>		print out a[i]<br>	&#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>跟时间复杂度分析一样，我们可以看到，第2行代码中，我们申请了一个空间存储变量i，但是它是常量阶的，跟数据规模n没有关系，所以我们可以忽略。第3行申请了一个大小为n的int类型数组，除此之外，剩下的代码都没有占用更多的空间，所以整段代码的空间复杂度就是O(n)。</p>
+<p>我们常见的空间复杂度就是O(1)、O(n)、O(n2 )，像O(logn)、O(nlogn)这样的对数阶复杂度平时都用不到。而且，空间复杂度分析比时间复杂度分析要简单很多。所以，对于空间复杂度，掌握刚我说的这些内容已经足够了。</p>
+<h3 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h3><p>基础复杂度分析的知识到此就讲完了，我们来总结一下。</p>
+<p>复杂度也叫渐进复杂度，包括时间复杂度和空间复杂度，用来分析算法执行效率与数据规模之间的增长关系，可以粗略地表示，越高阶复杂度的算法，执行效率越低。常见的复杂度并不多，从低阶到高阶有：O(1)、O(logn)、O(n)、O(nlogn)、O(n2 )。等你学完整个专栏之后，你就会发现几乎所有的数据结构和算法的复杂度都跑不出这几个。</p>
+<p><a target="_blank" rel="noopener" href="https://i.loli.net/2019/07/01/5d199477cc53579735.jpg"><img src="https://i.loli.net/2019/07/01/5d199477cc53579735.jpg" srcset="/img/loading.gif" lazyload alt="sf_5.jpg"></a></p>
+<p>复杂度分析并不难，关键在于多练。 之后讲后面的内容时，我还会带你详细地分析每一种数据结构和算法的时间、空间复杂度。只要跟着我的思路学习、练习，你很快就能和我一样，每次看到代码的时候，简单的一眼就能看出其复杂度，难的稍微分析一下就能得出答案。</p>
+<p>转自《数据结构与算法之美》–王争</p>
+
+              
+            </div>
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E7%AE%97%E6%B3%95%E4%B8%8E%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" class="category-chain-item">算法与数据结构</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>时间空间复杂度</div>
+      <div>http://example.com/2019/07/01/2019-07-01-时间空间复杂度/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>Author</div>
+          <div>Hoey</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>Posted on</div>
+          <div>July 1, 2019</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>Licensed under</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - Hoey">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2019/07/02/2019-07-02-C%E5%92%8CC++%E7%9A%84%E5%8F%82%E6%95%B0%E4%BC%A0%E9%80%92/" title="C和C++的参数传递">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">C和C++的参数传递</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2019/06/28/2019-06-28-Hbase%E8%AF%BB%E5%86%99%E6%93%8D%E4%BD%9C/" title="Hbase读写操作">
+                        <span class="hidden-mobile">Hbase读写操作</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;Table of Contents</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
+</body>
+</html>

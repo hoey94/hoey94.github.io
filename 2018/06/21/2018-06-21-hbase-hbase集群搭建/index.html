@@ -1,0 +1,755 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Hoey">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="本机环境 Ubuntu 16.0.4 TLS Vmware Workstation 14.1.1 hadoop 2.7.3 （集群） zookeeper 3.4.10 (集群)  前提已经在VM中部署好Hadoop 和Zookeeper集群。本次使用3台主机分别为cor1、cor2、cor3，在部署Hbase之前首先确保zookeeper和hadoop完好且可用。 下载apache官方下载,选取的">
+<meta property="og:type" content="article">
+<meta property="og:title" content="hbase集群搭建">
+<meta property="og:url" content="http://example.com/2018/06/21/2018-06-21-hbase-hbase%E9%9B%86%E7%BE%A4%E6%90%AD%E5%BB%BA/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="本机环境 Ubuntu 16.0.4 TLS Vmware Workstation 14.1.1 hadoop 2.7.3 （集群） zookeeper 3.4.10 (集群)  前提已经在VM中部署好Hadoop 和Zookeeper集群。本次使用3台主机分别为cor1、cor2、cor3，在部署Hbase之前首先确保zookeeper和hadoop完好且可用。 下载apache官方下载,选取的">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2018-06-20T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-11-14T05:58:36.309Z">
+<meta property="article:author" content="Hoey">
+<meta property="article:tag" content="Hbase">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>hbase集群搭建 - Hexo</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.9.1","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+
+  
+<meta name="generator" content="Hexo 6.2.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Hoey</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                主页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="hbase集群搭建"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2018-06-21 00:00" pubdate>
+          June 21, 2018 am
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          4.7k words
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          40 mins
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">hbase集群搭建</h1>
+            
+            <div class="markdown-body">
+              
+              <h4 id="本机环境"><a href="#本机环境" class="headerlink" title="本机环境"></a>本机环境</h4><ul>
+<li>Ubuntu 16.0.4 TLS</li>
+<li>Vmware Workstation 14.1.1</li>
+<li>hadoop 2.7.3 （集群）</li>
+<li>zookeeper 3.4.10 (集群)</li>
+</ul>
+<p>前提已经在VM中部署好Hadoop 和Zookeeper集群。本次使用3台主机分别为cor1、cor2、cor3，在部署Hbase之前首先确保zookeeper和hadoop完好且可用。</p>
+<h4 id="下载"><a href="#下载" class="headerlink" title="下载"></a>下载</h4><p><a target="_blank" rel="noopener" href="http://apache.org/dist/">apache官方下载</a>,选取的版本是hbase-2.0.1-bin.tar.gz。</p>
+<p>关于hbase和hadoop版本的对应关系，这边给一个blog做参考<a target="_blank" rel="noopener" href="https://blog.csdn.net/vtopqx/article/details/77882491%EF%BC%8C%E5%B0%8F%E4%BC%99%E4%BC%B4%E4%B9%9F%E5%8F%AF%E4%BB%A5%E5%8E%BB%E7%9C%8B%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3%EF%BC%8C%E4%BC%9A%E6%9B%B4%E8%AF%A6%E7%BB%86%E4%B8%80%E4%BA%9B%E3%80%82">https://blog.csdn.net/vtopqx/article/details/77882491，小伙伴也可以去看官方文档，会更详细一些。</a></p>
+<h4 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h4><p>解压到当前目录</p>
+<blockquote>
+<p>$ tar -zxvf hbase-2.0.1-bin.tar.gz  -C .&#x2F;</p>
+</blockquote>
+<p>进去conf目录编辑hbase-env.sh文件</p>
+<blockquote>
+<p>$ vim hbase-env.sh</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">the java implementation to use. 1.7+ required</span><br><br>export JAVA_HOME=/opt/jdk//jdk1.8.0_66<br><span class="hljs-meta prompt_"></span><br><span class="hljs-meta prompt_"># </span><span class="language-bash"><span class="hljs-built_in">export</span> JAVA_HOME=/usr/java/jdk1.8.0_66</span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">设置日志目录和PID目录</span><br><br>export HBASE_LOG_DIR=/data/bigdata/logs/hbase<br>export HBASE_PID_DIR=/data/bigdata/data/hbase<br><span class="hljs-meta prompt_"></span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">使用外部zookeeper</span><br><br>export HBASE_MANAGES_ZK=false<br></code></pre></td></tr></table></figure>
+
+<p>编辑hbase-site.xml,关于每个参数的详细描述可以在官方文档的第7章节<code>7. Default Configuration</code>中查到这边就不做详述,附上链接<a target="_blank" rel="noopener" href="http://hbase.apache.org/book.html#config.files">http://hbase.apache.org/book.html#config.files</a></p>
+<blockquote>
+<p>$ vi hbase-site.xml</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><code class="hljs shell">&lt;configuration&gt;<br>    &lt;property&gt;<br>        &lt;name&gt;hbase.tmp.dir&lt;/name&gt;<br>        &lt;value&gt;/home/hadoop/hbase-2.0.1/data&lt;/value&gt;<br>    &lt;/property&gt;<br>    &lt;property&gt;<br>        &lt;name&gt;hbase.rootdir&lt;/name&gt;<br>        &lt;value&gt;hdfs://cor1:9000/hbase&lt;/value&gt;<br>    &lt;/property&gt;<br>    &lt;property&gt;<br>        &lt;name&gt;hbase.cluster.distributed&lt;/name&gt;<br>        &lt;value&gt;true&lt;/value&gt;<br>    &lt;/property&gt;<br>    &lt;property&gt;<br>        &lt;name&gt;hbase.zookeeper.quorum&lt;/name&gt;<br>        &lt;value&gt;cor1:2181,cor2:2181,cor3:2181&lt;/value&gt;<br>    &lt;/property&gt;&lt;property&gt;<br>        &lt;name&gt;hbase.zookeeper.property.clientPort&lt;/name&gt;<br>        &lt;value&gt;2181&lt;/value&gt;<br>    &lt;/property&gt;<br>    &lt;property&gt;<br>        &lt;name&gt;hbase.zookeeper.property.dataDir&lt;/name&gt;<br>        &lt;value&gt;/home/hadoop/zookeeper/data&lt;/value&gt;<br>    &lt;/property&gt;<br>&lt;/configuration&gt;<br></code></pre></td></tr></table></figure>
+
+<p>配置<code>conf/regionservers</code>，写在该文件中的将被认为是从节点，在主节点上运行<code>bin/start-hbase.sh</code>以后，会自动启动从节点。</p>
+<h4 id="分发"><a href="#分发" class="headerlink" title="分发"></a>分发</h4><p>使用scp命令，将配置好的hbase分发给其他cor2和cor3节点</p>
+<blockquote>
+<p>$ scp -r hbase-2.0.1 hadoop@cor2:&#x2F;home&#x2F;hadoop</p>
+</blockquote>
+<blockquote>
+<p>$ scp -r hbase-2.0.1 hadoop@cor2:&#x2F;home&#x2F;hadoop</p>
+</blockquote>
+<h4 id="启动"><a href="#启动" class="headerlink" title="启动"></a>启动</h4><p>进入到hbase根目录执行下面命令就可以运行hbase,<code>需要提前确保zookeeper和hadoop集群正常运行</code>。</p>
+<blockquote>
+<p>$ bin&#x2F;start-hbase.sh</p>
+</blockquote>
+<h4 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h4><p>与Hadoop一样，hbase同样为我们提供了好看的WEB UI界面</p>
+<table>
+<thead>
+<tr>
+<th>master</th>
+<th>regionServer</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a target="_blank" rel="noopener" href="http://cor1:16010/">http://cor1:16010</a></td>
+<td><a target="_blank" rel="noopener" href="http://cor1:16030/">http://cor1:16030</a></td>
+</tr>
+</tbody></table>
+<p>我们也可以在本地CLI中使用命令进入hbase shell</p>
+<blockquote>
+<p>$ bin&#x2F;hbase shell</p>
+</blockquote>
+<h4 id="案例"><a href="#案例" class="headerlink" title="案例"></a>案例</h4><p>1.查看有哪些表</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_">hbase(main)&gt; </span><span class="language-bash">list</span><br></code></pre></td></tr></table></figure>
+
+<p>2.创建表</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_"></span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">语法：create &lt;table&gt;, &#123;NAME =&gt; &lt;family&gt;, VERSIONS =&gt; &lt;VERSIONS&gt;&#125;</span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">例如：创建表t1，有两个family name：f1，f2，且版本数均为2</span><br><span class="hljs-meta prompt_"></span><br><span class="hljs-meta prompt_">hbase(main)&gt; </span><span class="language-bash">create <span class="hljs-string">&#x27;t1&#x27;</span>,&#123;NAME =&gt; <span class="hljs-string">&#x27;f1&#x27;</span>, VERSIONS =&gt; 2&#125;,&#123;NAME =&gt; <span class="hljs-string">&#x27;f2&#x27;</span>, VERSIONS =&gt; 2&#125;</span><br></code></pre></td></tr></table></figure>
+
+<p>3.删除表</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_">hbase(main)&gt; </span><span class="language-bash"><span class="hljs-built_in">disable</span> <span class="hljs-string">&#x27;t1&#x27;</span></span><br><span class="hljs-meta prompt_">hbase(main)&gt; </span><span class="language-bash">drop <span class="hljs-string">&#x27;t1&#x27;</span></span><br></code></pre></td></tr></table></figure>
+
+<p>4.查看表的结构</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">语法：describe &lt;table&gt;</span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">例如：查看表t1的结构</span><br><span class="hljs-meta prompt_"></span><br><span class="hljs-meta prompt_">hbase(main)&gt; </span><span class="language-bash">describe <span class="hljs-string">&#x27;t1&#x27;</span></span><br></code></pre></td></tr></table></figure>
+
+<p>5.修改表结构</p>
+<p>修改表结构必须先disable</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">语法：alter <span class="hljs-string">&#x27;t1&#x27;</span>, &#123;NAME =&gt; <span class="hljs-string">&#x27;f1&#x27;</span>&#125;, &#123;NAME =&gt; <span class="hljs-string">&#x27;f2&#x27;</span>, METHOD =&gt; <span class="hljs-string">&#x27;delete&#x27;</span>&#125;</span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">例如：修改表test1的cf的TTL为180天</span><br><span class="hljs-meta prompt_"></span><br><span class="hljs-meta prompt_">hbase(main)&gt; </span><span class="language-bash"><span class="hljs-built_in">disable</span> <span class="hljs-string">&#x27;test1&#x27;</span></span><br><span class="hljs-meta prompt_">hbase(main)&gt; </span><span class="language-bash">alter <span class="hljs-string">&#x27;test1&#x27;</span>,&#123;NAME=&gt;<span class="hljs-string">&#x27;body&#x27;</span>,TTL=&gt;<span class="hljs-string">&#x27;15552000&#x27;</span>&#125;,&#123;NAME=&gt;<span class="hljs-string">&#x27;meta&#x27;</span>, TTL=&gt;<span class="hljs-string">&#x27;15552000&#x27;</span>&#125;</span><br><span class="hljs-meta prompt_">hbase(main)&gt; </span><span class="language-bash"><span class="hljs-built_in">enable</span> <span class="hljs-string">&#x27;test1&#x27;</span></span><br></code></pre></td></tr></table></figure>
+
+<p>6.添加数据</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">语法：put &lt;table&gt;,&lt;rowkey&gt;,&lt;family:column&gt;,&lt;value&gt;,&lt;timestamp&gt;</span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">例如：给表t1的添加一行记录：rowkey是rowkey001，family name：f1，column name：col1，value：value01，timestamp：系统默认</span><br><span class="hljs-meta prompt_"></span><br><span class="hljs-meta prompt_">hbase(main)&gt; </span><span class="language-bash">put <span class="hljs-string">&#x27;t1&#x27;</span>,<span class="hljs-string">&#x27;rowkey001&#x27;</span>,<span class="hljs-string">&#x27;f1:col1&#x27;</span>,<span class="hljs-string">&#x27;value01&#x27;</span></span><br></code></pre></td></tr></table></figure>
+
+<p>7.查询数据</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">语法：get &lt;table&gt;,&lt;rowkey&gt;,[&lt;family:column&gt;,....]</span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">例如：查询表t1，rowkey001中的f1下的col1的值</span><br><span class="hljs-meta prompt_"></span><br><span class="hljs-meta prompt_">hbase(main)&gt; </span><span class="language-bash">get <span class="hljs-string">&#x27;t1&#x27;</span>,<span class="hljs-string">&#x27;rowkey001&#x27;</span>, <span class="hljs-string">&#x27;f1:col1&#x27;</span></span><br><span class="hljs-meta prompt_"></span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">或者：</span><br><span class="hljs-meta prompt_"></span><br><span class="hljs-meta prompt_">hbase(main)&gt; </span><span class="language-bash">get <span class="hljs-string">&#x27;t1&#x27;</span>,<span class="hljs-string">&#x27;rowkey001&#x27;</span>, &#123;COLUMN=&gt;<span class="hljs-string">&#x27;f1:col1&#x27;</span>&#125;</span><br><span class="hljs-meta prompt_"></span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">查询表t1，rowke002中的f1下的所有列值</span><br><span class="hljs-meta prompt_"></span><br><span class="hljs-meta prompt_">hbase(main)&gt; </span><span class="language-bash">get <span class="hljs-string">&#x27;t1&#x27;</span>,<span class="hljs-string">&#x27;rowkey001&#x27;</span></span><br><span class="hljs-meta prompt_"></span><br><span class="hljs-meta prompt_"></span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">语法：scan &lt;table&gt;, &#123;COLUMNS =&gt; [ &lt;family:column&gt;,.... ], LIMIT =&gt; num&#125;</span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">另外，还可以添加STARTROW、TIMERANGE和FITLER等高级功能</span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">例如：扫描表t1的前5条数据</span><br><span class="hljs-meta prompt_"></span><br><span class="hljs-meta prompt_">hbase(main)&gt; </span><span class="language-bash">scan <span class="hljs-string">&#x27;t1&#x27;</span>,&#123;LIMIT=&gt;5&#125;</span><br><span class="hljs-meta prompt_"></span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">语法：count &lt;table&gt;, &#123;INTERVAL =&gt; intervalNum, CACHE =&gt; cacheNum&#125;</span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">INTERVAL设置多少行显示一次及对应的rowkey，默认1000；CACHE每次去取的缓存区大小，默认是10，调整该参数可提高查询速度</span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">例如，查询表t1中的行数，每100条显示一次，缓存区为500</span><br><span class="hljs-meta prompt_"></span><br><span class="hljs-meta prompt_">hbase(main)&gt; </span><span class="language-bash">count <span class="hljs-string">&#x27;t1&#x27;</span>, &#123;INTERVAL =&gt; 100, CACHE =&gt; 500&#125;</span><br></code></pre></td></tr></table></figure>
+
+<p>8.删除数据</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">语法：delete &lt;table&gt;, &lt;rowkey&gt;,  &lt;family:column&gt; , &lt;timestamp&gt;,必须指定列名</span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">例如：删除表t1，rowkey001中的f1:col1的数据</span><br><span class="hljs-meta prompt_"></span><br><span class="hljs-meta prompt_">hbase(main)&gt; </span><span class="language-bash">delete <span class="hljs-string">&#x27;t1&#x27;</span>,<span class="hljs-string">&#x27;rowkey001&#x27;</span>,<span class="hljs-string">&#x27;f1:col1&#x27;</span></span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">注：将删除改行f1:col1列所有版本的数据</span><br><span class="hljs-meta prompt_"></span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">语法：deleteall &lt;table&gt;, &lt;rowkey&gt;,  &lt;family:column&gt; , &lt;timestamp&gt;，可以不指定列名，删除整行数据</span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">例如：删除表t1，rowk001的数据</span><br><span class="hljs-meta prompt_"></span><br><span class="hljs-meta prompt_">hbase(main)&gt; </span><span class="language-bash">deleteall <span class="hljs-string">&#x27;t1&#x27;</span>,<span class="hljs-string">&#x27;rowkey001&#x27;</span></span><br><span class="hljs-meta prompt_"></span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">语法： <span class="hljs-built_in">truncate</span> &lt;table&gt;</span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">其具体过程是：<span class="hljs-built_in">disable</span> table -&gt; drop table -&gt; create table</span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">例如：删除表t1的所有数据</span><br><span class="hljs-meta prompt_"></span><br><span class="hljs-meta prompt_">hbase(main)&gt; </span><span class="language-bash"><span class="hljs-built_in">truncate</span> <span class="hljs-string">&#x27;t1&#x27;</span></span><br></code></pre></td></tr></table></figure>
+
+<p>前些日子去日本旅游，blog停更几天。后面需要继续加油了！！</p>
+
+              
+            </div>
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/" class="category-chain-item">大数据</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Hbase/">#Hbase</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>hbase集群搭建</div>
+      <div>http://example.com/2018/06/21/2018-06-21-hbase-hbase集群搭建/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>Author</div>
+          <div>Hoey</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>Posted on</div>
+          <div>June 21, 2018</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>Licensed under</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - Hoey">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2018/06/24/2018-07-24-alipay-Alipay%E6%94%AF%E4%BB%98%E5%AE%9D%E9%9B%86%E6%88%90/" title="Alipay对接">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Alipay对接</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2018/05/22/2018-05-22-scala-%E4%B8%BA%E4%BB%80%E4%B9%88%E4%BD%BF%E7%94%A8scala/" title="为什么使用scala">
+                        <span class="hidden-mobile">为什么使用scala</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;Table of Contents</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
+</body>
+</html>

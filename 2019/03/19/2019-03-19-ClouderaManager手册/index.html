@@ -1,0 +1,856 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="张帅">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="作者 ： 张帅 1 前言构建企业级别的大数据平台不是一件简单的事情，要从多个方面进行考虑，如硬件环境、软件环境。Hadoop生态圈的产品众多，部署、安装、运维、监控等工作异常琐碎，尤其当某个组件出现问题，由于机器的数量、组件的分布情况，往往会使得运维人员无从下手。 目前市面上Hadoop的发型版本主要有三种： 1. Apache Hadoop 2. CDH(Cloudera Distributio">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ClouderaManager操作指南">
+<meta property="og:url" content="http://example.com/2019/03/19/2019-03-19-ClouderaManager%E6%89%8B%E5%86%8C/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="作者 ： 张帅 1 前言构建企业级别的大数据平台不是一件简单的事情，要从多个方面进行考虑，如硬件环境、软件环境。Hadoop生态圈的产品众多，部署、安装、运维、监控等工作异常琐碎，尤其当某个组件出现问题，由于机器的数量、组件的分布情况，往往会使得运维人员无从下手。 目前市面上Hadoop的发型版本主要有三种： 1. Apache Hadoop 2. CDH(Cloudera Distributio">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://i.loli.net/2019/07/02/5d1ab0912d52292335.jpg">
+<meta property="article:published_time" content="2019-03-19T05:58:42.000Z">
+<meta property="article:modified_time" content="2020-11-14T05:58:36.319Z">
+<meta property="article:author" content="Hoey">
+<meta property="article:tag" content="CDH">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://i.loli.net/2019/07/02/5d1ab0912d52292335.jpg">
+  
+  
+  
+  <title>ClouderaManager操作指南 - Hexo</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.9.1","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+
+  
+<meta name="generator" content="Hexo 6.2.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Hoey</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                主页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="ClouderaManager操作指南"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2019-03-19 13:58" pubdate>
+          March 19, 2019 pm
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          7.5k words
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          63 mins
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">ClouderaManager操作指南</h1>
+            
+            <div class="markdown-body">
+              
+              <p>作者 ： 张帅</p>
+<h2 id="1-前言"><a href="#1-前言" class="headerlink" title="1 前言"></a>1 前言</h2><p>构建企业级别的大数据平台不是一件简单的事情，要从多个方面进行考虑，如硬件环境、软件环境。Hadoop生态圈的产品众多，部署、安装、运维、监控等工作异常琐碎，尤其当某个组件出现问题，由于机器的数量、组件的分布情况，往往会使得运维人员无从下手。</p>
+<p>目前市面上Hadoop的发型版本主要有三种：</p>
+<pre><code class="hljs">1. Apache Hadoop
+2. CDH(Cloudera Distribution Hadoop)
+3. HDP(Hortonworks Data Platform)
+</code></pre>
+<p>首先，Apache Hadoop是最正统的发行版本，版本更新快，新特性增加的多，但相对而言Bug较多，组件之间的兼容性也较差。</p>
+<p>其次，CDH版本会将Hadoop的各个组件进行打包，形成一个发布版本，针对该版本下的各个组件进行一系列测试，补丁修复，优化策略等，保证了CDH大版本下各个Hadoop组件之间的良好协作性。大部分公司均使用该系列。</p>
+<p>最后，HDP版本是Hortonworks公司针对Hadoop的发行版本，暂时没有过多的了解。</p>
+<hr>
+<p>CDH的公司Cloudera推出了Cloudera Manager用于CDH版本集群的管理。Cloudera Manager是一款管理CDH集群的端到端的应用产品，可以通过管理界面可视化的对集群中的一系列组件进行统一的管理：部署、安装、配置、监控等。</p>
+<p>简单来说，Cloudera Manager有四大功能：</p>
+<pre><code class="hljs">1. 管理：对集群进行管理，如添加、删除节点等操作。
+2. 监控：监控集群的健康情况，对设置的各种指标和系统运行情况进行全面监控。
+3. 诊断：对集群出现的问题进行诊断，对出现的问题给出建议解决方案。
+4. 集成：对hadoop的多组件进行整合。
+</code></pre>
+<p>Cloudera Manager的核心是Cloudera Manager Server，简称CMS。CMS提供了管理端Web界面，统一针对其他节点进行控制，如图所示</p>
+<p><img src="https://i.loli.net/2019/07/02/5d1ab0965fecb43192.jpg" srcset="/img/loading.gif" lazyload></p>
+<p><strong>组件介绍</strong></p>
+<pre><code class="hljs">1. Agent，Agent安装在集群中的各个节点上，用于启动、结束进程，安装、配置组件，监控节点等
+2. Management Service，由一系列的角色构成，角色有监控、预警、报告等
+3. Database，存储了配置和监控信息
+4. Cloudera Repository，Cloudera Manager用于分发的软件仓库
+</code></pre>
+<h2 id="2-前置准备工作"><a href="#2-前置准备工作" class="headerlink" title="2 前置准备工作"></a>2 前置准备工作</h2><p><strong>操作系统尽量和要使用Cloudera Manager版本匹配，可以参考官方给出的Cloudera Manager与操作系统的兼容性参照表。</strong></p>
+<p><a target="_blank" rel="noopener" href="http://archive.cloudera.com/cm5">Cloudera Manager官方下载</a></p>
+<p><a target="_blank" rel="noopener" href="http://archive.cloudera.com/cdh5/cdh/5/">Cloudera CDH 各个组件官方下载</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.cloudera.com/documentation/enterprise/release-notes/topics/rn_consolidated_pcm.html#cm_cdh_compatibility">CDH Requirements for Cloudera Manager</a></p>
+<h3 id="2-1-关于RAID-0的说明"><a href="#2-1-关于RAID-0的说明" class="headerlink" title="2.1 关于RAID 0的说明"></a>2.1 关于RAID 0的说明</h3><p>尽管建议采用RAID(Redundant Array of Independent Disk,即磁盘阵列)作为NameNode的存储器以保护元数据，但是若将RAID作为datanode的存储设备则不会给HDFS带来益处。HDFS所提供的节点间数据复制技术已可满足数据备份需求，无需使用RAID的冗余机制。</p>
+<p>此外，尽管RAID条带化技术(RAID 0)被广泛用户提升性能，但是其速度仍然比用在HDFS里的JBOD(Just a Bunch Of Disks)配置慢。JBOD在所有磁盘之间循环调度HDFS块。RAID 0的读写操作受限于磁盘阵列中最慢盘片的速度，而JBOD的磁盘操作均独立，因而平均读写速度高于最慢盘片的读写速度。需要强调的是，各个磁盘的性能在实际使用中总存在相当大的差异，即使对于相同型号的磁盘。针对某一雅虎集群的评测报告<a target="_blank" rel="noopener" href="http://markmail.org/message/xmzc45zi25htr7ry">点我</a>表明，在一个测试(Gridmix)中，JBOD比RAID 0 快10%；在另一测试(HDFS写吞吐量)中，JBOD比RAID 0 快30%。</p>
+<p>最后，若JBOD配置的某一磁盘出现故障，HDFS可以忽略该磁盘，继续工作。而RAID的某一盘片故障会导致整个磁盘阵列不可用，进而使相应节点失效。</p>
+<p><a target="_blank" rel="noopener" href="https://zh.hortonworks.com/blog/why-not-raid-0-its-about-time-and-snowflakes/">https://zh.hortonworks.com/blog/why-not-raid-0-its-about-time-and-snowflakes/</a></p>
+<p><em>备注：我们实际生成环境使用的是RAID5，12块4T硬盘，可用空间为40T。虽然有可能因为RAID卡的损坏导致节点故障，但是RAID卡极大程度的提高了IO性能，并且在逻辑上将12块硬盘映射为了一块大磁盘。单块磁盘故障不会影响到节点的状态。</em></p>
+<h3 id="2-2-IP地址"><a href="#2-2-IP地址" class="headerlink" title="2.2 IP地址"></a>2.2 IP地址</h3><p>尽可能的将集群部署在同一网段中，避免夸路由进行数据交互。</p>
+<h3 id="2-3-主机名及映射"><a href="#2-3-主机名及映射" class="headerlink" title="2.3 主机名及映射"></a>2.3 主机名及映射</h3><p>主机名映射为全限定名称和短名称的形式，例如：<br>​	<br>​	192.168.15.193 datacenter01.aisino.com datacenter01</p>
+<h3 id="2-4-启动级别"><a href="#2-4-启动级别" class="headerlink" title="2.4 启动级别"></a>2.4 启动级别</h3><p>启动级别尽可能设置为3，避免其他图形界面消耗机器资源。</p>
+<h3 id="2-5-防火墙和selinux"><a href="#2-5-防火墙和selinux" class="headerlink" title="2.5 防火墙和selinux"></a>2.5 防火墙和selinux</h3><p>关闭防火墙的原因是一些动态任务（YARN、Spark Executor）在运行时动态分配端口号，如果开启防火墙的话会导致任务无法连接，导致任务执行失败。</p>
+<p>selinux记得要关闭。</p>
+<h3 id="2-6-配置系统文件打开数量以及用户最大进程数量"><a href="#2-6-配置系统文件打开数量以及用户最大进程数量" class="headerlink" title="2.6 配置系统文件打开数量以及用户最大进程数量"></a>2.6 配置系统文件打开数量以及用户最大进程数量</h3><pre><code class="hljs">vi /etc/security/limits.conf
+* soft nofile 65536
+* hard nofile 65536
+* soft nproc 16384
+* hard nproc 16384
+</code></pre>
+<p><em>注意，星号表示所有用户</em></p>
+<h3 id="2-7-配置NTP服务"><a href="#2-7-配置NTP服务" class="headerlink" title="2.7 配置NTP服务"></a>2.7 配置NTP服务</h3><p>Cloudera Manager要求各个节点都启动NTP服务，保证集群内各节点之间的时间同步，由于是分布式架构，节点与节点之间时刻保持通信，如果节点之间时间差别过大，会导致通信故障，从而节点造成宕机。</p>
+<h3 id="2-8-配置SSH"><a href="#2-8-配置SSH" class="headerlink" title="2.8 配置SSH"></a>2.8 配置SSH</h3><p>所有节点都需要配置SSH免密登录（包括自己）。</p>
+<h2 id="3-安装Cloudera-Manager"><a href="#3-安装Cloudera-Manager" class="headerlink" title="3 安装Cloudera Manager"></a>3 安装Cloudera Manager</h2><p><strong>本次安装环境为CDH-5.7.0版本</strong></p>
+<h3 id="3-1-下载安装包"><a href="#3-1-下载安装包" class="headerlink" title="3.1 下载安装包"></a>3.1 下载安装包</h3><pre><code class="hljs">1. 下载Cloudera Manager安装包
+http://archive.cloudera.com/cm5/cm/5/cloudera-manager-centos7-cm5.7.0_x86_64.tar.gz
+
+2. 下载Parcel离线包
+http://archive.cloudera.com/cdh5/parcels/5.7.0/CDH-5.7.0-1.cdh5.7.0.p0.45-el7.parcel
+http://archive.cloudera.com/cdh5/parcels/5.7.0/CDH-5.7.0-1.cdh5.7.0.p0.45-el7.parcel.sha1
+http://archive.cloudera.com/cdh5/parcels/5.7.0/manifest.json
+</code></pre>
+<h3 id="3-2-安装yum依赖"><a href="#3-2-安装yum依赖" class="headerlink" title="3.2 安装yum依赖"></a>3.2 安装yum依赖</h3><pre><code class="hljs">yum install -y chkconfig python bind-utils psmisc libxslt zlib sqlite
+yum install -y cyrus-sasl-plain cyrus-sasl-gssapi fuse portmap fuse-libs
+yum install -y redhat-lsb bind-utils libxslt
+yum install -y protobuf snappy
+</code></pre>
+<h3 id="3-3-安装MySQL数据库"><a href="#3-3-安装MySQL数据库" class="headerlink" title="3.3 安装MySQL数据库"></a>3.3 安装MySQL数据库</h3><p>Cloudera Manager需要将配置信息以及监控信息存储至数据库中，这里采用MySQL数据。</p>
+<h3 id="3-4-MySQL驱动包路径"><a href="#3-4-MySQL驱动包路径" class="headerlink" title="3.4 MySQL驱动包路径"></a>3.4 MySQL驱动包路径</h3><p>必须将MySQL驱动包复制至&#x2F;usr&#x2F;share&#x2F;java目录下，并且驱动包的名称必须为mysql-connector-java.jar。</p>
+<p><strong>注意，所有节点都需要MySQL驱动包</strong></p>
+<h3 id="3-5-在MySQL中创建数据库"><a href="#3-5-在MySQL中创建数据库" class="headerlink" title="3.5 在MySQL中创建数据库"></a>3.5 在MySQL中创建数据库</h3><pre><code class="hljs">create database hive DEFAULT CHARSET utf8 COLLATE utf8_general_ci;
+create database hue DEFAULT CHARSET utf8 COLLATE utf8_general_ci;
+create database monitor DEFAULT CHARSET 
+utf8 COLLATE utf8_general_ci;
+create database oozie DEFAULT CHARSET utf8 COLLATE utf8_general_ci;
+create database cloudera DEFAULT CHARSET utf8 COLLATE utf8_general_ci;
+</code></pre>
+<h3 id="3-6-解压Cloudera-Manager安装包"><a href="#3-6-解压Cloudera-Manager安装包" class="headerlink" title="3.6 解压Cloudera Manager安装包"></a>3.6 解压Cloudera Manager安装包</h3><p>Cloudera Manager Server服务安装在Manager1服务器上，因此需要将Cloudera Manager的压缩包以及所有Parcel文件上传至服务器，并将Cloudera Manager压缩包解压至&#x2F;opt&#x2F;cloudera-manager目录下</p>
+<h3 id="3-7-创建用户"><a href="#3-7-创建用户" class="headerlink" title="3.7 创建用户"></a>3.7 创建用户</h3><p>在所有节点上创建cloudera-scm用户：<br>​	<br>​	useradd –system –home&#x3D;&#x2F;opt&#x2F;cloudera-manager&#x2F;cm-5.7.0&#x2F;run&#x2F;cloudera-scm-server –no-create-home –shell&#x3D;&#x2F;bin&#x2F;false –comment “Cloudera SCM User” cloudera-scm</p>
+<h3 id="3-8-创建Cloudera-Manager-Server元数据目录"><a href="#3-8-创建Cloudera-Manager-Server元数据目录" class="headerlink" title="3.8 创建Cloudera Manager Server元数据目录"></a>3.8 创建Cloudera Manager Server元数据目录</h3><p>在主节点上需要创建Cloudera Manager Server的元数据目录：</p>
+<pre><code class="hljs">mkdir /var/cloudera-scm-server
+chown cloudera-scm:cloudera-scm /var/cloudera-scm-server
+chown cloudera-scm:cloudera-scm /opt/cloudera-manager
+</code></pre>
+<h3 id="3-9-复制cloudera-manager目录到其他节点"><a href="#3-9-复制cloudera-manager目录到其他节点" class="headerlink" title="3.9 复制cloudera-manager目录到其他节点"></a>3.9 复制cloudera-manager目录到其他节点</h3><p>首先将&#x2F;opt&#x2F;cloudera-manager&#x2F;cm-5.7.0&#x2F;etc&#x2F;cloudera-scm-agent&#x2F;config.ini文件中server_host配置项的地址更改为主节点的地址</p>
+<p>将主节点上&#x2F;opt&#x2F;cloudera-manager目录复制至其他集群节点下，命令如下：</p>
+<pre><code class="hljs">scp -r /opt/cloudera-manager 主机:/opt/
+</code></pre>
+<h3 id="3-10-创建Parcel目录"><a href="#3-10-创建Parcel目录" class="headerlink" title="3.10 创建Parcel目录"></a>3.10 创建Parcel目录</h3><p>在主节点上创建Parcel包的存储目录，命令如下：</p>
+<pre><code class="hljs">mkdir -p /opt/cloudera/parcel-repo
+chown cloudera-scm:cloudera-scm /opt/cloudera/parcel-repo
+</code></pre>
+<p>将以下文件复制到该目录下</p>
+<ul>
+<li>CDH-5.7.0-1.cdh5.7.0.p0.45-el7.parcel</li>
+<li>CDH-5.7.0-1.cdh5.7.0.p0.45-el7.parcel.sha1</li>
+<li>manifest.json</li>
+</ul>
+<p>将<strong>CDH-5.7.0-1.cdh5.7.0.p0.45-el7.parcel.sha1</strong>文件的名称修改为<strong>CDH-5.7.0-1.cdh5.7.0.p0.45-el7.parcel.sha</strong></p>
+<h3 id="3-11-创建Parcel包分发目录"><a href="#3-11-创建Parcel包分发目录" class="headerlink" title="3.11 创建Parcel包分发目录"></a>3.11 创建Parcel包分发目录</h3><p>Cloudera Manager在安装的过程中，需要将安装包复制到集群的各个节点上，因此需要在集群各个节点上事先创建Parcel包的分发目录。</p>
+<p>在所有节点上：</p>
+<pre><code class="hljs">mkdir -p /opt/cloudera/parcels
+chown cloudera-scm:cloudera-scm /opt/cloudera/parcels
+</code></pre>
+<h3 id="3-12-初始化CSM数据库脚本"><a href="#3-12-初始化CSM数据库脚本" class="headerlink" title="3.12 初始化CSM数据库脚本"></a>3.12 初始化CSM数据库脚本</h3><p>在主节点上，执行初始化脚本：</p>
+<pre><code class="hljs">/opt/cloudera-manager/cm-5.7.0/share/cmf/schema/scm_prepare_database.sh mysql -hmanager1 -uroot -p123456 --scm-host manager1 scmdbn scmdbu scmdbp
+</code></pre>
+<p>说明：这个脚本就是用来创建和配置CMS需要的数据库的脚本。</p>
+<p>各参数是指：</p>
+<p>mysql：数据库用的是mysql，如果安装过程中用的oracle，那么该参数就应该改为oracle。</p>
+<p>-hmanager1：数据库建立在manager1主机上面。也就是主节点上面。</p>
+<p>-uroot：root身份运行mysql。</p>
+<p>-123456：mysql的root密码是123456。</p>
+<p>–scm-host manager1：CMS的主机，一般是和mysql安装的主机是在同一个主机上。</p>
+<p>最后三个参数是：数据库名，数据库用户名，数据库密码。</p>
+<p><strong>我的实际环境中采用如下命令</strong></p>
+<pre><code class="hljs">/opt/cloudera-manager/cm-5.7.0/share/cmf/schema/scm_prepare_database.sh mysql -hlocalhost -uroot -p -P13066 --scm-host localhost cloudera root BIM@123%$#qwe 
+</code></pre>
+<h3 id="3-13-配置与启动Cloudera-Manager-Server"><a href="#3-13-配置与启动Cloudera-Manager-Server" class="headerlink" title="3.13 配置与启动Cloudera Manager Server"></a>3.13 配置与启动Cloudera Manager Server</h3><p>首先将Cloudera Manager Server的启动脚本复制到&#x2F;etc&#x2F;init.d&#x2F;目录下：<br>​	<br>​	cp <br>​	&#x2F;opt&#x2F;cloudera-manager&#x2F;cm-5.7.0&#x2F;etc&#x2F;init.d&#x2F;cloudera-scm-server <br>​	&#x2F;etc&#x2F;init.d&#x2F;cloudera-scm-server</p>
+<p>配置&#x2F;etc&#x2F;init.d&#x2F;cloudera-scm-server：</p>
+<pre><code class="hljs">vi /etc/init.d/cloudera-scm-server
+找到CMF_DEFAULTS配置项，进行修改。
+CMF_DEFAULTS=$&#123;CMF_DEFAULTS:-/opt/cloudera-manager/cm-5.7.0/etc/default&#125;
+</code></pre>
+<p>启动Cloudera Manager Server：</p>
+<pre><code class="hljs">service cloudera-scm-server start
+chkconfig cloudera-scm-server on
+</code></pre>
+<h3 id="3-14-配置与启动Cloudera-Manager-Agent"><a href="#3-14-配置与启动Cloudera-Manager-Agent" class="headerlink" title="3.14 配置与启动Cloudera Manager Agent"></a>3.14 配置与启动Cloudera Manager Agent</h3><p>在所有节点上创建agent的运行时目录：</p>
+<pre><code class="hljs">mkdir /opt/cloudera-manager/cm-5.7.0/run/cloudera-scm-agent
+</code></pre>
+<p>将Cloudera Manager Agent的启动脚本复制到&#x2F;etc&#x2F;init.d&#x2F;目录下：</p>
+<pre><code class="hljs">cp \
+/opt/cloudera-manager/cm-5.7.0/etc/init.d/cloudera-scm-agent \
+/etc/init.d/cloudera-scm-agent
+</code></pre>
+<p>配置Cloudera Manager Agent：</p>
+<pre><code class="hljs">vi /etc/init.d/cloudera-scm-agent 
+找到CMF_DEFAULTS配置项，进行修改。
+CMF_DEFAULTS=$&#123;CMF_DEFAULTS:-/opt/cloudera-manager/cm-5.7.0/etc/default&#125;
+</code></pre>
+<p>启动Cloudera Manager Agent：</p>
+<pre><code class="hljs">service cloudera-scm-agent start
+chkconfig cloudera-scm-agent on
+</code></pre>
+<h3 id="3-15-日志文件路径"><a href="#3-15-日志文件路径" class="headerlink" title="3.15 日志文件路径"></a>3.15 日志文件路径</h3><p>启动Server或Agent由于各种原因可能会导致启动失败，因此需要查看日志文件定位错误信息，进行修复。</p>
+<p>Server的日志文件位于：</p>
+<pre><code class="hljs">/opt/cloudera-manager/cm-5.7.0/log/cloudera-scm-server
+</code></pre>
+<p>Agent的日志文件位于：</p>
+<pre><code class="hljs">/opt/cloudera-manager/cm-5.7.0/log/cloudera-scm-agent
+</code></pre>
+<h3 id="3-16-进入Cloudera-Manager-Server管理页面"><a href="#3-16-进入Cloudera-Manager-Server管理页面" class="headerlink" title="3.16 进入Cloudera Manager Server管理页面"></a>3.16 进入Cloudera Manager Server管理页面</h3><p>当Server与Agent全部启动完成后，可以访问CMS的WEB管理页面<a target="_blank" rel="noopener" href="http://localhost:7180/" title="例子">example link</a>，如图所示。</p>
+<p><img src="https://i.loli.net/2019/07/02/5d1ab09925de940367.jpg" srcset="/img/loading.gif" lazyload></p>
+<p><em>账户密码均为admin</em></p>
+<h2 id="4-安装CDH"><a href="#4-安装CDH" class="headerlink" title="4 安装CDH"></a>4 安装CDH</h2><p><em>在Cloudera Manager Server的WEB管理页面中，可以批量进行组件的安装、配置等，下面开始安装CDH各种组件。</em></p>
+<h3 id="4-1-接受协议"><a href="#4-1-接受协议" class="headerlink" title="4.1 接受协议"></a>4.1 接受协议</h3><p>首次登陆时，会自动弹出“接受协议”页面，接受即可。</p>
+<p><img src="https://i.loli.net/2019/07/02/5d1ab09f809b038392.jpg" srcset="/img/loading.gif" lazyload></p>
+<h3 id="4-2-选择版本"><a href="#4-2-选择版本" class="headerlink" title="4.2 选择版本"></a>4.2 选择版本</h3><p>选择版本时，选择免费版本即可。</p>
+<p><img src="https://i.loli.net/2019/07/02/5d1ab0a42f11c22720.jpg" srcset="/img/loading.gif" lazyload></p>
+<h3 id="4-3-查看当前已管理主机"><a href="#4-3-查看当前已管理主机" class="headerlink" title="4.3 查看当前已管理主机"></a>4.3 查看当前已管理主机</h3><p>如果Agent正产启动，在“当前管理的主机”页面会显示所有管理主机，否则请检查Agent是否正常启动。</p>
+<p><img src="https://i.loli.net/2019/07/02/5d1ab0a96fb1b57373.jpg" srcset="/img/loading.gif" lazyload></p>
+<p>选择所有主机，点击“继续”按钮。</p>
+<h3 id="4-4-等待系统分发Parcel包"><a href="#4-4-等待系统分发Parcel包" class="headerlink" title="4.4 等待系统分发Parcel包"></a>4.4 等待系统分发Parcel包</h3><p>Cloudera Manager会将Parcel包分发至各个节点，等待几分钟即可。</p>
+<p><img src="https://i.loli.net/2019/07/02/5d1ab0ada696c71741.jpg" srcset="/img/loading.gif" lazyload></p>
+<p><strong>注意，在分发Parcel包的过程中，可以会出现分发失败的问题，查看相应的Agent日志，定位错误，进行修复。</strong></p>
+<p><strong>比较常见的一个错误是Python脚本出现问题，需要进行一些修改，参见链接：</strong><br><a target="_blank" rel="noopener" href="http://www.jianshu.com/p/0d70a67b66b2">http://www.jianshu.com/p/0d70a67b66b2</a></p>
+<h4 id="4-5-等待检查主机正确性"><a href="#4-5-等待检查主机正确性" class="headerlink" title="4.5 等待检查主机正确性"></a>4.5 等待检查主机正确性</h4><p>Parcel包分发完成后，Cloudera Manager会检查主机的的正确性，包括一些优化的配置、要关闭的属性等，该步骤非常重要，一定要根据检查结果对主机进行配置修复，否则在以后的过程中会出现各种不可预料问题。</p>
+<p><img src="https://i.loli.net/2019/07/02/5d1ab0b07998314628.jpg" srcset="/img/loading.gif" lazyload></p>
+<h3 id="4-6-选择要安装的组件"><a href="#4-6-选择要安装的组件" class="headerlink" title="4.6 选择要安装的组件"></a>4.6 选择要安装的组件</h3><p>主机正确性检查完成后，就可以进入安装环节了，Cloudera Manager会要求你选择要安装的组件。</p>
+<p><img src="https://i.loli.net/2019/07/02/5d1ab0b607b8288865.jpg" srcset="/img/loading.gif" lazyload></p>
+<p><strong>选择“自定义服务”，选择集群中要安装的组件。</strong></p>
+<p><img src="https://i.loli.net/2019/07/02/5d1ab0be6732e32844.jpg" srcset="/img/loading.gif" lazyload></p>
+<h3 id="4-7-设置数据库"><a href="#4-7-设置数据库" class="headerlink" title="4.7 设置数据库"></a>4.7 设置数据库</h3><p>选择完成要安装的组件后，需要为Cloudera Manager配置运行时数据库环境，如图所示。</p>
+<p><img src="https://i.loli.net/2019/07/02/5d1ab0c3709f785092.jpg" srcset="/img/loading.gif" lazyload></p>
+<p>配置的数据库在前面的步骤中已经提前创建完成。</p>
+<h3 id="4-8-设置组件的基本运行环境"><a href="#4-8-设置组件的基本运行环境" class="headerlink" title="4.8 设置组件的基本运行环境"></a>4.8 设置组件的基本运行环境</h3><p>该步骤主要用于设置组件的基本运行环境，例如NameNode的节点、DataNode的节点、数据存放的目录等，该步骤根据实际的物理环境进行设置即可。</p>
+<h3 id="4-9-等待启动集群"><a href="#4-9-等待启动集群" class="headerlink" title="4.9 等待启动集群"></a>4.9 等待启动集群</h3><p>在集群的启动过程中，可能会因为权限或其他问题导致某些服务启动失败，只需要根据错误信息进行修复，即可启动完成。</p>
+<p><img src="https://i.loli.net/2019/07/02/5d1ab0c78f62f95988.jpg" srcset="/img/loading.gif" lazyload></p>
+<h3 id="4-10-启动成功"><a href="#4-10-启动成功" class="headerlink" title="4.10 启动成功"></a>4.10 启动成功</h3><p>集群启动成功后，可在首页查看集群的总览。</p>
+<p><img src="https://i.loli.net/2019/07/02/5d1ab0cd36cd412231.jpg" srcset="/img/loading.gif" lazyload></p>
+<h3 id="4-11-其他"><a href="#4-11-其他" class="headerlink" title="4.11 其他"></a>4.11 其他</h3><p>后续可以启动HDFS的HA、YARN的HA以及优化各个组件的配置等。</p>
+<p>感谢张帅分享。</p>
+
+              
+            </div>
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/" class="category-chain-item">大数据</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/CDH/">#CDH</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>ClouderaManager操作指南</div>
+      <div>http://example.com/2019/03/19/2019-03-19-ClouderaManager手册/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>Author</div>
+          <div>张帅</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>Posted on</div>
+          <div>March 19, 2019</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>Licensed under</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - Hoey">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2019/03/21/2019-03-21-2017IDEA-%E6%97%A0%E6%B3%95%E5%88%9B%E5%BB%BA-scala/" title="IDEA 无法创建 scala">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">IDEA 无法创建 scala</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2019/03/15/2019-03-15-%E7%94%A8%E6%88%B7%E8%A1%8C%E4%B8%BA%E6%8C%87%E5%88%86%E6%9E%90/" title="用户行为指分析">
+                        <span class="hidden-mobile">用户行为指分析</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;Table of Contents</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
+</body>
+</html>

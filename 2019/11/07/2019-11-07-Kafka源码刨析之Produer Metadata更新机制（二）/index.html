@@ -1,0 +1,742 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Hoey">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="在上一篇文章中，已经介绍了 Producer 的发送模型，Producer dosend() 方法中的第一步，就是获取相关的 topic 的 metadata，但在上篇中并没有深入展开，因为这部分的内容比较多，所以本文单独一篇文章进行介绍，本文主要来讲述以下三个问题： 1. metadata 内容是什么； 2. Producer 更新 metadata 的流程； 3. Producer 在什么情况">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kafka源码刨析之Produer Metadata更新机制（二）">
+<meta property="og:url" content="http://example.com/2019/11/07/2019-11-07-Kafka%E6%BA%90%E7%A0%81%E5%88%A8%E6%9E%90%E4%B9%8BProduer%20Metadata%E6%9B%B4%E6%96%B0%E6%9C%BA%E5%88%B6%EF%BC%88%E4%BA%8C%EF%BC%89/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="在上一篇文章中，已经介绍了 Producer 的发送模型，Producer dosend() 方法中的第一步，就是获取相关的 topic 的 metadata，但在上篇中并没有深入展开，因为这部分的内容比较多，所以本文单独一篇文章进行介绍，本文主要来讲述以下三个问题： 1. metadata 内容是什么； 2. Producer 更新 metadata 的流程； 3. Producer 在什么情况">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2019-11-07T11:04:00.000Z">
+<meta property="article:modified_time" content="2020-11-26T17:11:13.707Z">
+<meta property="article:author" content="Hoey">
+<meta property="article:tag" content="kafka">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>Kafka源码刨析之Produer Metadata更新机制（二） - Hexo</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.9.1","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+
+  
+<meta name="generator" content="Hexo 6.2.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Hoey</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                主页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="Kafka源码刨析之Produer Metadata更新机制（二）"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2019-11-07 19:04" pubdate>
+          November 7, 2019 pm
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          13k words
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          110 mins
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">Kafka源码刨析之Produer Metadata更新机制（二）</h1>
+            
+            <div class="markdown-body">
+              
+              <p>在上一篇文章中，已经介绍了 Producer 的发送模型，Producer <code>dosend()</code> 方法中的第一步，就是获取相关的 topic 的 metadata，但在上篇中并没有深入展开，因为这部分的内容比较多，所以本文单独一篇文章进行介绍，本文主要来讲述以下三个问题：</p>
+<pre><code class="hljs">1. metadata 内容是什么；
+2. Producer 更新 metadata 的流程；
+3. Producer 在什么情况下会去更新 metadata；
+</code></pre>
+<h3 id="Metadata-内容"><a href="#Metadata-内容" class="headerlink" title="Metadata 内容"></a>Metadata 内容</h3><p>Metadata 信息的内容可以通过源码看明白：</p>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><code class="hljs arduino"><span class="hljs-comment">// 这个类被 client 线程和后台 sender 所共享,它只保存了所有 topic 的部分数据,当我们请求一个它上面没有的 topic meta 时,它会通过发送 metadata update 来更新 meta 信息,</span><br><span class="hljs-comment">// 如果 topic meta 过期策略是允许的,那么任何 topic 过期的话都会被从集合中移除,</span><br><span class="hljs-comment">// 但是 consumer 是不允许 topic 过期的因为它明确地知道它需要管理哪些 topic</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">final</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Metadata</span> &#123;<br>    <span class="hljs-keyword">private</span> <span class="hljs-type">static</span> <span class="hljs-keyword">final</span> Logger log = LoggerFactory.<span class="hljs-built_in">getLogger</span>(Metadata.<span class="hljs-keyword">class</span>);<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-type">static</span> <span class="hljs-keyword">final</span> <span class="hljs-type">long</span> TOPIC_EXPIRY_MS = <span class="hljs-number">5</span> * <span class="hljs-number">60</span> * <span class="hljs-number">1000</span>;<br>    <span class="hljs-keyword">private</span> <span class="hljs-type">static</span> <span class="hljs-keyword">final</span> <span class="hljs-type">long</span> TOPIC_EXPIRY_NEEDS_UPDATE = <span class="hljs-number">-1L</span>;<br><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> <span class="hljs-type">long</span> refreshBackoffMs; <span class="hljs-comment">// metadata 更新失败时,为避免频繁更新 meta,最小的间隔时间,默认 100ms</span><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> <span class="hljs-type">long</span> metadataExpireMs; <span class="hljs-comment">// metadata 的过期时间, 默认 60,000ms</span><br>    <span class="hljs-keyword">private</span> <span class="hljs-type">int</span> version; <span class="hljs-comment">// 每更新成功1次，version自增1,主要是用于判断 metadata 是否更新</span><br>    <span class="hljs-keyword">private</span> <span class="hljs-type">long</span> lastRefreshMs; <span class="hljs-comment">// 最近一次更新时的时间（包含更新失败的情况）</span><br>    <span class="hljs-keyword">private</span> <span class="hljs-type">long</span> lastSuccessfulRefreshMs; <span class="hljs-comment">// 最近一次成功更新的时间（如果每次都成功的话，与前面的值相等, 否则，lastSuccessulRefreshMs &lt; lastRefreshMs)</span><br>    <span class="hljs-keyword">private</span> Cluster cluster; <span class="hljs-comment">// 集群中一些 topic 的信息</span><br>    <span class="hljs-keyword">private</span> <span class="hljs-type">boolean</span> needUpdate; <span class="hljs-comment">// 是都需要更新 metadata</span><br>    <span class="hljs-comment">/* Topics with expiry time */</span><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> Map&lt;<span class="hljs-type">String</span>, Long&gt; topics; <span class="hljs-comment">// topic 与其过期时间的对应关系</span><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> List&lt;Listener&gt; listeners; <span class="hljs-comment">// 事件监控者</span><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> ClusterResourceListeners clusterResourceListeners; <span class="hljs-comment">//当接收到 metadata 更新时, ClusterResourceListeners的列表</span><br>    <span class="hljs-keyword">private</span> <span class="hljs-type">boolean</span> needMetadataForAllTopics; <span class="hljs-comment">// 是否强制更新所有的 metadata</span><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> <span class="hljs-type">boolean</span> topicExpiryEnabled; <span class="hljs-comment">// 默认为 true, Producer 会定时移除过期的 topic,consumer 则不会移除</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>关于 topic 的详细信息（leader 所在节点、replica 所在节点、isr 列表）都是在<code>Cluster</code>实例中保存的。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><code class="hljs swift"><span class="hljs-comment">// 并不是一个全集,metadata的主要组成部分</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">final</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Cluster</span> &#123;<br><br>    <span class="hljs-comment">// 从命名直接就看出了各个变量的用途</span><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> boolean isBootstrapConfigured;<br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> <span class="hljs-type">List</span>&lt;<span class="hljs-type">Node</span>&gt; nodes; <span class="hljs-comment">// node 列表</span><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> <span class="hljs-type">Set</span>&lt;<span class="hljs-type">String</span>&gt; unauthorizedTopics; <span class="hljs-comment">// 未认证的 topic 列表</span><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> <span class="hljs-type">Set</span>&lt;<span class="hljs-type">String</span>&gt; internalTopics; <span class="hljs-comment">// 内置的 topic 列表</span><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> <span class="hljs-type">Map</span>&lt;<span class="hljs-type">TopicPartition</span>, <span class="hljs-type">PartitionInfo</span>&gt; partitionsByTopicPartition; <span class="hljs-comment">// partition 的详细信息</span><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> <span class="hljs-type">Map</span>&lt;<span class="hljs-type">String</span>, <span class="hljs-type">List</span>&lt;<span class="hljs-type">PartitionInfo</span>&gt;&gt; partitionsByTopic; <span class="hljs-comment">// topic 与 partition 的对应关系</span><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> <span class="hljs-type">Map</span>&lt;<span class="hljs-type">String</span>, <span class="hljs-type">List</span>&lt;<span class="hljs-type">PartitionInfo</span>&gt;&gt; availablePartitionsByTopic; <span class="hljs-comment">//  可用（leader 不为 null）的 topic 与 partition 的对应关系</span><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> <span class="hljs-type">Map</span>&lt;<span class="hljs-type">Integer</span>, <span class="hljs-type">List</span>&lt;<span class="hljs-type">PartitionInfo</span>&gt;&gt; partitionsByNode; <span class="hljs-comment">// node 与 partition 的对应关系</span><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> <span class="hljs-type">Map</span>&lt;<span class="hljs-type">Integer</span>, <span class="hljs-type">Node</span>&gt; nodesById; <span class="hljs-comment">// node 与 id 的对应关系</span><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> <span class="hljs-type">ClusterResource</span> clusterResource;<br>&#125;<br><br><br><span class="hljs-comment">// org.apache.kafka.common.PartitionInfo</span><br><span class="hljs-comment">// topic-partition: 包含 topic、partition、leader、replicas、isr</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">PartitionInfo</span> &#123;<br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> <span class="hljs-type">String</span> topic;<br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> int partition;<br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> <span class="hljs-type">Node</span> leader;<br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> <span class="hljs-type">Node</span>[] replicas;<br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> <span class="hljs-type">Node</span>[] inSyncReplicas;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>Cluster 实例主要是保存：</p>
+<pre><code class="hljs">1. ``broker.id`` 与 ``node`` 的对应关系；
+2. topic 与 partition （``PartitionInfo``）的对应关系；
+3. node 与 partition （``PartitionInfo``）的对应关系。
+</code></pre>
+<h3 id="Producer-的-Metadata-更新流程"><a href="#Producer-的-Metadata-更新流程" class="headerlink" title="Producer 的 Metadata 更新流程"></a>Producer 的 Metadata 更新流程</h3><p>Producer 在调用 <code>dosend()</code> 方法时，第一步就是通过 <code>waitOnMetadata</code> 方法获取该 topic 的 metadata 信息.</p>
+<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><code class="hljs pgsql">// 等待 metadata 的更新<br>private ClusterAndWaitTime waitOnMetadata(String topic, <span class="hljs-type">Integer</span> <span class="hljs-keyword">partition</span>, long maxWaitMs) throws InterruptedException &#123;<br>    metadata.<span class="hljs-keyword">add</span>(topic);// 在 metadata 中添加 topic 后,如果 metadata 中没有这个 topic 的 meta，那么 metadata 的更新标志设置为了 <span class="hljs-keyword">true</span><br>    <span class="hljs-keyword">Cluster</span> <span class="hljs-keyword">cluster</span> = metadata.<span class="hljs-keyword">fetch</span>();<br>    <span class="hljs-type">Integer</span> partitionsCount = <span class="hljs-keyword">cluster</span>.partitionCountForTopic(topic);// 如果 topic 已经存在 meta 中,则返回该 topic 的 <span class="hljs-keyword">partition</span> 数,否则返回 <span class="hljs-keyword">null</span><br><br>    // 当前 metadata 中如果已经有这个 topic 的 meta 的话,就直接返回<br>    <span class="hljs-keyword">if</span> (partitionsCount != <span class="hljs-keyword">null</span> &amp;&amp; (<span class="hljs-keyword">partition</span> == <span class="hljs-keyword">null</span> || <span class="hljs-keyword">partition</span> &lt; partitionsCount))<br>        <span class="hljs-keyword">return</span> <span class="hljs-built_in">new</span> ClusterAndWaitTime(<span class="hljs-keyword">cluster</span>, <span class="hljs-number">0</span>);<br><br>    long <span class="hljs-keyword">begin</span> = <span class="hljs-type">time</span>.milliseconds();<br>    long remainingWaitMs = maxWaitMs;<br>    long elapsed;<br><br>    // 发送 metadata 请求,直到获取了这个 topic 的 metadata 或者请求超时<br>    <span class="hljs-keyword">do</span> &#123;<br>        <span class="hljs-keyword">log</span>.trace(&quot;Requesting metadata update for topic &#123;&#125;.&quot;, topic);<br>        <span class="hljs-type">int</span> version = metadata.requestUpdate();// 返回当前版本号,初始值为<span class="hljs-number">0</span>,每次更新时会自增,并将 needUpdate 设置为 <span class="hljs-keyword">true</span><br>        sender.wakeup();// 唤起 sender，发送 metadata 请求<br>        try &#123;<br>            metadata.awaitUpdate(<span class="hljs-keyword">version</span>, remainingWaitMs);// 等待 metadata 的更新<br>        &#125; catch (TimeoutException ex) &#123;<br>            // Rethrow <span class="hljs-keyword">with</span> original maxWaitMs <span class="hljs-keyword">to</span> prevent logging <span class="hljs-keyword">exception</span> <span class="hljs-keyword">with</span> remainingWaitMs<br>            throw <span class="hljs-built_in">new</span> TimeoutException(&quot;Failed to update metadata after &quot; + maxWaitMs + &quot; ms.&quot;);<br>        &#125;<br>        <span class="hljs-keyword">cluster</span> = metadata.<span class="hljs-keyword">fetch</span>();<br>        elapsed = <span class="hljs-type">time</span>.milliseconds() - <span class="hljs-keyword">begin</span>;<br>        <span class="hljs-keyword">if</span> (elapsed &gt;= maxWaitMs)<br>            throw <span class="hljs-built_in">new</span> TimeoutException(&quot;Failed to update metadata after &quot; + maxWaitMs + &quot; ms.&quot;);// 超时<br>        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">cluster</span>.unauthorizedTopics().contains(topic))// 认证失败，对当前 topic 没有 <span class="hljs-keyword">Write</span> 权限<br>            throw <span class="hljs-built_in">new</span> TopicAuthorizationException(topic);<br>        remainingWaitMs = maxWaitMs - elapsed;<br>        partitionsCount = <span class="hljs-keyword">cluster</span>.partitionCountForTopic(topic);<br>    &#125; <span class="hljs-keyword">while</span> (partitionsCount == <span class="hljs-keyword">null</span>);// 不停循环,直到 partitionsCount 不为 <span class="hljs-keyword">null</span>（即直到 metadata 中已经包含了这个 topic 的相关信息）<br><br>    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">partition</span> != <span class="hljs-keyword">null</span> &amp;&amp; <span class="hljs-keyword">partition</span> &gt;= partitionsCount) &#123;<br>        throw <span class="hljs-built_in">new</span> KafkaException(<br>                String.format(&quot;Invalid partition given with record: %d is not in the range [0...%d).&quot;, <span class="hljs-keyword">partition</span>, partitionsCount));<br>    &#125;<br><br>    <span class="hljs-keyword">return</span> <span class="hljs-built_in">new</span> ClusterAndWaitTime(<span class="hljs-keyword">cluster</span>, elapsed);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>如果 metadata 中不存在这个 topic 的 metadata，那么就请求更新 metadata，如果 metadata 没有更新的话，方法就一直处在 <code>do ... while</code> 的循环之中，在循环之中，主要做以下操作：</p>
+<pre><code class="hljs">1. ``metadata.requestUpdate()`` 将 metadata 的 ``needUpdate`` 变量设置为 true（强制更新），并返回当前的版本号（version），通过版本号来判断 metadata 是否完成更新；
+2. ``sender.wakeup()`` 唤醒 sender 线程，sender 线程又会去唤醒 NetworkClient 线程，NetworkClient 线程进行一些实际的操作（后面详细介绍）；
+3. ``metadata.awaitUpdate(version, remainingWaitMs)`` 等待 metadata 的更新。
+</code></pre>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs arduino"><span class="hljs-comment">// 更新 metadata 信息（根据当前 version 值来判断）</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">synchronized</span> <span class="hljs-type">void</span> <span class="hljs-title">awaitUpdate</span><span class="hljs-params">(<span class="hljs-keyword">final</span> <span class="hljs-type">int</span> lastVersion, <span class="hljs-keyword">final</span> <span class="hljs-type">long</span> maxWaitMs)</span> throws InterruptedException </span>&#123;<br>    <span class="hljs-keyword">if</span> (maxWaitMs &lt; <span class="hljs-number">0</span>) &#123;<br>        <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">IllegalArgumentException</span>(<span class="hljs-string">&quot;Max time to wait for metadata updates should not be &lt; 0 milli seconds&quot;</span>);<br>    &#125;<br>    <span class="hljs-type">long</span> begin = System.<span class="hljs-built_in">currentTimeMillis</span>();<br>    <span class="hljs-type">long</span> remainingWaitMs = maxWaitMs;<br>    <span class="hljs-keyword">while</span> (<span class="hljs-keyword">this</span>.version &lt;= lastVersion) &#123;<span class="hljs-comment">// 不断循环,直到 metadata 更新成功,version 自增</span><br>        <span class="hljs-keyword">if</span> (remainingWaitMs != <span class="hljs-number">0</span>)<br>            <span class="hljs-built_in">wait</span>(remainingWaitMs);<span class="hljs-comment">// 阻塞线程，等待 metadata 的更新</span><br>        <span class="hljs-type">long</span> elapsed = System.<span class="hljs-built_in">currentTimeMillis</span>() - begin;<br>        <span class="hljs-keyword">if</span> (elapsed &gt;= maxWaitMs)<span class="hljs-comment">// timeout</span><br>            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">TimeoutException</span>(<span class="hljs-string">&quot;Failed to update metadata after &quot;</span> + maxWaitMs + <span class="hljs-string">&quot; ms.&quot;</span>);<br>        remainingWaitMs = maxWaitMs - elapsed;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>在 <code>Metadata.awaitUpdate()</code> 方法中，线程会阻塞在 <code>while</code> 循环中，直到 metadata 更新成功或者 timeout。</p>
+<p>从前面可以看出，此时 Producer 线程会阻塞在两个 <code>while</code> 循环中，直到 metadata 信息更新，那么 metadata 是如何更新的呢？如果有印象的话，前面应该已经介绍过了，主要是通过 <code>sender.wakeup()</code>来唤醒 sender 线程，间接唤醒 NetworkClient 线程，NetworkClient 线程来负责发送 Metadata 请求，并处理 Server 端的响应。</p>
+<p>在 Kafka 源码分析之 Producer 发送模型（一） 中介绍 Producer 发送模型时，在第五步 <code>sender</code> 线程会调用 <code>NetworkClient.poll()</code> 方法进行实际的操作，其源码如下：</p>
+<figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><code class="hljs reasonml">public List&lt;ClientResponse&gt; poll(long timeout, long now) &#123;<br>        long metadataTimeout = metadataUpdater.maybe<span class="hljs-constructor">Update(<span class="hljs-params">now</span>)</span>;<span class="hljs-comment">// 判断是否需要更新 meta,如果需要就更新（请求更新 metadata 的地方）</span><br>        <span class="hljs-keyword">try</span> &#123;<br>            this.selector.poll(<span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">Utils</span>.</span></span>min(timeout, metadataTimeout, requestTimeoutMs));<br>        &#125; catch (IOException e) &#123;<br>            log.error(<span class="hljs-string">&quot;Unexpected error during I/O&quot;</span>, e);<br>        &#125;<br><br>        <span class="hljs-comment">// process completed actions</span><br>        long updatedNow = this.time.milliseconds<span class="hljs-literal">()</span>;<br>        List&lt;ClientResponse&gt; responses = <span class="hljs-keyword">new</span> ArrayList&lt;&gt;<span class="hljs-literal">()</span>;<br>        handle<span class="hljs-constructor">AbortedSends(<span class="hljs-params">responses</span>)</span>;<br>        handle<span class="hljs-constructor">CompletedSends(<span class="hljs-params">responses</span>, <span class="hljs-params">updatedNow</span>)</span>;<span class="hljs-comment">// 通过 selector 中获取 Server 端的 response</span><br>        handle<span class="hljs-constructor">CompletedReceives(<span class="hljs-params">responses</span>, <span class="hljs-params">updatedNow</span>)</span>;<span class="hljs-comment">// 在返回的 handler 中，会处理 metadata 的更新</span><br>        handle<span class="hljs-constructor">Disconnections(<span class="hljs-params">responses</span>, <span class="hljs-params">updatedNow</span>)</span>;<br>        handle<span class="hljs-constructor">Connections()</span>;<br>        handle<span class="hljs-constructor">InitiateApiVersionRequests(<span class="hljs-params">updatedNow</span>)</span>;<br>        handle<span class="hljs-constructor">TimedOutRequests(<span class="hljs-params">responses</span>, <span class="hljs-params">updatedNow</span>)</span>;<br><br>        <span class="hljs-comment">// invoke callbacks</span><br>        <span class="hljs-keyword">for</span> (ClientResponse response : responses) &#123;<br>            <span class="hljs-keyword">try</span> &#123;<br>                response.on<span class="hljs-constructor">Complete()</span>;<br>            &#125; catch (Exception e) &#123;<br>                log.error(<span class="hljs-string">&quot;Uncaught error in request completion:&quot;</span>, e);<br>            &#125;<br>        &#125;<br>        return responses;<br>    &#125;<br>    <br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>在这个方法中，主要会以下操作：</p>
+<ul>
+<li><code>metadataUpdater.maybeUpdate(now)</code>：判断是否需要更新 Metadata，如果需要更新的话，先与 Broker 建立连接，然后发送更新 metadata 的请求；</li>
+<li>处理 Server 端的一些响应，这里主要讨论的是 <code>handleCompletedReceives(responses, updatedNow)</code> 方法，它会处理 Server 端返回的 Metadata 结果。</li>
+</ul>
+<p>先看一下 <code>metadataUpdater.maybeUpdate()</code> 的具体实现：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-type">long</span> <span class="hljs-title function_">maybeUpdate</span><span class="hljs-params">(<span class="hljs-type">long</span> now)</span> &#123;<br>        <span class="hljs-comment">// should we update our metadata?</span><br>        <span class="hljs-comment">// metadata 是否应该更新</span><br>        <span class="hljs-type">long</span> <span class="hljs-variable">timeToNextMetadataUpdate</span> <span class="hljs-operator">=</span> metadata.timeToNextUpdate(now);<span class="hljs-comment">// metadata 下次更新的时间（需要判断是强制更新还是 metadata 过期更新,前者是立马更新,后者是计算 metadata 的过期时间）</span><br>        <span class="hljs-comment">// 如果一条 metadata 的 fetch 请求还未从 server 收到恢复,那么时间设置为 waitForMetadataFetch（默认30s）</span><br>        <span class="hljs-type">long</span> <span class="hljs-variable">waitForMetadataFetch</span> <span class="hljs-operator">=</span> <span class="hljs-built_in">this</span>.metadataFetchInProgress ? requestTimeoutMs : <span class="hljs-number">0</span>;<br><br>        <span class="hljs-type">long</span> <span class="hljs-variable">metadataTimeout</span> <span class="hljs-operator">=</span> Math.max(timeToNextMetadataUpdate, waitForMetadataFetch);<br>        <span class="hljs-keyword">if</span> (metadataTimeout &gt; <span class="hljs-number">0</span>) &#123;<span class="hljs-comment">// 时间未到时,直接返回下次应该更新的时间</span><br>            <span class="hljs-keyword">return</span> metadataTimeout;<br>        &#125;<br><br>        <span class="hljs-type">Node</span> <span class="hljs-variable">node</span> <span class="hljs-operator">=</span> leastLoadedNode(now);<span class="hljs-comment">// 选择一个连接数最小的节点</span><br>        <span class="hljs-keyword">if</span> (node == <span class="hljs-literal">null</span>) &#123;<br>            log.debug(<span class="hljs-string">&quot;Give up sending metadata request since no node is available&quot;</span>);<br>            <span class="hljs-keyword">return</span> reconnectBackoffMs;<br>        &#125;<br><br>        <span class="hljs-keyword">return</span> maybeUpdate(now, node); <span class="hljs-comment">// 可以发送 metadata 请求的话,就发送 metadata 请求</span><br>    &#125;<br><br>    <span class="hljs-comment">/**</span><br><span class="hljs-comment">     * Add a metadata request to the list of sends if we can make one</span><br><span class="hljs-comment">     */</span><br>    <span class="hljs-comment">// 判断是否可以发送请求,可以的话将 metadata 请求加入到发送列表中</span><br>    <span class="hljs-keyword">private</span> <span class="hljs-type">long</span> <span class="hljs-title function_">maybeUpdate</span><span class="hljs-params">(<span class="hljs-type">long</span> now, Node node)</span> &#123;<br>        <span class="hljs-type">String</span> <span class="hljs-variable">nodeConnectionId</span> <span class="hljs-operator">=</span> node.idString();<br><br>        <span class="hljs-keyword">if</span> (canSendRequest(nodeConnectionId)) &#123;<span class="hljs-comment">// 通道已经 ready 并且支持发送更多的请求</span><br>            <span class="hljs-built_in">this</span>.metadataFetchInProgress = <span class="hljs-literal">true</span>; <span class="hljs-comment">// 准备开始发送数据,将 metadataFetchInProgress 置为 true</span><br>            MetadataRequest.Builder metadataRequest; <span class="hljs-comment">// 创建 metadata 请求</span><br>            <span class="hljs-keyword">if</span> (metadata.needMetadataForAllTopics())<span class="hljs-comment">// 强制更新所有 topic 的 metadata（虽然默认不会更新所有 topic 的 metadata 信息，但是每个 Broker 会保存所有 topic 的 meta 信息）</span><br>                metadataRequest = MetadataRequest.Builder.allTopics();<br>            <span class="hljs-keyword">else</span> <span class="hljs-comment">// 只更新 metadata 中的 topics 列表（列表中的 topics 由 metadata.add() 得到）</span><br>                metadataRequest = <span class="hljs-keyword">new</span> <span class="hljs-title class_">MetadataRequest</span>.Builder(<span class="hljs-keyword">new</span> <span class="hljs-title class_">ArrayList</span>&lt;&gt;(metadata.topics()));<br><br><br>            log.debug(<span class="hljs-string">&quot;Sending metadata request &#123;&#125; to node &#123;&#125;&quot;</span>, metadataRequest, node.id());<br>            sendInternalMetadataRequest(metadataRequest, nodeConnectionId, now);/ 发送 metadata 请求<br>            <span class="hljs-keyword">return</span> requestTimeoutMs;<br>        &#125;<br><br>        <span class="hljs-comment">// If there&#x27;s any connection establishment underway, wait until it completes. This prevents</span><br>        <span class="hljs-comment">// the client from unnecessarily connecting to additional nodes while a previous connection</span><br>        <span class="hljs-comment">// attempt has not been completed.</span><br>        <span class="hljs-keyword">if</span> (isAnyNodeConnecting()) &#123;<span class="hljs-comment">// 如果 client 正在与任何一个 node 的连接状态是 connecting,那么就进行等待</span><br>            <span class="hljs-comment">// Strictly the timeout we should return here is &quot;connect timeout&quot;, but as we don&#x27;t</span><br>            <span class="hljs-comment">// have such application level configuration, using reconnect backoff instead.</span><br>            <span class="hljs-keyword">return</span> reconnectBackoffMs;<br>        &#125;<br><br>        <span class="hljs-keyword">if</span> (connectionStates.canConnect(nodeConnectionId, now)) &#123;<span class="hljs-comment">// 如果没有连接这个 node,那就初始化连接</span><br>            <span class="hljs-comment">// we don&#x27;t have a connection to this node right now, make one</span><br>            log.debug(<span class="hljs-string">&quot;Initialize connection to node &#123;&#125; for sending metadata request&quot;</span>, node.id());<br>            initiateConnect(node, now);<span class="hljs-comment">// 初始化连接</span><br>            <span class="hljs-keyword">return</span> reconnectBackoffMs;<br>        &#125;<br>        <span class="hljs-keyword">return</span> Long.MAX_VALUE;<br>    &#125;<br><br> <span class="hljs-comment">// 发送 Metadata 请求   </span><br> <span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">sendInternalMetadataRequest</span><span class="hljs-params">(MetadataRequest.Builder builder,</span><br><span class="hljs-params">                                         String nodeConnectionId, <span class="hljs-type">long</span> now)</span> &#123;<br>    <span class="hljs-type">ClientRequest</span> <span class="hljs-variable">clientRequest</span> <span class="hljs-operator">=</span> newClientRequest(nodeConnectionId, builder, now, <span class="hljs-literal">true</span>);<span class="hljs-comment">// 创建 metadata 请求</span><br>    doSend(clientRequest, <span class="hljs-literal">true</span>, now);<br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<p>所以，每次 Producer 请求更新 metadata 时，会有以下几种情况：</p>
+<pre><code class="hljs">1. 如果 node 可以发送请求，则直接发送请求；
+2. 如果该 node 正在建立连接，则直接返回；
+3. 如果该 node 还没建立连接，则向 broker 初始化链接。
+</code></pre>
+<p>而 KafkaProducer 线程之前是一直阻塞在两个 while 循环中，直到 metadata 更新</p>
+<pre><code class="hljs">1. sender 线程第一次调用 ``poll()`` 方法时，初始化与 node 的连接；
+2. sender 线程第二次调用 ``poll()`` 方法时，发送 ``Metadata`` 请求；
+3. sender 线程第三次调用 ``poll()`` 方法时，获取 ``metadataResponse``，并更新 metadata。
+</code></pre>
+<p>经过上述 sender 线程三次调用 poll()方法，所请求的 metadata 信息才会得到更新，此时 Producer 线程也不会再阻塞，开始发送消息。</p>
+<p><code>NetworkClient</code> 接收到 Server 端对 Metadata 请求的响应后，更新 Metadata 信息。</p>
+<figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><code class="hljs reasonml"><span class="hljs-comment">// 处理任何已经完成的接收响应</span><br>    <span class="hljs-keyword">private</span> void handle<span class="hljs-constructor">CompletedReceives(List&lt;ClientResponse&gt; <span class="hljs-params">responses</span>, <span class="hljs-params">long</span> <span class="hljs-params">now</span>)</span> &#123;<br>        <span class="hljs-keyword">for</span> (NetworkReceive receive : this.selector.completed<span class="hljs-constructor">Receives()</span>) &#123;<br>            String source = receive.source<span class="hljs-literal">()</span>;<br>            InFlightRequest req = inFlightRequests.complete<span class="hljs-constructor">Next(<span class="hljs-params">source</span>)</span>;<br>            AbstractResponse body = parse<span class="hljs-constructor">Response(<span class="hljs-params">receive</span>.<span class="hljs-params">payload</span>()</span>, req.header);<br>            log.trace(<span class="hljs-string">&quot;Completed receive from node &#123;&#125;, for key &#123;&#125;, received &#123;&#125;&quot;</span>, req.destination, req.header.api<span class="hljs-constructor">Key()</span>, body);<br>            <span class="hljs-keyword">if</span> (req.isInternalRequest<span class="hljs-operator"> &amp;&amp; </span>body instanceof MetadataResponse)<span class="hljs-comment">// 如果是 meta 响应</span><br>                metadataUpdater.handle<span class="hljs-constructor">CompletedMetadataResponse(<span class="hljs-params">req</span>.<span class="hljs-params">header</span>, <span class="hljs-params">now</span>, (MetadataResponse)</span> body);<br>            <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (req.isInternalRequest<span class="hljs-operator"> &amp;&amp; </span>body instanceof ApiVersionsResponse)<br>                handle<span class="hljs-constructor">ApiVersionsResponse(<span class="hljs-params">responses</span>, <span class="hljs-params">req</span>, <span class="hljs-params">now</span>, (ApiVersionsResponse)</span> body); <span class="hljs-comment">// 如果是其他响应</span><br>            <span class="hljs-keyword">else</span><br>                responses.add(req.completed(body, now));<br>        &#125;<br>    &#125;<br><br>        <span class="hljs-comment">// 处理 Server 端对 Metadata 请求处理后的 response</span><br>        public void handle<span class="hljs-constructor">CompletedMetadataResponse(RequestHeader <span class="hljs-params">requestHeader</span>, <span class="hljs-params">long</span> <span class="hljs-params">now</span>, MetadataResponse <span class="hljs-params">response</span>)</span> &#123;<br>            this.metadataFetchInProgress = <span class="hljs-literal">false</span>;<br>            Cluster cluster = response.cluster<span class="hljs-literal">()</span>;<br>            <span class="hljs-comment">// check if any topics metadata failed to get updated</span><br>            Map&lt;String, Errors&gt; errors = response.errors<span class="hljs-literal">()</span>;<br>            <span class="hljs-keyword">if</span> (!errors.is<span class="hljs-constructor">Empty()</span>)<br>                log.warn(<span class="hljs-string">&quot;Error while fetching metadata with correlation id &#123;&#125; : &#123;&#125;&quot;</span>, requestHeader.correlation<span class="hljs-constructor">Id()</span>, errors);<br><br>            <span class="hljs-comment">// don&#x27;t update the cluster if there are no valid nodes...the topic we want may still be in the process of being</span><br>            <span class="hljs-comment">// created which means we will get errors and no nodes until it exists</span><br>            <span class="hljs-keyword">if</span> (cluster.nodes<span class="hljs-literal">()</span>.size<span class="hljs-literal">()</span> &gt; <span class="hljs-number">0</span>) &#123;<br>                this.metadata.update(cluster, now);<span class="hljs-comment">// 更新 meta 信息</span><br>            &#125; <span class="hljs-keyword">else</span> &#123;<span class="hljs-comment">// 如果 metadata 中 node 信息无效,则不更新 metadata 信息</span><br>                log.trace(<span class="hljs-string">&quot;Ignoring empty metadata response with correlation id &#123;&#125;.&quot;</span>, requestHeader.correlation<span class="hljs-constructor">Id()</span>);<br>                this.metadata.failed<span class="hljs-constructor">Update(<span class="hljs-params">now</span>)</span>;<br>            &#125;<br>        &#125;<br><br></code></pre></td></tr></table></figure>
+<p>Producer Metadata 的更新策略</p>
+<p>Metadata 会在下面两种情况下进行更新</p>
+<pre><code class="hljs">1. KafkaProducer 第一次发送消息时强制更新，其他时间周期性更新，它会通过 Metadata 的 lastRefreshMs, lastSuccessfulRefreshMs 这2个字段来实现；
+2. 强制更新： 调用 Metadata.requestUpdate() 将 needUpdate 置成了 true 来强制更新。
+</code></pre>
+<p>在 NetworkClient 的 poll() 方法调用时，就会去检查这两种更新机制，只要达到其中一种，就行触发更新操作。</p>
+<p>Metadata 的强制更新会在以下几种情况下进行：</p>
+<pre><code class="hljs">1. initConnect 方法调用时，初始化连接；
+2. ``poll()`` 方法中对 ``handleDisconnections()`` 方法调用来处理连接断开的情况，这时会触发强制更新；
+3. ``poll()`` 方法中对 ``handleTimedOutRequests()`` 来处理请求超时时；
+4. 发送消息时，如果无法找到 partition 的 leader；
+5. 处理 Producer 响应（handleProduceResponse），如果返回关于 Metadata 过期的异常，比如：没有 topic-partition 的相关 meta 或者 client 没有权限获取其 metadata。
+</code></pre>
+<p>强制更新主要是用于处理各种异常情况。</p>
+<p>转自：<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/66190242">https://zhuanlan.zhihu.com/p/66190242</a></p>
+
+              
+            </div>
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/" class="category-chain-item">大数据</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/kafka/">#kafka</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Kafka源码刨析之Produer Metadata更新机制（二）</div>
+      <div>http://example.com/2019/11/07/2019-11-07-Kafka源码刨析之Produer Metadata更新机制（二）/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>Author</div>
+          <div>Hoey</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>Posted on</div>
+          <div>November 7, 2019</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>Licensed under</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - Hoey">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2019/11/09/2019%E2%80%9311-08-Flink%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/" title="Flink基本概念（一）">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Flink基本概念（一）</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2019/11/07/2019%E2%80%9311-07-KafkaProducer%E6%BA%90%E7%A0%81%E5%88%A8%E6%9E%90/" title="Kafka源码刨析之Produer发送模型（一）">
+                        <span class="hidden-mobile">Kafka源码刨析之Produer发送模型（一）</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;Table of Contents</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
+</body>
+</html>
