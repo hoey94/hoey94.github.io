@@ -349,7 +349,7 @@
 <p>文件切分的方法是InputFormat类提供的，在getSplits方法中我们可以看到<code>(double)bytesRemaining / (double)splitSize &gt; 1.1D</code>，只要<code>文件的大小/splitSize &gt; 1.1倍</code>时就会对文件进行切分,splitSize默认是128M。</p>
 <p>通过查看源码我们可以知道通过两个参数<code>mapreduce.input.fileinputformat.split.minsize</code>和<code>mapreduce.input.fileinputformat.split.maxsize</code>就可以调节。</p>
 <p>了解了切片后，我们到底切多大？是比HDFS block大好还是比他小好？为什么要对文件进行切分？要明白切片规划的其中一个重要的原因就是mapreduce期望，在运行每个maptask时，任务所需要的输入数据恰好能在本地，这样就能保证每次maptask于hdfs的数据交互时，直接可以从本地拿到数据。理想状态（切片的大小&#x3D;blocksize,减少maptask于hdfs的跨网络数据传输）。</p>
-<p>本人水平有限，不当之处希望各位高手指正。邮箱<a href="mailto:&#x63;&#x6e;&#x6e;&#x71;&#x6a;&#x62;&#97;&#x6e;&#53;&#x32;&#x31;&#x40;&#103;&#109;&#97;&#105;&#108;&#x2e;&#99;&#111;&#x6d;">&#x63;&#x6e;&#x6e;&#x71;&#x6a;&#x62;&#97;&#x6e;&#53;&#x32;&#x31;&#x40;&#103;&#109;&#97;&#105;&#108;&#x2e;&#99;&#111;&#x6d;</a>。</p>
+<p>本人水平有限，不当之处希望各位高手指正。邮箱<a href="mailto:&#x63;&#110;&#x6e;&#113;&#x6a;&#98;&#x61;&#110;&#53;&#x32;&#x31;&#64;&#103;&#109;&#x61;&#105;&#x6c;&#x2e;&#99;&#x6f;&#x6d;">&#x63;&#110;&#x6e;&#113;&#x6a;&#98;&#x61;&#110;&#53;&#x32;&#x31;&#64;&#103;&#109;&#x61;&#105;&#x6c;&#x2e;&#99;&#x6f;&#x6d;</a>。</p>
 
               
             </div>

@@ -16,21 +16,21 @@
   <meta name="author" content="Hoey">
   <meta name="keywords" content="">
   
-    <meta name="description" content="幂等性幂等性指的是，请求一次或者是多次资源应该具有相同的副作用。   重要性在一些业务场景下，幂等性显得很重要；比如金融系统、电商系统，这些都是很敏感的系统，作为软件开发者，我们有必要了解一下它。   订单创建接口，第一次调用超时了，如果再调用一次会不会再创建一个订单？   购买商品时，减库存接口超时了，再调一次会不会扣减2个库存？   当一笔订单开始支付，支付请求发出后，服务端发生了扣钱操作，接">
+    <meta name="description" content="oracleoracleM1macM1ARMdocker  1docker1docker pull registry.cn-hangzhou.aliyuncs.com&#x2F;helowin&#x2F;oracle_11g  21docker run -d -p 1521">
 <meta property="og:type" content="article">
-<meta property="og:title" content="分布式幂等性设计">
-<meta property="og:url" content="http://example.com/2019/07/15/2019%E2%80%9307-15-%E5%88%86%E5%B8%83%E5%BC%8F%E5%B9%82%E7%AD%89%E6%80%A7%E8%AE%BE%E8%AE%A1/index.html">
+<meta property="og:title" content="docker oracle11g">
+<meta property="og:url" content="http://example.com/2022/06/16/docker-oracle11g/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="幂等性幂等性指的是，请求一次或者是多次资源应该具有相同的副作用。   重要性在一些业务场景下，幂等性显得很重要；比如金融系统、电商系统，这些都是很敏感的系统，作为软件开发者，我们有必要了解一下它。   订单创建接口，第一次调用超时了，如果再调用一次会不会再创建一个订单？   购买商品时，减库存接口超时了，再调一次会不会扣减2个库存？   当一笔订单开始支付，支付请求发出后，服务端发生了扣钱操作，接">
+<meta property="og:description" content="oracleoracleM1macM1ARMdocker  1docker1docker pull registry.cn-hangzhou.aliyuncs.com&#x2F;helowin&#x2F;oracle_11g  21docker run -d -p 1521">
 <meta property="og:locale" content="en_US">
-<meta property="article:published_time" content="2019-07-15T12:57:00.000Z">
-<meta property="article:modified_time" content="2020-11-14T05:58:36.324Z">
+<meta property="article:published_time" content="2022-06-16T15:02:03.000Z">
+<meta property="article:modified_time" content="2022-06-16T15:08:14.583Z">
 <meta property="article:author" content="Hoey">
 <meta name="twitter:card" content="summary_large_image">
   
   
   
-  <title>分布式幂等性设计 - Hexo</title>
+  <title>docker oracle11g - Hexo</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -193,7 +193,7 @@
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="分布式幂等性设计"></span>
+            <span id="subtitle" data-typed-text="docker oracle11g"></span>
           
         </div>
 
@@ -204,8 +204,8 @@
     
       <span class="post-meta">
         <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2019-07-15 20:57" pubdate>
-          July 15, 2019 pm
+        <time datetime="2022-06-16 23:02" pubdate>
+          June 16, 2022 pm
         </time>
       </span>
     
@@ -216,7 +216,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          606 words
+          656 words
         
       </span>
     
@@ -265,51 +265,35 @@
         <div id="board">
           <article class="post-content mx-auto">
             <!-- SEO header -->
-            <h1 style="display: none">分布式幂等性设计</h1>
+            <h1 style="display: none">docker oracle11g</h1>
             
             <div class="markdown-body">
               
-              <h3 id="幂等性"><a href="#幂等性" class="headerlink" title="幂等性"></a>幂等性</h3><p>幂等性指的是，请求一次或者是多次资源应该具有相同的副作用。  </p>
-<h3 id="重要性"><a href="#重要性" class="headerlink" title="重要性"></a>重要性</h3><p>在一些业务场景下，幂等性显得很重要；比如金融系统、电商系统，这些都是很敏感的系统，作为软件开发者，我们有必要了解一下它。 </p>
-<ul>
-<li>订单创建接口，第一次调用超时了，如果再调用一次会不会再创建一个订单？  </li>
-<li>购买商品时，减库存接口超时了，再调一次会不会扣减2个库存？  </li>
-<li>当一笔订单开始支付，支付请求发出后，服务端发生了扣钱操作，接口响应超时了，调用方再重试一次，会不会多扣一笔钱？</li>
-</ul>
-<p>下面我们介绍一下怎么解决上面所述的问题。</p>
-<h3 id="设计"><a href="#设计" class="headerlink" title="设计"></a>设计</h3><p>通常我们有两个方法来保证幂等性。也就是不管调用接口多少次，都要产生相同的副作用：  </p>
-<ul>
-<li>下游做一个查询接口，上游系统发现请求超时后，调用查询接口。发现成功了，逻辑里面什么都不用做；如果发现失败了，走失败流程进行后续处理保证最终结果正确。</li>
-<li>把这个查询操作交给下游系统，上游系统只负责重试，下游系统要在代码上保证一次或多次请求结果是一样的.</li>
-</ul>
-<p>第一种没什么好说的，很好实现；第二种则需要利用一个全局ID来辅助完成。由于我们的系统是一个分布式的，要做到全局唯一貌有点小难度，分布式中，子系统很多。该由谁来维护这个全局ID？这里介绍一下Twitter 的开源项目Snowflake。它是一个分布式ID的生成算法，可以帮我们完成这个工作，你可以通过阅读下面这个文章来交接它<a target="_blank" rel="noopener" href="https://www.cnblogs.com/haoxinyue/p/5208136.html">https://www.cnblogs.com/haoxinyue/p/5208136.html</a> </p>
+              <p>oracleoracleM1macM1ARMdocker </p>
+<h3 id="1docker"><a href="#1docker" class="headerlink" title="1docker"></a>1docker</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">docker pull registry.cn-hangzhou.aliyuncs.com/helowin/oracle_11g<br></code></pre></td></tr></table></figure>
+
+<h3 id="2"><a href="#2" class="headerlink" title="2"></a>2</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">docker run -d -p 1521:1521 --name oracle11g registry.cn-hangzhou.aliyuncs.com/helowin/oracle_11g<br></code></pre></td></tr></table></figure>
+
+<h3 id="3"><a href="#3" class="headerlink" title="3"></a>3</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">docker exec -it oracle11 bash<br></code></pre></td></tr></table></figure>
+
+<h3 id="4root"><a href="#4root" class="headerlink" title="4root"></a>4root</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs shell">sqlplus /nolog<br><br>su root <br></code></pre></td></tr></table></figure>
+
+<h3 id="5profileORACLE"><a href="#5profileORACLE" class="headerlink" title="5profileORACLE"></a>5profileORACLE</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs shell">vi /etc/profile<br><br>export ORACLE_HOME=/home/oracle/app/oracle/product/11.2.0/dbhome_2<br><br>export ORACLE_SID=helowin<br><br>export PATH=$ORACLE_HOME/bin:$PATH<br></code></pre></td></tr></table></figure>
+
+<h3 id="6"><a href="#6" class="headerlink" title="6"></a>6</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">ln -s $ORACLE_HOME/bin/sqlplus /usr/bin<br></code></pre></td></tr></table></figure>
+
+<h3 id="7oracle"><a href="#7oracle" class="headerlink" title="7oracle"></a>7oracle</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">su - oracle<br></code></pre></td></tr></table></figure>
+
+<h3 id="8sqlplus"><a href="#8sqlplus" class="headerlink" title="8sqlplus"></a>8sqlplus</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs shell">sqlplus /nolog<br><br>conn /as sysdba<br></code></pre></td></tr></table></figure>
+
+<p>oracle </p>
+<p>Navcatoracle ,helowin </p>
 
               
             </div>
             <hr/>
             <div>
               <div class="post-metas my-3">
-  
-    <div class="post-meta mr-3 d-flex align-items-center">
-      <i class="iconfont icon-category"></i>
-      
-
-<span class="category-chains">
-  
-  
-    
-      <span class="category-chain">
-        
-  <a href="/categories/%E5%88%86%E5%B8%83%E5%BC%8F/" class="category-chain-item">分布式</a>
-  
-  
-
-      </span>
-    
-  
-</span>
-
-    </div>
   
   
 </div>
@@ -320,8 +304,8 @@
 
   <div class="license-box my-3">
     <div class="license-title">
-      <div>分布式幂等性设计</div>
-      <div>http://example.com/2019/07/15/2019–07-15-分布式幂等性设计/</div>
+      <div>docker oracle11g</div>
+      <div>http://example.com/2022/06/16/docker-oracle11g/</div>
     </div>
     <div class="license-meta">
       
@@ -333,7 +317,7 @@
       
         <div class="license-meta-item license-meta-date">
           <div>Posted on</div>
-          <div>July 15, 2019</div>
+          <div>June 16, 2022</div>
         </div>
       
       
@@ -363,18 +347,12 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/2019/07/16/2019%E2%80%9307-16-Export-requires-a--table-or-a--call-argument/" title="Export requires a --table or a --call argument">
-                        <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">Export requires a --table or a --call argument</span>
-                        <span class="visible-mobile">Previous</span>
-                      </a>
-                    
                   </article>
                   <article class="post-next col-6">
                     
                     
-                      <a href="/2019/07/08/2019%E2%80%9307-08-%E6%8E%92%E5%BA%8F%E7%A9%BA%E9%97%B4%E5%A4%8D%E6%9D%82%E5%BA%A6%E4%B8%8E%E7%A8%B3%E5%AE%9A%E6%80%A7/" title="排序空间复杂度与稳定性">
-                        <span class="hidden-mobile">排序空间复杂度与稳定性</span>
+                      <a href="/2022/01/10/Flink-DataStream%20kafka2ES/" title="FlinkDataStream Kafka2ES">
+                        <span class="hidden-mobile">FlinkDataStream Kafka2ES</span>
                         <span class="visible-mobile">Next</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>
