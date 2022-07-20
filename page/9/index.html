@@ -177,7 +177,7 @@
   
 
 <div id="banner" class="banner" parallax=true
-     style="background: url('https://wx1.sinaimg.cn/mw2000/0066vfZIgy1h4dptid85jj312w10j7wh.jpg') no-repeat center center; background-size: cover;">
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
   <div class="full-bg-img">
     <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
       <div class="banner-text text-center fade-in-up">
@@ -221,15 +221,15 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h1 class="index-header">
         
-        <a href="/2018/12/02/2018-12-02-VirtualBox%E5%AE%89%E8%A3%85CentOS6.7/" target="_self">
-          VirtualBox安装CentOS6.7
+        <a href="/2018/12/02/2018-12-02-%E9%83%A8%E7%BD%B2storm%E9%9B%86%E7%BE%A4/" target="_self">
+          部署storm集群
         </a>
       </h1>
 
       
-      <a class="index-excerpt index-excerpt__noimg" href="/2018/12/02/2018-12-02-VirtualBox%E5%AE%89%E8%A3%85CentOS6.7/" target="_self">
+      <a class="index-excerpt index-excerpt__noimg" href="/2018/12/02/2018-12-02-%E9%83%A8%E7%BD%B2storm%E9%9B%86%E7%BE%A4/" target="_self">
         <div>
-          1.安装新建虚拟机环境，由于VBox环境没有CentOS的选项，所以可以选择Red Hat Linux（64Bit）    动态分配硬盘大小所以你可以选择大一点的硬盘空间（不用的话不会占用的，但是C盘性能上没固定的好）     在VBOX主界面，选择刚刚新建的CentOS64，点击启动。   选择第二项，安装操作系统  选择Skip             选择服务器类型为Basic Server
+          1.准备三个虚拟机搭建Storm集群安装步骤参考2018-12-02-VirtualBox安装CentOS6.7 2.配置集群Hosts所有的虚拟机上都需要配置hosts 12345vi &#x2F;etc&#x2F;hosts#192.168.239.128 storm01 zk01 hadoop01#192.168.239.129 storm02 zk02 hadoop02#192.168.239.130 sto
         </div>
       </a>
 
@@ -264,6 +264,13 @@
 
           </div>
         
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/Storm/">#Storm</a>
+            
+          </div>
         
       </div>
     </article>
@@ -641,15 +648,15 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h1 class="index-header">
         
-        <a href="/2018/10/28/2018-10-28-Lambda%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/" target="_self">
-          Lambda架构
+        <a href="/2018/10/28/2018-10-28-12%E7%A7%8D%E5%A4%A7%E6%95%B0%E6%8D%AE%E7%9B%B8%E5%85%B3%E7%B3%BB%E7%BB%9F%E4%BD%A0%E5%81%9A%E8%BF%87%E5%87%A0%E4%B8%AA%EF%BC%9F/" target="_self">
+          十二种大数据经典案例你做过几个?
         </a>
       </h1>
 
       
-      <a class="index-excerpt index-excerpt__noimg" href="/2018/10/28/2018-10-28-Lambda%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/" target="_self">
+      <a class="index-excerpt index-excerpt__noimg" href="/2018/10/28/2018-10-28-12%E7%A7%8D%E5%A4%A7%E6%95%B0%E6%8D%AE%E7%9B%B8%E5%85%B3%E7%B3%BB%E7%BB%9F%E4%BD%A0%E5%81%9A%E8%BF%87%E5%87%A0%E4%B8%AA%EF%BC%9F/" target="_self">
         <div>
-          Lambda架构是由Strom的作者提出的一种通用系统架构，可以说它是一种混合式架构，其架构大致分为三层batch layer、speed layer和serving layer。  batch layer : 称为批处理层，主要进行离线数据处理和计算。计算数据量大，延时高是其主要特点 speed layer : 称为流处理层 ，主要进行实时数据处理和计算。远远不断的处理过来的数据，延时低是其
+          1离线数据处理项目内容为通过对网站访问日志的采集和清洗，结合数据库中的结构化用户数据，统计并展示网站的PV、UV情况，以对网站的运行情况进行监控。通过此项目，回顾并串联前面讲述的离线数据处理相关技术，如：FIune、Sqoop、Hive、Spark等，了解和掌握PB级数据离线处理的一般过程和架构。 2流式数据处理项目内容为通过对数据库交易数据修改的实时同步，监控网站实时交易情况，以提高网站交易情况
         </div>
       </a>
 
@@ -695,15 +702,15 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h1 class="index-header">
         
-        <a href="/2018/10/28/2018-10-28-12%E7%A7%8D%E5%A4%A7%E6%95%B0%E6%8D%AE%E7%9B%B8%E5%85%B3%E7%B3%BB%E7%BB%9F%E4%BD%A0%E5%81%9A%E8%BF%87%E5%87%A0%E4%B8%AA%EF%BC%9F/" target="_self">
-          十二种大数据经典案例你做过几个?
+        <a href="/2018/10/28/2018-10-28-Lambda%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/" target="_self">
+          Lambda架构
         </a>
       </h1>
 
       
-      <a class="index-excerpt index-excerpt__noimg" href="/2018/10/28/2018-10-28-12%E7%A7%8D%E5%A4%A7%E6%95%B0%E6%8D%AE%E7%9B%B8%E5%85%B3%E7%B3%BB%E7%BB%9F%E4%BD%A0%E5%81%9A%E8%BF%87%E5%87%A0%E4%B8%AA%EF%BC%9F/" target="_self">
+      <a class="index-excerpt index-excerpt__noimg" href="/2018/10/28/2018-10-28-Lambda%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/" target="_self">
         <div>
-          1离线数据处理项目内容为通过对网站访问日志的采集和清洗，结合数据库中的结构化用户数据，统计并展示网站的PV、UV情况，以对网站的运行情况进行监控。通过此项目，回顾并串联前面讲述的离线数据处理相关技术，如：FIune、Sqoop、Hive、Spark等，了解和掌握PB级数据离线处理的一般过程和架构。 2流式数据处理项目内容为通过对数据库交易数据修改的实时同步，监控网站实时交易情况，以提高网站交易情况
+          Lambda架构是由Strom的作者提出的一种通用系统架构，可以说它是一种混合式架构，其架构大致分为三层batch layer、speed layer和serving layer。  batch layer : 称为批处理层，主要进行离线数据处理和计算。计算数据量大，延时高是其主要特点 speed layer : 称为流处理层 ，主要进行实时数据处理和计算。远远不断的处理过来的数据，延时低是其
         </div>
       </a>
 
