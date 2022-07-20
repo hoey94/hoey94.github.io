@@ -177,13 +177,13 @@
   
 
 <div id="banner" class="banner" parallax=true
-     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+     style="background: url('https://wx1.sinaimg.cn/mw2000/0066vfZIgy1h4dptid85jj312w10j7wh.jpg') no-repeat center center; background-size: cover;">
   <div class="full-bg-img">
     <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="while(true){ print(&#34;lose my hair&#34;); }"></span>
+            <span id="subtitle" data-typed-text=""></span>
           
         </div>
 
@@ -214,60 +214,6 @@
               <div class="col-12 col-md-10 m-auto">
                 
 
-
-  <div class="row mx-auto index-card">
-    
-    
-    <article class="col-12 col-md-12 mx-auto index-info">
-      <h1 class="index-header">
-        
-        <a href="/2018/05/10/2018-05-10-ubuntu-%E6%95%B0%E6%8D%AE%E6%A0%B7%E6%9C%AC%E7%9A%84%E7%A6%BB%E6%95%A3%E7%A8%8B%E5%BA%A6%E8%AE%A1%E7%AE%97/" target="_self">
-          数据样本的离散程度计算
-        </a>
-      </h1>
-
-      
-      <a class="index-excerpt index-excerpt__noimg" href="/2018/05/10/2018-05-10-ubuntu-%E6%95%B0%E6%8D%AE%E6%A0%B7%E6%9C%AC%E7%9A%84%E7%A6%BB%E6%95%A3%E7%A8%8B%E5%BA%A6%E8%AE%A1%E7%AE%97/" target="_self">
-        <div>
-          统计数据样本的离散程度方法大致可分为三种：极差、方差、标准差，样本数据  极差只能简单计算数据存在的区间分布范围情况，它在计算离散程度时存在着很大的问题。计算方式如下： 极差 &#x3D; 样本数据最大值 - 样本数据最小值 方差计算公式如下： $$\sigma^2&#x3D;\frac{1}{N}\sum_{i&#x3D;1}^N{\left(x_i-\mu\right)^2}$$  如果觉得计
-        </div>
-      </a>
-
-      <div class="index-btm post-metas">
-        
-          <div class="post-meta mr-3">
-            <i class="iconfont icon-date"></i>
-            <time datetime="2018-05-10 00:00" pubdate>
-              2018-05-10
-            </time>
-          </div>
-        
-        
-          <div class="post-meta mr-3 d-flex align-items-center">
-            <i class="iconfont icon-category"></i>
-            
-
-<span class="category-chains">
-  
-  
-    
-      <span class="category-chain">
-        
-  <a href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/" class="category-chain-item">大数据</a>
-  
-  
-
-      </span>
-    
-  
-</span>
-
-          </div>
-        
-        
-      </div>
-    </article>
-  </div>
 
   <div class="row mx-auto index-card">
     
@@ -772,6 +718,67 @@
       <a class="index-excerpt index-excerpt__noimg" href="/2018/04/22/2018-04-22-mapreduce-mapreduce%E7%9A%84shuffle%E6%9C%BA%E5%88%B6/" target="_self">
         <div>
           在编写MapReduce，启动主程序以后，到底maptask和reducetask之间是怎么工作的？数据是如何进行排序的？  1.inputFormat:我们知道mapreduce主程序初始化job以后会对输入的数据进行切片规划，生成job.split文件，inputFormat会读取job.split文件，根据信息从DHFS中找到要读取的数据,调用recordReader将数据读成一行,传入ma
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2018-04-22 00:00" pubdate>
+              2018-04-22
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3 d-flex align-items-center">
+            <i class="iconfont icon-category"></i>
+            
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/" class="category-chain-item">大数据</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/MapReduce/">#MapReduce</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h1 class="index-header">
+        
+        <a href="/2018/04/22/2018-04-22-mapreduce-%E5%88%9D%E8%AF%86mapreduce/" target="_self">
+          初识MapReduce
+        </a>
+      </h1>
+
+      
+      <a class="index-excerpt index-excerpt__noimg" href="/2018/04/22/2018-04-22-mapreduce-%E5%88%9D%E8%AF%86mapreduce/" target="_self">
+        <div>
+          mapredice其实就是分而治之的一种思想，hadoop的mapreduce是应对大数据产生的一种计算方式。分为两个步骤，maptask和reducetask。多个maptask并发执行运算输入数据，每个maptask各司其职，各自为政。多个reducetask并发执行，但它依赖于maptask，它输入参数是maptask的输出参数。 mapreduce框架中角色核心角色有三个，分别为mapta
         </div>
       </a>
 
